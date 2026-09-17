@@ -204,6 +204,50 @@
       .members .name { font-size: 20px; }
     }
 
+    /* 5. 문의 — 결정: docs/plan-04-contact.md */
+    .contact { display: grid; grid-template-columns: 480px 1fr; gap: 64px; align-items: start; }
+    @media (max-width: 879px) { .contact { grid-template-columns: 1fr; gap: 32px; } }
+    .contact .lead { display: flex; flex-direction: column; gap: 20px; }
+    .contact h2 { font-size: 56px; }
+    @media (max-width: 879px) { .contact h2 { font-size: 32px; } }
+    .contact-form {
+      background: var(--ink); color: var(--paper);
+      border-radius: 40px; padding: 48px;
+      display: flex; flex-direction: column; gap: 22px;
+    }
+    @media (max-width: 879px) { .contact-form { padding: 24px; border-radius: 28px; } }
+    .contact-form :focus-visible { outline-color: var(--paper); }
+    .contact-form .req { font-size: 15px; color: var(--label-on-ink); }
+    .field { display: flex; flex-direction: column; gap: 8px; }
+    .field label, .field legend { font-size: 15px; font-weight: 700; padding: 0; }
+    .field .hint { font-size: 15px; color: var(--label-on-ink); }
+    .field input[type="text"], .field input[type="email"], .field textarea {
+      background: var(--paper); color: var(--ink);
+      border: 0; border-radius: 20px; padding: 16px 20px;
+      font: inherit; font-size: 18px; line-height: 1.5; width: 100%;
+    }
+    .field textarea { resize: vertical; min-height: 120px; }
+    fieldset.field { border: 0; margin: 0; }
+    .choices { display: flex; flex-wrap: wrap; gap: 10px; }
+    .choices label {
+      display: inline-flex; align-items: center; gap: 10px; min-height: 48px;
+      border: 3px solid var(--paper); border-radius: 999px; padding: 10px 20px;
+      font-size: 16px; font-weight: 700; cursor: pointer;
+    }
+    .choices input { width: 20px; height: 20px; margin: 0; accent-color: var(--paper); }
+    .two { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media (max-width: 879px) { .two { grid-template-columns: 1fr; } }
+    .contact-form button {
+      align-self: flex-start; margin-top: 8px;
+      background: var(--paper); color: var(--ink);
+      border: 0; border-radius: 999px; min-height: 56px; padding: 16px 36px;
+      font: inherit; font-size: 20px; font-weight: 900; cursor: pointer;
+    }
+    .contact-form button[disabled] { cursor: progress; opacity: .7; }
+    .form-msg { font-size: 18px; font-weight: 700; }
+    .form-msg:empty { display: none; }
+    .gotcha { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
+
     /* 푸터 */
     .site-footer {
       margin-top: var(--section-gap);
@@ -333,6 +377,62 @@
       </ul>
       <p class="note">포지션과 담당은 팀원 본인이 제출한 것만 싣는다. 아직 제출 전이다.</p>
     </section>
+    <!-- 5. 문의 — Formspree. 엔드포인트 ID 확보 전까지 hidden. 켜는 절차: docs/plan-04-contact.md -->
+    <section id="contact" class="contact" aria-labelledby="h-contact" hidden>
+      <div class="lead">
+        <p class="eyebrow">04 — 문의</p>
+        <h2 id="h-contact">다 채워야 보낼 수 있습니다.</h2>
+        <p class="caption">이메일 한 줄 대신 이 폼을 씁니다. 문제를 설명하는 데 시간을 들일 수 있는 분과 일하고 싶어서입니다.</p>
+      </div>
+
+      <form class="contact-form" method="POST" action="https://formspree.io/f/FORM_ID" data-endpoint="https://formspree.io/f/FORM_ID" novalidate="false">
+        <p class="req">모든 항목이 필수입니다.</p>
+        <p class="form-msg" role="alert" id="form-error"></p>
+
+        <div class="field">
+          <label for="f-org">소속과 역할</label>
+          <input id="f-org" name="소속과 역할" type="text" required autocomplete="organization">
+        </div>
+        <div class="field">
+          <label for="f-problem">해결하려는 문제</label>
+          <p class="hint" id="f-problem-hint">한 단락. 누구의 어떤 문제인지.</p>
+          <textarea id="f-problem" name="해결하려는 문제" required rows="5" aria-describedby="f-problem-hint"></textarea>
+        </div>
+        <div class="field">
+          <label for="f-tried">지금까지 시도한 것</label>
+          <textarea id="f-tried" name="지금까지 시도한 것" required rows="3"></textarea>
+        </div>
+        <fieldset class="field">
+          <legend>기대하는 협업 형태</legend>
+          <div class="choices">
+            <label><input type="radio" name="협업 형태" value="프로젝트 의뢰" required> 프로젝트 의뢰</label>
+            <label><input type="radio" name="협업 형태" value="협업 제안"> 협업 제안</label>
+            <label><input type="radio" name="협업 형태" value="커피챗"> 커피챗</label>
+          </div>
+        </fieldset>
+        <div class="two">
+          <div class="field">
+            <label for="f-when">일정 범위</label>
+            <p class="hint" id="f-when-hint">예: 11월 시작, 3개월 / 미정이면 '미정'</p>
+            <input id="f-when" name="일정 범위" type="text" required aria-describedby="f-when-hint">
+          </div>
+          <div class="field">
+            <label for="f-budget">예산 범위</label>
+            <p class="hint" id="f-budget-hint">예: 300~500만 원 / 미정이면 '미정'</p>
+            <input id="f-budget" name="예산 범위" type="text" required aria-describedby="f-budget-hint">
+          </div>
+        </div>
+        <div class="field">
+          <label for="f-email">연락처 (이메일)</label>
+          <input id="f-email" name="email" type="email" required autocomplete="email">
+        </div>
+        <input type="hidden" name="_subject" value="[remo-web] 문의">
+        <input type="text" name="_gotcha" class="gotcha" tabindex="-1" autocomplete="off" aria-hidden="true">
+
+        <button type="submit">보내기</button>
+        <p class="form-msg" role="status" id="form-ok"></p>
+      </form>
+    </section>
   </main>
 
   <footer class="site-footer">
@@ -358,6 +458,32 @@
       Object.keys(byId).forEach(function (id) {
         var el = document.getElementById(id);
         if (el) io.observe(el);
+      });
+    })();
+    // 문의 폼 — AJAX 제출, 실패 시 입력값 유지. 근거: plan-04
+    (function () {
+      var form = document.querySelector('.contact-form');
+      if (!form || !window.fetch) return;
+      var ok = document.getElementById('form-ok');
+      var err = document.getElementById('form-error');
+      var btn = form.querySelector('button[type="submit"]');
+      form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        if (!form.reportValidity()) return;
+        err.textContent = '';
+        btn.disabled = true; btn.textContent = '보내는 중…';
+        fetch(form.dataset.endpoint, {
+          method: 'POST',
+          body: new FormData(form),
+          headers: { 'Accept': 'application/json' }
+        }).then(function (r) {
+          if (!r.ok) throw new Error(r.status);
+          form.querySelectorAll('.field, .two, .req, button').forEach(function (el) { el.hidden = true; });
+          ok.textContent = '받았습니다. 적어 주신 연락처로 답합니다.';
+        }).catch(function () {
+          err.textContent = '보내지 못했습니다. 잠시 후 다시 시도하거나, 아래 노션 링크로 연락해 주세요.';
+          btn.disabled = false; btn.textContent = '보내기';
+        });
       });
     })();
   </script>
