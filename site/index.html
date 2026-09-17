@@ -129,6 +129,45 @@
     .quarter p.display { font-size: 24px; }
     .quarter .rule { font-size: 15px; color: var(--caption); }
 
+    /* 4. 팀 — 결정: docs/plan-02-team.md */
+    .team { display: flex; flex-direction: column; gap: 40px; }
+    .team .lead { display: flex; flex-direction: column; gap: 16px; }
+    .team h2 { font-size: 56px; }
+    @media (max-width: 879px) { .team h2 { font-size: 32px; } }
+    .members { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-start; }
+    .members li {
+      width: 232px; border: 4px solid var(--ink); border-radius: 28px; padding: 24px;
+      display: flex; flex-direction: column; gap: 12px;
+    }
+    /* 손맛 오프셋 — 8배수, 최대 40 < 간격 24×2 */
+    .members li:nth-child(2)  { margin-top: 24px; }
+    .members li:nth-child(4)  { margin-top: 40px; }
+    .members li:nth-child(5)  { margin-top: 12px; }
+    .members li:nth-child(7)  { margin-top: 32px; }
+    .members li:nth-child(9)  { margin-top: 16px; }
+    .members li:nth-child(10) { margin-top: 40px; }
+    .initial {
+      width: 64px; height: 64px; border-radius: 50%;
+      background: var(--ink); color: var(--paper);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 24px; font-weight: 900; line-height: 1;
+    }
+    .members li:nth-child(3n+1) .initial { background: var(--blue); }
+    .members .name { font-size: 24px; font-weight: 900; letter-spacing: -0.03em; line-height: 1.15; }
+    .team .note { font-size: 15px; color: var(--caption); }
+    @media (max-width: 879px) {
+      .members { gap: 12px; }
+      .members li { width: calc(50% - 6px); padding: 18px; border-radius: 24px; }
+      .members li:nth-child(2)  { margin-top: 12px; }
+      .members li:nth-child(4)  { margin-top: 20px; }
+      .members li:nth-child(5)  { margin-top: 6px; }
+      .members li:nth-child(7)  { margin-top: 16px; }
+      .members li:nth-child(9)  { margin-top: 8px; }
+      .members li:nth-child(10) { margin-top: 20px; }
+      .initial { width: 48px; height: 48px; font-size: 18px; }
+      .members .name { font-size: 20px; }
+    }
+
     /* 푸터 */
     .site-footer {
       margin-top: var(--section-gap);
@@ -148,6 +187,7 @@
     <!-- 내비 링크는 대상 섹션이 실제로 존재할 때만 추가한다 — docs/plan-01-header-direction.md -->
     <nav class="site-nav" aria-label="섹션">
       <a href="#direction">방향</a>
+      <a href="#team">팀</a>
     </nav>
   </header>
 
@@ -193,6 +233,26 @@
           </div>
         </div>
       </div>
+    </section>
+    <!-- 4. 팀 — 표기명 10 확정(2026-09-17). 포지션·담당·링크는 본인 제출 전까지 렌더링하지 않는다. docs/plan-02-team.md -->
+    <section id="team" class="team" aria-labelledby="h-team">
+      <div class="lead">
+        <p class="eyebrow">02 — 팀</p>
+        <h2 id="h-team">리모의 열 명</h2>
+      </div>
+      <ul class="members">
+          <li><span class="initial" aria-hidden="true">브</span><span class="name">브루노</span></li>
+          <li><span class="initial" aria-hidden="true">쏠</span><span class="name">쏠</span></li>
+          <li><span class="initial" aria-hidden="true">조</span><span class="name">조이</span></li>
+          <li><span class="initial" aria-hidden="true">정</span><span class="name">정우</span></li>
+          <li><span class="initial" aria-hidden="true">막</span><span class="name">막스</span></li>
+          <li><span class="initial" aria-hidden="true">유</span><span class="name">유진</span></li>
+          <li><span class="initial" aria-hidden="true">로</span><span class="name">로</span></li>
+          <li><span class="initial" aria-hidden="true">겸</span><span class="name">겸</span></li>
+          <li><span class="initial" aria-hidden="true">이</span><span class="name">이든</span></li>
+          <li><span class="initial" aria-hidden="true">비</span><span class="name">비크</span></li>
+      </ul>
+      <p class="note">포지션과 담당은 팀원 본인이 제출한 것만 싣는다. 아직 제출 전이다.</p>
     </section>
   </main>
 
