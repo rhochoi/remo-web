@@ -129,6 +129,42 @@
     .quarter p.display { font-size: 24px; }
     .quarter .rule { font-size: 15px; color: var(--caption); }
 
+    /* 3. 포트폴리오 — 결정: docs/plan-03-portfolio.md */
+    .portfolio { display: flex; flex-direction: column; gap: 40px; }
+    .portfolio .lead { display: flex; flex-direction: column; gap: 16px; }
+    .portfolio h2 { font-size: 56px; max-width: 1040px; }
+    @media (max-width: 879px) { .portfolio h2 { font-size: 32px; } }
+    .projects { display: flex; flex-direction: column; gap: 32px; }
+    .row { display: grid; gap: 32px; align-items: stretch; }
+    .row-a { grid-template-columns: 1.6fr 1fr; }
+    .row-b { grid-template-columns: 1fr 1.6fr; }
+    @media (max-width: 879px) { .row-a, .row-b { grid-template-columns: 1fr; gap: 20px; } .projects { gap: 20px; } }
+    .project {
+      border-radius: 36px; padding: 40px 44px;
+      display: flex; flex-direction: column; gap: 14px;
+    }
+    @media (max-width: 879px) { .project { padding: 28px 24px; border-radius: 28px; } }
+    .project.ink   { background: var(--ink);  color: var(--paper); transform: rotate(-1deg); }
+    .project.blue  { background: var(--blue); color: var(--paper); }
+    .project.line  { border: 4px solid var(--ink); }
+    .project .meta { font-size: 15px; font-weight: 700; letter-spacing: 0.02em; }
+    .project.ink  .meta, .project.ink  .stage { color: var(--label-on-ink); }  /* 9.96:1 */
+    .project.blue .meta, .project.blue .stage { color: #E3ECF5; }              /* 6.51:1 */
+    .project.line .meta, .project.line .stage { color: var(--caption); }        /* 6.49:1 */
+    .project h3 { font-size: 32px; }
+    @media (max-width: 879px) { .project h3 { font-size: 24px; } }
+    .project .one { font-size: 18px; line-height: 1.6; }
+    .project .stage { font-size: 15px; }
+    .project .more {
+      margin-top: auto; align-self: flex-start;
+      display: inline-flex; align-items: center; min-height: 44px; padding: 12px 22px;
+      border-radius: 999px; font-weight: 700; font-size: 16px; text-decoration: none;
+    }
+    .project .more:hover { text-decoration: underline; }
+    .project.ink .more, .project.blue .more { background: var(--paper); color: var(--ink); }
+    .project.line .more { background: var(--ink); color: var(--paper); }
+    .project.ink .more:focus-visible, .project.blue .more:focus-visible { outline-color: var(--paper); }
+
     /* 4. 팀 — 결정: docs/plan-02-team.md */
     .team { display: flex; flex-direction: column; gap: 40px; }
     .team .lead { display: flex; flex-direction: column; gap: 16px; }
@@ -187,6 +223,7 @@
     <!-- 내비 링크는 대상 섹션이 실제로 존재할 때만 추가한다 — docs/plan-01-header-direction.md -->
     <nav class="site-nav" aria-label="섹션">
       <a href="#direction">방향</a>
+      <a href="#portfolio">포트폴리오</a>
       <a href="#team">팀</a>
     </nav>
   </header>
@@ -234,10 +271,52 @@
         </div>
       </div>
     </section>
+    <!-- 3. 포트폴리오 — 사실은 노션 프로젝트 페이지 4개 원문(2026-09-17). 추정·미확정·개인정보는 싣지 않는다. docs/plan-03-portfolio.md -->
+    <section id="portfolio" class="portfolio" aria-labelledby="h-portfolio">
+      <div class="lead">
+        <p class="eyebrow">02 — 포트폴리오</p>
+        <h2 id="h-portfolio">지금 하고 있는 네 가지 일</h2>
+        <p class="caption">넷 다 진행 중이다. 상세 기획과 기록은 노션에 있다.</p>
+      </div>
+      <div class="projects">
+        <div class="row row-a">
+          <article class="project ink" aria-labelledby="p-kpipe">
+            <p class="meta">진행 중 · 2026.02 ~ · 정우, 이든</p>
+            <h3 id="p-kpipe">K-Pipe</h3>
+            <p class="one">하수관로 CCTV 조사 보고서 작성 프로그램. 실무자가 불편해하는 기존 단일 프로그램을 고쳐 만든다. 윈도우 설치형.</p>
+            <p class="stage">현재 단계 — Pipe Asset 분석 보고서</p>
+            <a class="more" href="https://remo-core.notion.site/K-Pipe-3bd4e56fc730801fa19cf713a1ccbfc7">노션에서 자세히 →</a>
+          </article>
+          <article class="project line" aria-labelledby="p-dataflow">
+            <p class="meta">진행 중 · 2026.08 ~ · 이든, 로</p>
+            <h3 id="p-dataflow">DATAFLOW 2</h3>
+            <p class="stage">현재 단계 — 경쟁사 분석</p>
+            <a class="more" href="https://remo-core.notion.site/DATAFLOW-2-3c34e56fc73080f1ae6fd3d73c78773c">노션에서 자세히 →</a>
+          </article>
+        </div>
+        <div class="row row-b">
+          <article class="project line" aria-labelledby="p-pln">
+            <p class="meta">진행 중 · 막스, 이든</p>
+            <h3 id="p-pln">PLN</h3>
+            <p class="one">노션 템플릿을 만들어 크라우드펀딩으로 수요를 검증한다.</p>
+            <p class="stage">현재 단계 — 디자인 마감, 펀딩 준비</p>
+            <a class="more" href="https://remo-core.notion.site/PLN-3bd4e56fc7308037a596ea10868eefa7">노션에서 자세히 →</a>
+          </article>
+          <article class="project blue" aria-labelledby="p-moodism">
+            <p class="meta">진행 중 · 2026.06 ~ · 정우, 쏠, 겸</p>
+            <h3 id="p-moodism">Moodism 무디즘</h3>
+            <p class="one">"불안하면서 꿈꾸는 사람들"을 위한 의류 브랜드. 첫 제품을 텀블벅 펀딩으로 낸다.</p>
+            <p class="stage">현재 단계 — 펀딩 2026.09.23 → 10.07 (예정)</p>
+            <a class="more" href="https://remo-core.notion.site/Moodism-3bd4e56fc73080ba9808ef5c4fc0d15a">노션에서 자세히 →</a>
+          </article>
+        </div>
+      </div>
+    </section>
+
     <!-- 4. 팀 — 표기명 10 확정(2026-09-17). 포지션·담당·링크는 본인 제출 전까지 렌더링하지 않는다. docs/plan-02-team.md -->
     <section id="team" class="team" aria-labelledby="h-team">
       <div class="lead">
-        <p class="eyebrow">02 — 팀</p>
+        <p class="eyebrow">03 — 팀</p>
         <h2 id="h-team">리모의 열 명</h2>
       </div>
       <ul class="members">
