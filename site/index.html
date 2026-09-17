@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- 최소 공개 단위(정의문·사례 1·팀 10·연락 수단) 충족 전까지 검색 노출 차단 — docs/structure.md -->
+  <meta name="robots" content="noindex">
+  <title>리모 — 문제를 받아 실행으로 증명하는 열 명의 학생 협동조합</title>
+  <meta name="description" content="문제를 받아 실행으로 증명하는 열 명의 학생 협동조합, 리모. 데이터 분석 · 디자인 · 프로토타입으로 끝까지 풀어냅니다.">
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard-dynamic-subset.min.css">
+  <style>
+    /* 토큰 — 근거: docs/plan-01-header-direction.md */
+    :root {
+      --ink: #0A0A0A;
+      --blue: #1E548C;
+      --paper: #F8F8F6;
+      --caption: #5A5A5A;      /* on paper 6.49:1 */
+      --label-on-ink: #9DBBDB; /* on ink 9.96:1 */
+      --header-h: 80px;
+      --gutter: 80px;
+      --section-gap: 128px;
+    }
+    @media (max-width: 879px) {
+      :root { --header-h: 64px; --gutter: 16px; --section-gap: 80px; }
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+    body {
+      margin: 0;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: Pretendard, -apple-system, system-ui, sans-serif;
+      font-size: 18px;
+      line-height: 1.7;
+      word-break: keep-all; /* 국문: 어절 단위 줄바꿈. 본문 포함 전역 */
+      overflow-x: clip;
+    }
+    a { color: var(--blue); }
+    :focus-visible { outline: 3px solid var(--blue); outline-offset: 3px; }
+
+    h1, h2, h3, .display {
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      word-break: keep-all;
+      line-height: 1.15;
+      margin: 0;
+    }
+    p { margin: 0; }
+
+    /* 스킵 링크 */
+    .skip {
+      position: absolute; left: var(--gutter); top: -100px;
+      background: var(--ink); color: var(--paper);
+      padding: 12px 20px; border-radius: 999px; font-weight: 700; text-decoration: none;
+      z-index: 20;
+    }
+    .skip:focus { top: 12px; }
+
+    /* 헤더 */
+    .site-header {
+      position: sticky; top: 0; z-index: 10;
+      height: var(--header-h);
+      background: var(--paper);
+      border-bottom: 4px solid var(--ink);
+      padding: 0 var(--gutter);
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    }
+    .wordmark-slot {
+      width: 168px; height: 56px; flex-shrink: 0;
+      border: 3px dashed var(--blue); border-radius: 20px;
+      color: var(--blue); font-size: 13px; font-weight: 500; line-height: 1.3; text-align: center;
+      display: flex; align-items: center; justify-content: center;
+    }
+    @media (max-width: 879px) { .wordmark-slot { width: 100px; height: 36px; font-size: 11px; border-radius: 12px; } }
+    .site-nav { display: flex; gap: 4px; }
+    .site-nav a {
+      display: inline-flex; align-items: center; min-height: 44px;
+      padding: 12px 20px; border-radius: 999px;
+      color: var(--ink); text-decoration: none; font-weight: 700; font-size: 16px;
+    }
+    .site-nav a[aria-current="true"] { background: var(--ink); color: var(--paper); }
+    @media (max-width: 879px) { .site-nav a { padding: 12px 8px; font-size: 14px; } }
+
+    /* 공통 섹션 */
+    main > section { padding: var(--section-gap) var(--gutter) 0; scroll-margin-top: var(--header-h); }
+    .eyebrow { font-size: 15px; font-weight: 700; letter-spacing: 0.08em; color: var(--blue); }
+    .caption { font-size: 18px; color: var(--caption); max-width: 640px; }
+
+    /* 0. 정의문 */
+    .hero { min-height: 70vh; display: flex; flex-direction: column; justify-content: center; gap: 20px; padding-top: 48px !important; }
+    .hero h1 { font-size: clamp(34px, 6.5vw, 72px); max-width: 1100px; }
+    .hero .sub { font-size: 24px; font-weight: 500; max-width: 720px; }
+    /* 모바일: 세로 중앙 정렬 대신 상단 정렬 — 빈 여백 250px은 페이지 시작으로 읽히지 않음 */
+    @media (max-width: 879px) { .hero { min-height: 0; } .hero .sub { font-size: 18px; } }
+
+    /* 1. 방향 */
+    .direction { display: flex; flex-direction: column; gap: 48px; }
+    .direction .lead { display: flex; flex-direction: column; gap: 20px; }
+    .direction h2 { font-size: 56px; max-width: 1040px; }
+    @media (max-width: 879px) { .direction h2 { font-size: 32px; } }
+    .direction .grid { display: grid; grid-template-columns: 560px 1fr; gap: 32px; align-items: start; }
+    @media (max-width: 879px) { .direction .grid { grid-template-columns: 1fr; } }
+
+    .vision {
+      background: var(--ink); color: var(--paper);
+      border-radius: 36px; padding: 44px 48px;
+      display: flex; flex-direction: column; gap: 16px;
+      transform: rotate(-1deg);
+    }
+    .vision .label { font-size: 15px; font-weight: 700; letter-spacing: 0.08em; color: var(--label-on-ink); }
+    .vision p.display { font-size: 32px; }
+    @media (max-width: 879px) { .vision { padding: 28px 24px; border-radius: 28px; } .vision p.display { font-size: 24px; } }
+
+    .right { display: flex; flex-direction: column; gap: 32px; padding-top: 12px; }
+    .values { display: flex; flex-direction: column; gap: 12px; }
+    .values ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 12px; }
+    .values li {
+      background: var(--blue); color: var(--paper);
+      border-radius: 999px; padding: 12px 20px;
+      font-size: 18px; font-weight: 700; line-height: 1.3;
+    }
+    .quarter {
+      border: 4px solid var(--ink); border-radius: 28px; padding: 28px 32px;
+      display: flex; flex-direction: column; gap: 10px;
+    }
+    .quarter p.display { font-size: 24px; }
+    .quarter .rule { font-size: 15px; color: var(--caption); }
+
+    /* 푸터 */
+    .site-footer {
+      margin-top: var(--section-gap);
+      padding: 40px var(--gutter) 56px;
+      border-top: 4px solid var(--ink);
+      display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap;
+      font-size: 15px; color: var(--caption);
+    }
+    .site-footer a { font-weight: 700; }
+  </style>
+</head>
+<body>
+  <a class="skip" href="#main">본문으로 건너뛰기</a>
+
+  <header class="site-header">
+    <div class="wordmark-slot" aria-label="REMO 워드마크 자리 — 벡터 원본 확보 대기">REMO 워드마크<br>벡터 원본 대기</div>
+    <!-- 내비 링크는 대상 섹션이 실제로 존재할 때만 추가한다 — docs/plan-01-header-direction.md -->
+    <nav class="site-nav" aria-label="섹션">
+      <a href="#direction">방향</a>
+    </nav>
+  </header>
+
+  <main id="main">
+    <!-- 0. 정의문 — 구절별 근거: docs/structure.md §0 -->
+    <section class="hero" aria-labelledby="h-hero">
+      <h1 id="h-hero">문제를 받아 실행으로 증명하는 열 명의 학생 협동조합, 리모.</h1>
+      <p class="sub">데이터 분석 · 디자인 · 프로토타입으로 끝까지 풀어냅니다.</p>
+    </section>
+
+    <!-- 1. 방향 — 문장은 전부 노션 REMO.core TEAM 페이지 원문 (2026-09-17 확인).
+         노션이 바뀌면 여기를 바꾼다. 사이트에서 먼저 고치지 않는다.
+         다음 갱신: 2027-01 (분기 목표) / 담당: ___ -->
+    <section id="direction" class="direction" aria-labelledby="h-direction">
+      <div class="lead">
+        <p class="eyebrow">01 — 왜, 무엇을, 어디로</p>
+        <h2 id="h-direction">우리는 가치와 문제를 비즈니스로 풀어내며 실행으로 증명한다.</h2>
+        <p class="caption">리모(REMO) 협동조합의 미션. 팀 노션에 기록된 문장 그대로다.</p>
+      </div>
+
+      <div class="grid">
+        <div class="vision">
+          <p class="label">비전 · 2년차</p>
+          <p class="display">혼자가 아닌 팀으로 선순환하며, 시장의 평가 속에서 성장한다.</p>
+        </div>
+
+        <div class="right">
+          <div class="values">
+            <p class="eyebrow">가치 · 다섯 가지</p>
+            <ul>
+              <li>학습 · 성장</li>
+              <li>협력</li>
+              <li>신뢰 · 안전감</li>
+              <li>책임 · 설명</li>
+              <li>실행 · 실험</li>
+            </ul>
+          </div>
+
+          <div class="quarter">
+            <p class="eyebrow">지금 분기 목표 · 2026.09 → 2026.12</p>
+            <p class="display">팀이 서로 연결되어 협업할 수 있는 시스템을 구축한다.</p>
+            <p class="rule">의사결정 기준: 1차 만장일치 → 2차 80% → 3차 60%</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <span>리모(REMO) 협동조합</span>
+    <a href="https://remo-core.notion.site">REMO.core (노션) →</a>
+  </footer>
+
+  <script>
+    // 현재 섹션 표시 — 내비 링크가 가리키는 섹션만 관찰. 근거: plan-01 "현재 섹션 표시"
+    (function () {
+      var links = document.querySelectorAll('.site-nav a[href^="#"]');
+      if (!links.length || !('IntersectionObserver' in window)) return;
+      var byId = {};
+      links.forEach(function (a) { byId[a.getAttribute('href').slice(1)] = a; });
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) {
+          var a = byId[e.target.id];
+          if (!a) return;
+          if (e.isIntersecting) a.setAttribute('aria-current', 'true');
+          else a.removeAttribute('aria-current');
+        });
+      }, { rootMargin: '-40% 0px -55% 0px' });
+      Object.keys(byId).forEach(function (id) {
+        var el = document.getElementById(id);
+        if (el) io.observe(el);
+      });
+    })();
+  </script>
+</body>
+</html>
