@@ -149,38 +149,50 @@
     .quarter p.display { font-size: 24px; }
     .quarter .rule { font-size: 15px; color: var(--caption); }
 
-    /* 2. 관계 맵 — 데이터 파일이 있을 때만 표시. 결정: docs/plan-06-relation-map.md */
-    .relations .wrap { display: flex; flex-direction: column; gap: 40px; }
-    .relations .lead { display: flex; flex-direction: column; gap: 16px; }
-    .relations h2 { font-size: 56px; max-width: 1040px; }
-    @media (max-width: 879px) { .relations h2 { font-size: 32px; } }
-    .rel-map { display: grid; grid-template-columns: 1fr 300px; gap: 32px; align-items: start; }
-    @media (max-width: 879px) { .rel-map { grid-template-columns: 1fr; gap: 16px; } }
+    /* 첫 화면 관계 맵 — 결정: docs/plan-08-hero-map.md */
+    .hero-grid { display: grid; grid-template-columns: 1fr; gap: 32px; align-items: start; }
+    .hero-text { display: flex; flex-direction: column; gap: 20px; }
+    @media (min-width: 880px) {
+      .hero-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 48px; align-items: center; }
+      .hero h1 { font-size: clamp(34px, 4.6vw, 64px); }   /* 반 폭에서 4줄 이내 */
+    }
+    .relations { display: grid; grid-template-columns: 1fr; gap: 16px; }
     .rel-stage { position: relative; background: var(--blue); border-radius: 40px; padding: 24px; aspect-ratio: 640 / 440; }
     @media (max-width: 879px) { .rel-stage { border-radius: 28px; padding: 12px; } }
     .rel-stage svg { position: absolute; inset: 24px; width: calc(100% - 48px); height: calc(100% - 48px); }
     @media (max-width: 879px) { .rel-stage svg { inset: 12px; width: calc(100% - 24px); height: calc(100% - 24px); } }
     .rel-stage line { stroke: var(--paper); stroke-linecap: round; transition: opacity 200ms; }
     @media (prefers-reduced-motion: reduce) { .rel-stage line { transition: none; } }
+    /* 노드: 열 명이 전부 다른 형태 — "각자의 형태를 잃지 않은 채 하나로"(가이드 v4) */
     .rel-node {
       position: absolute; transform: translate(-50%, -50%);
-      border: 4px solid var(--ink); background: var(--paper); border-radius: 50%;
+      border: 4px solid var(--ink); background: var(--paper);
       padding: 0; min-width: 24px; min-height: 24px; cursor: pointer;
+      border-radius: 50%;
     }
+    .rel-node:nth-child(2)  { border-radius: 52% 48% 46% 54% / 48% 54% 46% 52%; }
+    .rel-node:nth-child(3)  { border-radius: 46% 54% 52% 48% / 54% 46% 48% 52%; }
+    .rel-node:nth-child(4)  { border-radius: 55% 45% 50% 50% / 45% 50% 50% 55%; }
+    .rel-node:nth-child(5)  { border-radius: 48% 52% 55% 45% / 52% 48% 45% 55%; }
+    .rel-node:nth-child(6)  { border-radius: 50% 50% 45% 55% / 55% 45% 50% 50%; }
+    .rel-node:nth-child(7)  { border-radius: 53% 47% 48% 52% / 47% 53% 52% 48%; }
+    .rel-node:nth-child(8)  { border-radius: 45% 55% 53% 47% / 53% 47% 45% 55%; }
+    .rel-node:nth-child(9)  { border-radius: 51% 49% 54% 46% / 49% 51% 46% 54%; }
+    .rel-node:nth-child(10) { border-radius: 47% 53% 49% 51% / 51% 49% 53% 47%; }
+    .rel-node:nth-child(11) { border-radius: 54% 46% 51% 49% / 46% 54% 49% 51%; }
     .rel-node[aria-pressed="true"] { background: var(--ink); }
     .rel-node:focus-visible { outline-color: var(--paper); }
-    .rel-filters { display: flex; flex-direction: column; gap: 10px; }
-    @media (max-width: 879px) { .rel-filters { flex-direction: row; flex-wrap: wrap; } }
+    .rel-side { display: flex; flex-direction: column; gap: 12px; }
+    .rel-filters { display: flex; flex-wrap: wrap; gap: 8px; }
     .rel-filters button {
-      text-align: left; border: 4px solid var(--ink); border-radius: 999px; padding: 12px 20px;
-      font: inherit; font-weight: 700; font-size: 16px; background: var(--paper); color: var(--ink);
+      border: 4px solid var(--ink); border-radius: 999px; padding: 10px 18px;
+      font: inherit; font-weight: 700; font-size: 15px; background: var(--paper); color: var(--ink);
       cursor: pointer; min-height: 44px;
     }
     .rel-filters button[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
-    .rel-def { font-size: 15px; color: var(--caption); margin: 6px 0 0; }
-    @media (max-width: 879px) { .rel-def { display: none; } }
-    .rel-status { margin-top: 20px; font-weight: 700; }
-    .rel-note { margin-top: 24px; font-size: 15px; color: var(--caption); }
+    .rel-def { display: none; }
+    .rel-status { font-weight: 700; font-size: 16px; }
+    .rel-cap { font-size: 14px; max-width: none; }
 
     /* 3. 포트폴리오 — 결정: docs/plan-03-portfolio.md */
     .portfolio .wrap { display: flex; flex-direction: column; gap: 40px; }
@@ -337,10 +349,23 @@
 
   <main id="main">
     <!-- 0. 정의문 — 구절별 근거: docs/structure.md §0 -->
+    <!-- 첫 화면 = 정의문(글자) + 관계 맵(도구). 맵은 data/relations.json이 있을 때만 나타난다. docs/plan-08-hero-map.md -->
     <section class="hero" aria-labelledby="h-hero">
      <div class="wrap">
-      <h1 id="h-hero">문제를 받아 실행으로 증명하는 열 명의 학생 협동조합, 리모.</h1>
-      <p class="sub">데이터 분석 · 디자인 · 프로토타입으로 끝까지 풀어냅니다.</p>
+      <div class="hero-grid">
+        <div class="hero-text">
+          <h1 id="h-hero">문제를 받아 실행으로 증명하는 열 명의 학생 협동조합, 리모.</h1>
+          <p class="sub">데이터 분석 · 디자인 · 프로토타입으로 끝까지 풀어냅니다.</p>
+        </div>
+        <div id="relations" class="relations" aria-label="열 명의 관계 맵" hidden>
+          <div class="rel-stage" id="rel-stage"><svg viewBox="0 0 640 440" aria-hidden="true" id="rel-lines"></svg></div>
+          <div class="rel-side">
+            <div class="rel-filters" role="group" aria-label="관계 유형" id="rel-filters"></div>
+            <p class="rel-status" role="status" id="rel-status"></p>
+            <p class="caption rel-cap" id="rel-caption">팀 진단 도구(REMO OS)의 관계 데이터. 노드에 이름은 없다.</p>
+          </div>
+        </div>
+      </div>
      </div>
     </section>
 
@@ -381,24 +406,6 @@
       </div>
      </div>
     </section>
-    <!-- 2. 관계 맵 — site/data/relations.json 이 있을 때만 렌더링(본인 동의 후 추가). 안 B: 긍정 3유형, 익명 번호 노드. docs/plan-06-relation-map.md -->
-    <section id="relations" class="relations" aria-labelledby="h-relations" hidden>
-     <div class="wrap">
-      <div class="lead">
-        <h2 id="h-relations">서로 어떻게 연결돼 있는가</h2>
-        <p class="caption" id="rel-caption">팀 진단 도구(REMO OS)의 관계 데이터. 노드에 이름은 없다.</p>
-      </div>
-      <div class="rel-map">
-        <div class="rel-stage" id="rel-stage"><svg viewBox="0 0 640 440" aria-hidden="true" id="rel-lines"></svg></div>
-        <div>
-          <div class="rel-filters" role="group" aria-label="관계 유형" id="rel-filters"></div>
-          <p class="rel-status" role="status" id="rel-status"></p>
-          <p class="rel-note">부딪히기 쉬운 · 말이 엇갈리는 관계는 팀 내부 도구에만 있다.</p>
-        </div>
-      </div>
-     </div>
-    </section>
-
     <!-- 3. 포트폴리오 — 사실은 노션 프로젝트 페이지 4개 원문(2026-09-17). 추정·미확정·개인정보는 싣지 않는다. docs/plan-03-portfolio.md -->
     <section id="portfolio" class="portfolio" aria-labelledby="h-portfolio">
      <div class="wrap">
