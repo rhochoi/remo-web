@@ -243,7 +243,6 @@
       display: flex; align-items: center; justify-content: center;
       font-size: 24px; font-weight: 900; line-height: 1;
     }
-    .members li:nth-child(3n+1) .initial { background: var(--blue); }
     .members .name { font-size: 24px; font-weight: 900; letter-spacing: -0.03em; line-height: 1.15; }
     .team .note { font-size: 15px; color: var(--caption); }
     .team figure { margin: 0; display: flex; flex-direction: column; gap: 12px; }
@@ -303,6 +302,9 @@
       font: inherit; font-size: 20px; font-weight: 900; cursor: pointer;
     }
     .contact-form button[disabled] { cursor: progress; opacity: .7; }
+    .consent label { display: flex; gap: 12px; align-items: flex-start; font-size: 15px; font-weight: 400; line-height: 1.6; cursor: pointer; }
+    .consent input { width: 22px; height: 22px; margin: 4px 0 0; flex-shrink: 0; accent-color: var(--paper); }
+    .consent a { color: var(--label-on-ink); }
     .form-msg { font-size: 18px; font-weight: 700; }
     .form-msg:empty { display: none; }
     .gotcha { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
@@ -329,6 +331,7 @@
       <a href="#direction">방향</a>
       <a href="#portfolio">포트폴리오</a>
       <a href="#team">팀</a>
+      <a href="#contact">문의</a>
     </nav>
    </div>
   </header>
@@ -466,15 +469,15 @@
       <p class="note">포지션과 담당은 싣지 않는다.</p>
      </div>
     </section>
-    <!-- 5. 문의 — Formspree. 엔드포인트 ID 확보 전까지 hidden. 켜는 절차: docs/plan-04-contact.md -->
-    <section id="contact" class="contact" aria-labelledby="h-contact" hidden>
+    <!-- 5. 문의 — Formspree xdekorqo (2026-09-18 켬). docs/plan-04-contact.md · 개인정보 고지 plan-05 F11 -->
+    <section id="contact" class="contact" aria-labelledby="h-contact">
      <div class="wrap">
       <div class="lead">
         <h2 id="h-contact">다 채워야 보낼 수 있습니다.</h2>
         <p class="caption">이메일 한 줄 대신 이 폼을 씁니다. 문제를 설명하는 데 시간을 들일 수 있는 분과 일하고 싶어서입니다.</p>
       </div>
 
-      <form class="contact-form" method="POST" action="https://formspree.io/f/FORM_ID" data-endpoint="https://formspree.io/f/FORM_ID" novalidate="false">
+      <form class="contact-form" method="POST" action="https://formspree.io/f/xdekorqo" data-endpoint="https://formspree.io/f/xdekorqo" novalidate="false">
         <p class="req">모든 항목이 필수입니다.</p>
         <p class="form-msg" role="alert" id="form-error"></p>
 
@@ -515,6 +518,11 @@
           <label for="f-email">연락처 (이메일)</label>
           <input id="f-email" name="email" type="email" required autocomplete="email">
         </div>
+        <div class="field consent">
+          <label><input type="checkbox" name="개인정보 동의" value="동의" required>
+            <span>위 항목(소속·문제·시도·협업 형태·일정·예산·이메일)을 문의 응대 목적으로 수집하고 <b>1년간</b> 보관하는 데 동의합니다. 자세한 내용은 <a href="https://remo-core.notion.site/3bd4e56fc730802b95dfc91ec12d8c41">개인정보처리방침</a>에 있습니다. 동의하지 않으면 보낼 수 없습니다.</span>
+          </label>
+        </div>
         <input type="hidden" name="_subject" value="[remo-web] 문의">
         <input type="text" name="_gotcha" class="gotcha" tabindex="-1" autocomplete="off" aria-hidden="true">
 
@@ -528,7 +536,10 @@
   <footer class="site-footer">
    <div class="wrap">
     <span>리모(REMO) 협동조합</span>
-    <a href="https://remo-core.notion.site">REMO.core (노션) →</a>
+    <span style="display: flex; gap: 20px; flex-wrap: wrap;">
+      <a href="https://remo-core.notion.site/3bd4e56fc730802b95dfc91ec12d8c41">개인정보처리방침</a>
+      <a href="https://remo-core.notion.site">REMO.core (노션) →</a>
+    </span>
    </div>
   </footer>
 

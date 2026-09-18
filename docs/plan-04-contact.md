@@ -1,7 +1,7 @@
 # 계획 04 — 문의 섹션
 
 형식: 결정 / 이유 / 근거 / 기각안. 공통 토큰은 [plan-01](plan-01-header-direction.md).
-백엔드: **Formspree** (팀 승인 2026-09-17). 엔드포인트 ID 확보 전까지 섹션은 `hidden`, 내비 링크 없음.
+백엔드: **Formspree** `xdekorqo` (2026-09-18 켬). 테스트 제출 1건 성공(`{"ok":true}`, HTTP 200, AJAX). 개인정보 동의 체크박스 포함 — plan-05 F11.
 
 ## 결정
 
