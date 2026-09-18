@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <!-- 최소 공개 단위 4조건 충족, 2026-09-18 공개 — docs/structure.md -->
+  <!-- 2026-09-18 재설계 — docs/plan-09-redesign.md. 콘텐츠는 노션 원문·팀 확인 사실만. -->
   <title>리모 — 문제를 받아 실행으로 증명하는 열 명의 학생 협동조합</title>
   <meta name="description" content="문제를 받아 실행으로 증명하는 열 명의 학생 협동조합, 리모. 데이터 분석 · 디자인 · 프로토타입으로 끝까지 풀어냅니다.">
   <meta property="og:type" content="website">
@@ -16,614 +16,392 @@
   <meta property="og:image:height" content="630">
   <meta property="og:image:alt" content="콘크리트 벽에 붙인 종이 앞에서 포스트잇을 옮기는 리모 팀원들의 뒷모습">
   <meta name="twitter:card" content="summary_large_image">
-  <!-- 파비콘: 마스코트 배지, 오렌지→오션 블루 치환(한 화면 = 한 모드). plan-07 -->
   <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
   <link rel="icon" type="image/png" sizes="64x64" href="assets/favicon-64.png">
   <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+  <link rel="preload" as="image" href="assets/remo-wordmark.png">
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard-dynamic-subset.min.css">
   <style>
-    /* 토큰 — 근거: docs/plan-01-header-direction.md */
+    /* ===== 토큰 — 가이드 v4 실측값. 결정: docs/plan-09-redesign.md ===== */
     :root {
       --ink: #0A0A0A;
       --blue: #1E548C;
       --paper: #F8F8F6;
-      --caption: #5A5A5A;      /* on paper 6.49:1 */
-      --label-on-ink: #9DBBDB; /* on ink 9.96:1 */
-      --header-h: 80px;
-      --gutter: 80px;
-      --section-gap: 128px;
+      --mute-on-paper: #5A5A5A;   /* 6.49:1 */
+      --mute-on-ink: #A8A8A4;     /* 8.9:1 */
+      --mute-on-blue: #E3ECF5;    /* 6.51:1 */
+      --gutter: clamp(16px, 5vw, 80px);
+      --wrap: 1280px;
+      --header-h: 64px;
     }
-    @media (max-width: 879px) {
-      :root { --header-h: 64px; --gutter: 16px; --section-gap: 80px; }
-    }
-
     * { box-sizing: border-box; }
     html { scroll-behavior: smooth; }
     @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
     body {
-      margin: 0;
-      background: var(--paper);
-      color: var(--ink);
+      margin: 0; background: var(--paper); color: var(--ink);
       font-family: Pretendard, -apple-system, system-ui, sans-serif;
-      font-size: 18px;
-      line-height: 1.7;
-      word-break: keep-all; /* 국문: 어절 단위 줄바꿈. 본문 포함 전역 */
-      overflow-x: clip;
+      font-size: 18px; line-height: 1.7; word-break: keep-all; overflow-x: clip;
     }
-    a { color: var(--blue); }
-    :focus-visible { outline: 3px solid var(--blue); outline-offset: 3px; }
-    /* 눌림 피드백: 입력이 들어갔다는 정보. transform만, 120ms, reduced-motion 시 제거 (plan-05 F4) */
-    .site-nav a, .project .more, .contact-form button, .site-footer a { transition: transform 120ms ease-out; }
-    .site-nav a:active, .project .more:active, .contact-form button:active { transform: translateY(1px); }
-    @media (prefers-reduced-motion: reduce) { .site-nav a, .project .more, .contact-form button, .site-footer a { transition: none; } }
-    .site-nav a:hover { text-decoration: underline; text-underline-offset: 4px; }
-
-    h1, h2, h3, .display {
-      font-weight: 900;
-      letter-spacing: -0.03em;
-      word-break: keep-all;
-      line-height: 1.15;
-      margin: 0;
-    }
+    a { color: inherit; }
     p { margin: 0; }
+    h1, h2, h3 { margin: 0; letter-spacing: -0.03em; line-height: 1; text-wrap: balance; }
+    :focus-visible { outline: 3px solid var(--blue); outline-offset: 3px; }
+    .dark :focus-visible { outline-color: var(--paper); }
+    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+    .wrap { max-width: var(--wrap); margin: 0 auto; padding-inline: var(--gutter); }
+    .label { font-size: 13px; font-weight: 600; letter-spacing: 0.04em; }
 
-    /* 스킵 링크 */
-    .skip {
-      position: absolute; left: var(--gutter); top: -100px;
-      background: var(--ink); color: var(--paper);
-      padding: 12px 20px; border-radius: 999px; font-weight: 700; text-decoration: none;
-      z-index: 20;
-    }
+    /* 스킵 */
+    .skip { position: absolute; left: var(--gutter); top: -100px; z-index: 30; background: var(--paper); color: var(--ink); padding: 12px 20px; border-radius: 999px; font-weight: 700; text-decoration: none; }
     .skip:focus { top: 12px; }
 
-    /* 헤더 */
-    .site-header {
-      position: sticky; top: 0; z-index: 10;
-      height: var(--header-h);
-      background: var(--paper);
-      border-bottom: 4px solid var(--ink);
-      padding: 0 var(--gutter);
-    }
-    .site-header .wrap { height: 100%; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-    /* 워드마크: 원본 PNG(가이드 로고 규칙). 36px + 상하 22px = 80, 여백 ≥ 높이의 50%. 모바일 28px = 가이드 최소 크기. plan-07 */
-    .wordmark { display: flex; align-items: center; flex-shrink: 0; }
-    .wordmark img { height: 36px; width: auto; display: block; }
-    @media (max-width: 879px) { .wordmark img { height: 28px; } }
+    /* ===== 헤더: 히어로 위에서는 투명, 스크롤 후 근백색. 직선 룰 없음 ===== */
+    .site-header { position: fixed; inset: 0 0 auto 0; z-index: 20; height: var(--header-h); color: var(--paper); transition: background-color 200ms, color 200ms; }
+    .site-header .wrap { height: 100%; display: flex; align-items: center; justify-content: space-between; }
+    .site-header .brand { font-size: 13px; font-weight: 700; letter-spacing: 0.08em; text-decoration: none; }
     .site-nav { display: flex; gap: 4px; }
-    .site-nav a {
-      display: inline-flex; align-items: center; min-height: 44px;
-      padding: 12px 20px; border-radius: 999px;
-      color: var(--ink); text-decoration: none; font-weight: 700; font-size: 16px;
-    }
-    .site-nav a[aria-current="true"] { background: var(--ink); color: var(--paper); }
-    @media (max-width: 879px) { .site-nav a { padding: 12px 8px; font-size: 14px; } }
+    .site-nav a { display: inline-flex; align-items: center; min-height: 44px; padding: 10px 12px; font-size: 14px; font-weight: 600; text-decoration: none; opacity: .8; }
+    .site-nav a[aria-current="true"], .site-nav a:hover { opacity: 1; text-decoration: underline; text-underline-offset: 6px; text-decoration-thickness: 2px; }
+    .site-header.on-paper { background: rgba(248, 248, 246, .92); color: var(--ink); }
+    @media (prefers-reduced-motion: reduce) { .site-header { transition: none; } }
 
-    /* 공통 섹션 — 콘텐츠 폭 상한 1120 (= 1280 뷰포트 − 거터 80×2): plan-01~03의 모든 폭 계산 기준. 그 위에서는 계산이 깨진다 (plan-05 F1) */
-    .wrap { max-width: 1120px; margin: 0 auto; }
-    main > section { padding: var(--section-gap) var(--gutter) 0; scroll-margin-top: var(--header-h); }
-    main > section > .wrap { display: block; }
-    h1, h2, h3 { text-wrap: balance; }
-    p { text-wrap: pretty; }
-    .eyebrow { font-size: 15px; font-weight: 700; letter-spacing: 0.08em; color: var(--blue); }
-    .caption { font-size: 18px; color: var(--caption); max-width: 640px; }
-
-    /* 0. 첫 화면 — 관계 맵이 화면을 채운다. 결정: docs/plan-08-hero-map.md */
-    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
-    main > section.hero { padding-top: 16px; }
-    .relations { display: block; }
-    .rel-stage {
-      --px: 48px; --py: 48px; --pb: 120px;
-      position: relative; background: var(--blue); border-radius: 40px;
-      height: calc(100dvh - var(--header-h) - 32px); min-height: 480px; max-height: 900px;
-    }
-    @media (max-width: 879px) { .rel-stage { --px: 28px; --py: 36px; --pb: 132px; border-radius: 28px; height: calc(100dvh - var(--header-h) - 24px); min-height: 420px; } }
-    /* 선: 매스 안쪽 여백(노드 반지름 + 필터 높이)을 남기고 스테이지에 맞춰 늘어난다 */
-    .rel-stage svg { position: absolute; left: var(--px); top: var(--py); width: calc(100% - 2 * var(--px)); height: calc(100% - var(--py) - var(--pb)); overflow: visible; }
-    .rel-stage line { stroke: var(--paper); stroke-linecap: round; transition: opacity 200ms; }
-    /* 노드: 열 명이 전부 다른 형태 — "각자의 형태를 잃지 않은 채 하나로"(가이드 v4). 위치는 선과 같은 좌표계(%). */
-    .rel-node {
-      position: absolute; transform: translate(-50%, -50%);
-      border: 4px solid var(--ink); background: var(--paper);
-      padding: 0; min-width: 24px; min-height: 24px; cursor: pointer;
+    /* ===== 0. 히어로: 잉크 위 블루 로고(가이드 2.2 블루 모드 그대로), 그 위에 열 명 ===== */
+    .hero { background: var(--ink); color: var(--paper); min-height: 100dvh; display: grid; grid-template-rows: 1fr auto; padding-block: calc(var(--header-h) + 24px) 32px; position: relative; overflow: hidden; }
+    .hero-stage { position: relative; align-self: center; width: min(92vw, 1180px); justify-self: start; margin-left: 2vw; }
+    .hero-stage .mark { display: block; width: 100%; height: auto; }
+    @keyframes settle { from { transform: scale(1.04); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    @keyframes pop { from { scale: 0; } to { scale: 1; } }
+    @keyframes draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+    @keyframes floaty { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+    .hero-stage .mark { animation: settle 900ms cubic-bezier(.2,.9,.2,1.05) both; }
+    .hero-map { position: absolute; inset: 0; }
+    .hero-map svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+    .hero-map line { stroke: var(--paper); stroke-linecap: round; stroke-dasharray: 1; stroke-dashoffset: 0; transition: opacity 250ms; animation: draw 700ms ease-out both; animation-delay: 600ms; }
+    .node {
+      position: absolute; translate: -50% -50%; border: 0; padding: 0; cursor: pointer; min-width: 24px; min-height: 24px;
+      background: radial-gradient(circle at 32% 30%, #FFFFFF 0%, #EEF2F6 45%, #C9D6E4 100%);
+      box-shadow: inset -3px -4px 6px rgba(30, 84, 140, .35), inset 2px 3px 4px rgba(255,255,255,.9), 0 6px 14px rgba(0,0,0,.35);
       border-radius: 50%;
-      transition: transform 150ms ease-out, background-color 150ms;
+      animation: pop 380ms cubic-bezier(.2,.9,.2,1.15) both;
+      animation-delay: calc(700ms + var(--i, 0) * 60ms);
+      transition: scale 150ms ease-out, background-color 150ms;
     }
-    .rel-node:hover, .rel-node:focus-visible { transform: translate(-50%, -50%) scale(1.12); }
-    @media (prefers-reduced-motion: reduce) { .rel-stage line, .rel-node { transition: none; } .rel-node:hover, .rel-node:focus-visible { transform: translate(-50%, -50%); } }
-    .rel-node:nth-of-type(2)  { border-radius: 52% 48% 46% 54% / 48% 54% 46% 52%; }
-    .rel-node:nth-of-type(3)  { border-radius: 46% 54% 52% 48% / 54% 46% 48% 52%; }
-    .rel-node:nth-of-type(4)  { border-radius: 55% 45% 50% 50% / 45% 50% 50% 55%; }
-    .rel-node:nth-of-type(5)  { border-radius: 48% 52% 55% 45% / 52% 48% 45% 55%; }
-    .rel-node:nth-of-type(6)  { border-radius: 50% 50% 45% 55% / 55% 45% 50% 50%; }
-    .rel-node:nth-of-type(7)  { border-radius: 53% 47% 48% 52% / 47% 53% 52% 48%; }
-    .rel-node:nth-of-type(8)  { border-radius: 45% 55% 53% 47% / 53% 47% 45% 55%; }
-    .rel-node:nth-of-type(9)  { border-radius: 51% 49% 54% 46% / 49% 51% 46% 54%; }
-    .rel-node:nth-of-type(10) { border-radius: 47% 53% 49% 51% / 51% 49% 53% 47%; }
-    .rel-node[aria-pressed="true"] { background: var(--ink); }
-    .rel-node:focus-visible { outline-color: var(--paper); }
-    /* 필터: 매스 안 왼쪽 아래. 설명 없이 이름만 */
-    .rel-filters { position: absolute; left: 24px; right: 24px; bottom: 24px; display: flex; flex-wrap: wrap; gap: 8px; }
-    @media (max-width: 879px) { .rel-filters { left: 16px; right: 16px; bottom: 16px; } }
-    .rel-filters button {
-      border: 4px solid var(--ink); border-radius: 999px; padding: 10px 18px;
-      font: inherit; font-weight: 700; font-size: 15px; background: var(--paper); color: var(--ink);
-      cursor: pointer; min-height: 44px;
-    }
-    .rel-filters button[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
+    .node:nth-of-type(2)  { border-radius: 52% 48% 46% 54% / 48% 54% 46% 52%; }
+    .node:nth-of-type(3)  { border-radius: 46% 54% 52% 48% / 54% 46% 48% 52%; }
+    .node:nth-of-type(4)  { border-radius: 55% 45% 50% 50% / 45% 50% 50% 55%; }
+    .node:nth-of-type(5)  { border-radius: 48% 52% 55% 45% / 52% 48% 45% 55%; }
+    .node:nth-of-type(6)  { border-radius: 50% 50% 45% 55% / 55% 45% 50% 50%; }
+    .node:nth-of-type(7)  { border-radius: 53% 47% 48% 52% / 47% 53% 52% 48%; }
+    .node:nth-of-type(8)  { border-radius: 45% 55% 53% 47% / 53% 47% 45% 55%; }
+    .node:nth-of-type(9)  { border-radius: 51% 49% 54% 46% / 49% 51% 46% 54%; }
+    .node:nth-of-type(10) { border-radius: 47% 53% 49% 51% / 51% 49% 53% 47%; }
+    .node.float { animation: pop 380ms cubic-bezier(.2,.9,.2,1.15) both, floaty var(--dur, 7s) ease-in-out infinite; animation-delay: calc(700ms + var(--i, 0) * 60ms), calc(1400ms + var(--i, 0) * 300ms); }
+    .node:hover, .node:focus-visible { scale: 1.15; }
+    .node[aria-pressed="true"] { background: var(--blue); box-shadow: inset -3px -4px 6px rgba(0,0,0,.35), 0 0 0 3px var(--paper); }
+    .node:focus-visible { outline-color: var(--paper); }
+    .hero-foot { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; flex-wrap: wrap; }
+    .hero h1 { font-size: 22px; font-weight: 500; line-height: 1.45; letter-spacing: -0.01em; max-width: 34ch; }
+    @media (max-width: 879px) { .hero h1 { font-size: 18px; } }
+    .rel-filters { display: flex; gap: 4px 18px; flex-wrap: wrap; }
+    .rel-filters button { background: none; border: 0; padding: 10px 0; min-height: 44px; color: var(--paper); font: inherit; font-size: 13px; font-weight: 600; letter-spacing: 0.02em; cursor: pointer; opacity: .6; text-decoration: underline; text-underline-offset: 6px; text-decoration-thickness: 1.5px; text-decoration-color: transparent; }
+    .rel-filters button:hover { opacity: 1; }
+    .rel-filters button[aria-pressed="true"] { opacity: 1; text-decoration-color: currentColor; }
     .rel-filters button:focus-visible { outline-color: var(--paper); }
-    .rel-def { display: none; }
-    .rel-cap { position: absolute; right: 24px; top: 20px; margin: 0; font-size: 13px; color: #E3ECF5; max-width: 60%; text-align: right; } /* on blue 6.51:1 */
-    @media (max-width: 879px) { .rel-cap { display: none; } }
-    .hero-grid, .hero-text, .hero .sub { display: none; }
-
-    /* 1. 방향 */
-    .direction .wrap { display: flex; flex-direction: column; gap: 48px; }
-    .direction .lead { display: flex; flex-direction: column; gap: 20px; }
-    .direction h2 { font-size: 56px; max-width: 1040px; }
-    @media (max-width: 879px) { .direction h2 { font-size: 32px; } }
-    .direction .grid { display: grid; grid-template-columns: 560px 1fr; gap: 32px; align-items: start; }
-    @media (max-width: 879px) { .direction .grid { grid-template-columns: 1fr; } }
-
-    .vision {
-      background: var(--ink); color: var(--paper);
-      border-radius: 36px; padding: 44px 48px;
-      display: flex; flex-direction: column; gap: 16px;
-      transform: rotate(-1deg);
+    .rel-cap { font-size: 12px; color: var(--mute-on-ink); }
+    @supports (animation-timeline: scroll()) {
+      @keyframes rise { to { transform: translateY(-12vh) scale(.94); } }
+      .hero-stage { animation: rise linear both; animation-timeline: scroll(root); animation-range: 0 100vh; }
     }
-    .vision .label { font-size: 15px; font-weight: 700; letter-spacing: 0.08em; color: var(--label-on-ink); }
-    .vision p.display { font-size: 32px; }
-    @media (max-width: 879px) { .vision { padding: 28px 24px; border-radius: 28px; } .vision p.display { font-size: 24px; } }
-
-    .right { display: flex; flex-direction: column; gap: 32px; padding-top: 12px; }
-    .values { display: flex; flex-direction: column; gap: 12px; }
-    .values ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 12px; }
-    .values li {
-      background: var(--blue); color: var(--paper);
-      border-radius: 999px; padding: 12px 20px;
-      font-size: 18px; font-weight: 700; line-height: 1.3;
-    }
-    .quarter {
-      border: 4px solid var(--ink); border-radius: 28px; padding: 28px 32px;
-      display: flex; flex-direction: column; gap: 10px;
-    }
-    .quarter p.display { font-size: 24px; }
-    .quarter .rule { font-size: 15px; color: var(--caption); }
-
-    /* 3. 포트폴리오 — 결정: docs/plan-03-portfolio.md */
-    .portfolio .wrap { display: flex; flex-direction: column; gap: 40px; }
-    .portfolio .lead { display: flex; flex-direction: column; gap: 16px; }
-    .portfolio h2 { font-size: 56px; max-width: 1040px; }
-    @media (max-width: 879px) { .portfolio h2 { font-size: 32px; } }
-    .projects { display: flex; flex-direction: column; gap: 32px; }
-    .row { display: grid; gap: 32px; align-items: stretch; }
-    .row-a { grid-template-columns: 1.6fr 1fr; }
-    .row-b { grid-template-columns: 1fr 1.6fr; }
-    @media (max-width: 879px) { .row-a, .row-b { grid-template-columns: 1fr; gap: 20px; } .projects { gap: 20px; } }
-    .project {
-      border-radius: 36px; padding: 40px 44px;
-      display: flex; flex-direction: column; gap: 14px;
-    }
-    @media (max-width: 879px) { .project { padding: 28px 24px; border-radius: 28px; } }
-    .project.ink   { background: var(--ink);  color: var(--paper); transform: rotate(-1deg); }
-    .project.blue  { background: var(--blue); color: var(--paper); }
-    .project.line  { border: 4px solid var(--ink); }
-    .project .meta { font-size: 15px; font-weight: 700; letter-spacing: 0.02em; }
-    .project.ink  .meta, .project.ink  .stage { color: var(--label-on-ink); }  /* 9.96:1 */
-    .project.blue .meta, .project.blue .stage { color: #E3ECF5; }              /* 6.51:1 */
-    .project.line .meta, .project.line .stage { color: var(--caption); }        /* 6.49:1 */
-    .project h3 { font-size: 32px; }
-    @media (max-width: 879px) { .project h3 { font-size: 24px; } }
-    .project .one { font-size: 18px; line-height: 1.6; }
-    .project .stage { font-size: 15px; }
-    .project .stage b { font-weight: 700; margin-right: 10px; }
-    .project .more {
-      margin-top: auto; align-self: flex-start;
-      display: inline-flex; align-items: center; min-height: 44px; padding: 12px 22px;
-      border-radius: 999px; font-weight: 700; font-size: 16px; text-decoration: none;
-    }
-    .project .more:hover { text-decoration: underline; }
-    .project.ink .more, .project.blue .more { background: var(--paper); color: var(--ink); }
-    .project.line .more { background: var(--ink); color: var(--paper); }
-    .project.ink .more:focus-visible, .project.blue .more:focus-visible { outline-color: var(--paper); }
-
-    /* 4. 팀 — 결정: docs/plan-02-team.md */
-    .team .wrap { display: flex; flex-direction: column; gap: 40px; }
-    .team .lead { display: flex; flex-direction: column; gap: 16px; }
-    .team h2 { font-size: 56px; }
-    @media (max-width: 879px) { .team h2 { font-size: 32px; } }
-    .members { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-start; }
-    .members li {
-      width: 232px; border: 4px solid var(--ink); border-radius: 28px; padding: 24px;
-      display: flex; flex-direction: column; gap: 12px;
-    }
-    /* 손맛 오프셋 — 8배수, 최대 40 < 간격 24×2 */
-    .members li:nth-child(2)  { margin-top: 24px; }
-    .members li:nth-child(4)  { margin-top: 40px; }
-    .members li:nth-child(5)  { margin-top: 12px; }
-    .members li:nth-child(7)  { margin-top: 32px; }
-    .members li:nth-child(9)  { margin-top: 16px; }
-    .members li:nth-child(10) { margin-top: 40px; }
-    .initial {
-      width: 64px; height: 64px; border-radius: 50%;
-      background: var(--ink); color: var(--paper);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 24px; font-weight: 900; line-height: 1;
-    }
-    .members .name { font-size: 24px; font-weight: 900; letter-spacing: -0.03em; line-height: 1.15; }
-    .team .note { font-size: 15px; color: var(--caption); }
-    .team figure { margin: 0; display: flex; flex-direction: column; gap: 12px; }
-    .team figure img { width: 100%; height: auto; display: block; border-radius: 36px; aspect-ratio: 4 / 3; object-fit: cover; }
-    @media (max-width: 879px) { .team figure img { border-radius: 28px; } }
-    .team figcaption { font-size: 15px; color: var(--caption); }
-    @media (max-width: 879px) {
-      .members { gap: 12px; }
-      .members li { width: calc(50% - 6px); padding: 18px; border-radius: 24px; }
-      .members li:nth-child(2)  { margin-top: 12px; }
-      .members li:nth-child(4)  { margin-top: 20px; }
-      .members li:nth-child(5)  { margin-top: 6px; }
-      .members li:nth-child(7)  { margin-top: 16px; }
-      .members li:nth-child(9)  { margin-top: 8px; }
-      .members li:nth-child(10) { margin-top: 20px; }
-      .initial { width: 48px; height: 48px; font-size: 18px; }
-      .members .name { font-size: 20px; }
+    @media (prefers-reduced-motion: reduce) {
+      .hero-stage .mark, .hero-map line, .node, .node.float, .hero-stage { animation: none !important; }
+      .node:hover, .node:focus-visible { scale: 1; }
     }
 
-    /* 5. 문의 — 결정: docs/plan-04-contact.md */
-    .contact .wrap { display: grid; grid-template-columns: 480px 1fr; gap: 64px; align-items: start; }
-    @media (max-width: 879px) { .contact .wrap { grid-template-columns: 1fr; gap: 32px; } }
-    .contact .lead { display: flex; flex-direction: column; gap: 20px; }
-    .contact h2 { font-size: 56px; }
-    @media (max-width: 879px) { .contact h2 { font-size: 32px; } }
-    .contact-form {
-      background: var(--ink); color: var(--paper);
-      border-radius: 40px; padding: 48px;
-      display: flex; flex-direction: column; gap: 22px;
-    }
-    @media (max-width: 879px) { .contact-form { padding: 24px; border-radius: 28px; } }
-    .contact-form :focus-visible { outline-color: var(--paper); }
-    .contact-form .req { font-size: 15px; color: var(--label-on-ink); }
+    /* ===== 1. 방향: 잉크 위 매니페스토. 계단 들여쓰기가 로고의 상승 리듬 ===== */
+    .direction { background: var(--ink); color: var(--paper); padding-block: 12vh 16vh; }
+    .direction .mission { font-size: clamp(44px, 7vw, 112px); font-weight: 800; line-height: .98; max-width: 14ch; }
+    .direction .mission .step { display: block; padding-left: 1.2em; }
+    .direction .src { margin-top: 24px; color: var(--mute-on-ink); font-size: 14px; }
+    .direction .grid { margin-top: 10vh; display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: 48px; align-items: start; }
+    @media (max-width: 879px) { .direction .grid { grid-template-columns: 1fr; gap: 40px; } }
+    .direction .vision { font-size: clamp(26px, 2.6vw, 34px); font-weight: 500; line-height: 1.3; letter-spacing: -0.02em; }
+    .direction .vision .label { display: block; margin-top: 10px; color: var(--mute-on-ink); }
+    .direction .kv { display: grid; gap: 28px; }
+    .direction .kv .label { color: var(--mute-on-ink); display: block; margin-bottom: 8px; }
+    .direction .values { font-size: 20px; font-weight: 600; }
+    .direction .values span + span::before { content: " / "; color: var(--mute-on-ink); font-weight: 400; }
+    .direction .goal { font-size: 22px; font-weight: 500; line-height: 1.4; }
+
+    /* ===== 2. 포트폴리오: 근백색, 인덱스 행. 이미지 없음은 타이포로 정직하게 ===== */
+    .portfolio { padding-block: 12vh 8vh; }
+    .portfolio .head { display: flex; justify-content: space-between; align-items: baseline; gap: 24px; flex-wrap: wrap; margin-bottom: 40px; }
+    .portfolio h2 { font-size: clamp(32px, 4vw, 56px); font-weight: 800; }
+    .portfolio .head p { color: var(--mute-on-paper); font-size: 16px; }
+    .rows { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--ink); }
+    .row { border-bottom: 1px solid var(--ink); }
+    .row a { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px 32px; align-items: end; padding: 28px 0; text-decoration: none; transition: background-color 200ms, color 200ms, padding 200ms, margin 200ms; }
+    @media (max-width: 879px) { .row a { grid-template-columns: 1fr; gap: 10px; padding: 22px 0; } }
+    .row a:hover, .row a:focus-visible { background: var(--blue); color: var(--paper); padding-inline: 20px; margin-inline: -20px; outline: none; }
+    .row a:focus-visible { box-shadow: inset 0 0 0 3px var(--paper); }
+    .row .name { font-size: clamp(36px, 6vw, 88px); font-weight: 800; line-height: .95; letter-spacing: -0.03em; }
+    .row .one { margin-top: 14px; font-size: 17px; line-height: 1.55; max-width: 44ch; }
+    .row .meta { display: flex; flex-direction: column; gap: 4px; font-size: 13px; letter-spacing: 0.02em; color: var(--mute-on-paper); text-align: right; }
+    .row a:hover .meta, .row a:focus-visible .meta { color: var(--mute-on-blue); }
+    @media (max-width: 879px) { .row .meta { text-align: left; flex-direction: row; flex-wrap: wrap; gap: 4px 14px; } }
+    @media (prefers-reduced-motion: reduce) { .row a { transition: none; } }
+
+    /* ===== 3. 팀: 풀블리드 사진 + 이름의 벽 ===== */
+    .team { padding-block: 8vh 12vh; }
+    .team figure { margin: 0 calc(-1 * var(--gutter)); }
+    .team figure img { display: block; width: 100%; height: auto; aspect-ratio: 21 / 9; object-fit: cover; }
+    @media (max-width: 879px) { .team figure img { aspect-ratio: 4 / 3; } }
+    .team figcaption { padding: 10px var(--gutter) 0; font-size: 13px; color: var(--mute-on-paper); }
+    .team h2 { margin-top: 8vh; font-size: 13px; font-weight: 600; letter-spacing: 0.04em; color: var(--mute-on-paper); }
+    .names { list-style: none; margin: 16px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0 .35em; font-size: clamp(40px, 7vw, 104px); font-weight: 800; line-height: 1.05; letter-spacing: -0.03em; }
+    .team .note { margin-top: 24px; font-size: 15px; color: var(--mute-on-paper); }
+
+    /* ===== 4. 문의: 에디토리얼 폼. 필수 3, 나머지 선택 ===== */
+    .contact { padding-block: 8vh 14vh; border-top: 1px solid var(--ink); }
+    .contact h2 { font-size: clamp(36px, 5vw, 72px); font-weight: 800; }
+    .contact .lead { margin-top: 20px; max-width: 46ch; color: var(--mute-on-paper); font-size: 17px; }
+    .contact-form { margin-top: 48px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 36px 40px; }
+    @media (max-width: 879px) { .contact-form { grid-template-columns: 1fr; gap: 28px; } }
     .field { display: flex; flex-direction: column; gap: 8px; }
-    .field label, .field legend { font-size: 15px; font-weight: 700; padding: 0; }
-    .field .hint { font-size: 15px; color: var(--label-on-ink); }
+    .field.wide { grid-column: 1 / -1; }
+    .field label, .field legend { font-size: 17px; font-weight: 700; padding: 0; }
+    .field label small, .field legend small { font-weight: 400; color: var(--mute-on-paper); margin-left: 6px; font-size: 14px; }
+    .field .hint { font-size: 14px; color: var(--mute-on-paper); }
     .field input[type="text"], .field input[type="email"], .field textarea {
-      background: var(--paper); color: var(--ink);
-      border: 0; border-radius: 20px; padding: 16px 20px;
-      font: inherit; font-size: 18px; line-height: 1.5; width: 100%;
+      background: transparent; color: var(--ink); border: 0; border-bottom: 2px solid var(--ink); border-radius: 0;
+      padding: 10px 0 12px; font: inherit; font-size: 20px; line-height: 1.4; width: 100%;
     }
-    .field textarea { resize: vertical; min-height: 120px; }
+    .field textarea { resize: vertical; min-height: 96px; }
+    .field input:focus-visible, .field textarea:focus-visible { outline: none; border-bottom-color: var(--blue); box-shadow: 0 2px 0 0 var(--blue); }
     fieldset.field { border: 0; margin: 0; }
-    .choices { display: flex; flex-wrap: wrap; gap: 10px; }
-    .choices label {
-      display: inline-flex; align-items: center; gap: 10px; min-height: 48px;
-      border: 3px solid var(--paper); border-radius: 999px; padding: 10px 20px;
-      font-size: 16px; font-weight: 700; cursor: pointer;
-    }
-    .choices input { width: 20px; height: 20px; margin: 0; accent-color: var(--paper); }
-    .two { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-    @media (max-width: 879px) { .two { grid-template-columns: 1fr; } }
-    .contact-form button {
-      align-self: flex-start; margin-top: 8px;
-      background: var(--paper); color: var(--ink);
-      border: 0; border-radius: 999px; min-height: 56px; padding: 16px 36px;
-      font: inherit; font-size: 20px; font-weight: 900; cursor: pointer;
-    }
-    .contact-form button[disabled] { cursor: progress; opacity: .7; }
+    .choices { display: flex; flex-wrap: wrap; gap: 8px 22px; }
+    .choices label { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; font-size: 17px; font-weight: 500; cursor: pointer; }
+    .choices input { width: 20px; height: 20px; margin: 0; accent-color: var(--blue); }
+    .consent { grid-column: 1 / -1; }
     .consent label { display: flex; gap: 12px; align-items: flex-start; font-size: 15px; font-weight: 400; line-height: 1.6; cursor: pointer; }
-    .consent input { width: 22px; height: 22px; margin: 4px 0 0; flex-shrink: 0; accent-color: var(--paper); }
-    .consent a { color: var(--label-on-ink); }
-    .form-msg { font-size: 18px; font-weight: 700; }
+    .consent input { width: 22px; height: 22px; margin: 4px 0 0; flex-shrink: 0; accent-color: var(--blue); }
+    .contact-form button { grid-column: 1 / -1; background: var(--blue); color: var(--paper); border: 0; border-radius: 999px; min-height: 64px; padding: 16px 36px; font: inherit; font-size: 20px; font-weight: 800; cursor: pointer; transition: transform 120ms ease-out; }
+    .contact-form button:active { transform: translateY(1px); }
+    .contact-form button[disabled] { cursor: progress; opacity: .7; }
+    .form-msg { grid-column: 1 / -1; font-size: 18px; font-weight: 700; }
     .form-msg:empty { display: none; }
     .gotcha { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
 
-    /* 푸터 */
-    .site-footer {
-      margin-top: var(--section-gap);
-      padding: 40px var(--gutter) 56px;
-      border-top: 4px solid var(--ink);
-      font-size: 15px; color: var(--caption);
-    }
-    .site-footer .wrap { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
-    .site-footer a { font-weight: 700; }
+    /* ===== 푸터: 잉크, 로고 과감한 크롭(가이드 2.4) ===== */
+    .site-footer { background: var(--ink); color: var(--paper); overflow: hidden; padding-top: 10vh; }
+    .site-footer .links { display: flex; justify-content: space-between; gap: 12px 24px; flex-wrap: wrap; font-size: 14px; color: var(--mute-on-ink); }
+    .site-footer .links a { color: var(--paper); text-decoration: none; }
+    .site-footer .links a:hover { text-decoration: underline; text-underline-offset: 4px; }
+    .site-footer .big { margin-top: 6vh; line-height: 0; }
+    .site-footer .big img { width: 140%; max-width: none; height: auto; display: block; margin-left: -6%; margin-bottom: -28%; }
+    @media (max-width: 879px) { .site-footer .big img { width: 170%; margin-left: -12%; margin-bottom: -36%; } }
   </style>
 </head>
 <body>
   <a class="skip" href="#main">본문으로 건너뛰기</a>
 
-  <header class="site-header">
-   <div class="wrap">
-    <a class="wordmark" href="#main" aria-label="리모 첫 화면으로"><img src="assets/remo-wordmark.png" alt="REMO" width="299" height="144"></a>
-    <!-- 내비 링크는 대상 섹션이 실제로 존재할 때만 추가한다 — docs/plan-01-header-direction.md -->
-    <nav class="site-nav" aria-label="섹션">
-      <a href="#direction">방향</a>
-      <a href="#portfolio">포트폴리오</a>
-      <a href="#team">팀</a>
-      <a href="#contact">문의</a>
-    </nav>
-   </div>
+  <header class="site-header" id="site-header">
+    <div class="wrap">
+      <a class="brand" href="#main">REMO</a>
+      <nav class="site-nav" aria-label="섹션">
+        <a href="#direction">방향</a>
+        <a href="#portfolio">포트폴리오</a>
+        <a href="#team">팀</a>
+        <a href="#contact">문의</a>
+      </nav>
+    </div>
   </header>
 
   <main id="main">
-    <!-- 0. 정의문 — 구절별 근거: docs/structure.md §0 -->
-    <!-- 첫 화면 = 관계 맵. 설명하지 않고 재현한다(가이드 v4 · decisions 2026-09-17). h1·상태 문장은 보조기기용으로만 남긴다. docs/plan-08-hero-map.md -->
-    <section class="hero" aria-labelledby="h-hero">
-      <h1 id="h-hero" class="sr-only">문제를 받아 실행으로 증명하는 열 명의 학생 협동조합, 리모.</h1>
-      <div id="relations" class="relations" aria-label="열 명의 관계 맵" hidden>
-        <div class="rel-stage" id="rel-stage">
+    <!-- 0. 히어로 — 로고가 화면의 주인공. 노드 10개는 data/relations.json이 있을 때만 로고 위에 얹힌다. -->
+    <section class="hero dark" id="hero" aria-labelledby="h-hero">
+      <div class="hero-stage" id="hero-stage">
+        <img class="mark" src="assets/remo-wordmark.png" alt="REMO" width="738" height="355" fetchpriority="high">
+        <div class="hero-map" id="relations" hidden>
           <svg viewBox="0 0 640 440" preserveAspectRatio="none" aria-hidden="true" id="rel-lines"></svg>
-          <div class="rel-filters" role="group" aria-label="관계 유형" id="rel-filters"></div>
-          <p class="rel-cap" id="rel-caption">팀 진단 도구(REMO OS)의 관계 데이터. 노드에 이름은 없다.</p>
         </div>
-        <p class="rel-status sr-only" role="status" id="rel-status"></p>
       </div>
+      <div class="hero-foot wrap">
+        <h1 id="h-hero">문제를 받아 실행으로 증명하는 열 명의 학생 협동조합.</h1>
+        <div>
+          <div class="rel-filters" role="group" aria-label="관계 유형" id="rel-filters" hidden></div>
+          <p class="rel-cap" id="rel-caption" hidden>팀 진단 도구(REMO OS)의 관계 데이터. 노드에 이름은 없다.</p>
+        </div>
+      </div>
+      <p class="sr-only" role="status" id="rel-status"></p>
     </section>
-    <!-- 1. 방향 — 문장은 전부 노션 REMO.core TEAM 페이지 원문 (2026-09-17 확인).
-         노션이 바뀌면 여기를 바꾼다. 사이트에서 먼저 고치지 않는다.
-         다음 갱신: 2027-01 (분기 목표) / 담당: ___ -->
-    <section id="direction" class="direction" aria-labelledby="h-direction">
-     <div class="wrap">
-      <div class="lead">
-        <h2 id="h-direction">우리는 가치와 문제를 비즈니스로 풀어내며 실행으로 증명한다.</h2>
-        <p class="caption">리모(REMO) 협동조합의 미션. 팀 노션에 기록된 문장 그대로다.</p>
-      </div>
 
-      <div class="grid">
-        <div class="vision">
-          <p class="label">비전 · 2년차</p>
-          <p class="display">혼자가 아닌 팀으로 선순환하며, 시장의 평가 속에서 성장한다.</p>
-        </div>
-
-        <div class="right">
-          <div class="values">
-            <p class="eyebrow">가치 · 다섯 가지</p>
-            <ul>
-              <li>학습 · 성장</li>
-              <li>협력</li>
-              <li>신뢰 · 안전감</li>
-              <li>책임 · 설명</li>
-              <li>실행 · 실험</li>
-            </ul>
-          </div>
-
-          <div class="quarter">
-            <p class="eyebrow">지금 분기 목표 · 2026.09 → 2026.12</p>
-            <p class="display">팀이 서로 연결되어 협업할 수 있는 시스템을 구축한다.</p>
-            <p class="rule">의사결정 기준: 1차 만장일치 → 2차 80% → 3차 60%</p>
+    <!-- 1. 방향 — 노션 TEAM 페이지 원문(2026-09-17). 노션이 바뀌면 여기를 바꾼다. 다음 갱신: 2027-01 / 담당: ___ -->
+    <section id="direction" class="direction dark" aria-labelledby="h-direction">
+      <div class="wrap">
+        <h2 id="h-direction" class="mission">우리는 가치와 문제를<span class="step">비즈니스로 풀어내며</span><span class="step">실행으로 증명한다.</span></h2>
+        <p class="src">리모(REMO) 협동조합의 미션. 팀 노션에 기록된 문장 그대로.</p>
+        <div class="grid">
+          <p class="vision">혼자가 아닌 팀으로 선순환하며, 시장의 평가 속에서 성장한다.<span class="label">비전 · 2년차</span></p>
+          <div class="kv">
+            <div><span class="label">가치</span><p class="values"><span>학습 · 성장</span><span>협력</span><span>신뢰 · 안전감</span><span>책임 · 설명</span><span>실행 · 실험</span></p></div>
+            <div><span class="label">이번 분기 · 2026.09 → 2026.12</span><p class="goal">팀이 서로 연결되어 협업할 수 있는 시스템을 구축한다.</p></div>
           </div>
         </div>
       </div>
-     </div>
     </section>
-    <!-- 3. 포트폴리오 — 사실은 노션 프로젝트 페이지 4개 원문(2026-09-17). 추정·미확정·개인정보는 싣지 않는다. docs/plan-03-portfolio.md -->
+
+    <!-- 2. 포트폴리오 — 노션 프로젝트 페이지 원문. 전부 진행 중. 썸네일 없음은 타이포로 정직하게. -->
     <section id="portfolio" class="portfolio" aria-labelledby="h-portfolio">
-     <div class="wrap">
-      <div class="lead">
-        <h2 id="h-portfolio">지금 하고 있는 네 가지 일</h2>
-        <p class="caption">넷 다 진행 중이다. 상세 기획과 기록은 노션에 있다.</p>
-      </div>
-      <div class="projects">
-        <div class="row row-a">
-          <article class="project ink" aria-labelledby="p-kpipe">
-            <p class="meta">진행 중 · 2026.02 ~ · 정우, 이든</p>
-            <h3 id="p-kpipe">K-Pipe</h3>
-            <p class="one">하수관로 CCTV 조사 보고서 작성 프로그램. 실무자가 불편해하는 기존 단일 프로그램을 고쳐 만든다. 윈도우 설치형.</p>
-            <p class="stage"><b>현재 단계</b>Pipe Asset 분석 보고서</p>
-            <a class="more" href="https://remo-core.notion.site/K-Pipe-3bd4e56fc730801fa19cf713a1ccbfc7">노션에서 자세히 →</a>
-          </article>
-          <article class="project line" aria-labelledby="p-dataflow">
-            <p class="meta">진행 중 · 2026.08 ~ · 이든, 로</p>
-            <h3 id="p-dataflow">DATAFLOW 2</h3>
-            <p class="stage"><b>현재 단계</b>경쟁사 분석</p>
-            <a class="more" href="https://remo-core.notion.site/DATAFLOW-2-3c34e56fc73080f1ae6fd3d73c78773c">노션에서 자세히 →</a>
-          </article>
+      <div class="wrap">
+        <div class="head">
+          <h2 id="h-portfolio">지금 하고 있는 네 가지 일</h2>
+          <p>넷 다 진행 중. 상세는 노션에.</p>
         </div>
-        <div class="row row-b">
-          <article class="project line" aria-labelledby="p-pln">
-            <p class="meta">진행 중 · 막스, 이든</p>
-            <h3 id="p-pln">PLN</h3>
-            <p class="one">노션 템플릿을 만들어 크라우드펀딩으로 수요를 검증한다.</p>
-            <p class="stage"><b>현재 단계</b>디자인 마감, 펀딩 준비</p>
-            <a class="more" href="https://remo-core.notion.site/PLN-3bd4e56fc7308037a596ea10868eefa7">노션에서 자세히 →</a>
-          </article>
-          <article class="project blue" aria-labelledby="p-moodism">
-            <p class="meta">진행 중 · 2026.06 ~ · 정우, 쏠, 겸</p>
-            <h3 id="p-moodism">Moodism 무디즘</h3>
-            <p class="one">"불안하면서 꿈꾸는 사람들"을 위한 의류 브랜드. 첫 제품을 텀블벅 펀딩으로 낸다.</p>
-            <p class="stage"><b>현재 단계</b>펀딩 2026.09.23 → 10.07 (예정)</p>
-            <a class="more" href="https://remo-core.notion.site/Moodism-3bd4e56fc73080ba9808ef5c4fc0d15a">노션에서 자세히 →</a>
-          </article>
-        </div>
+        <ul class="rows">
+          <li class="row"><a href="https://remo-core.notion.site/K-Pipe-3bd4e56fc730801fa19cf713a1ccbfc7">
+            <div><h3 class="name">K-Pipe</h3><p class="one">하수관로 CCTV 조사 보고서 작성 프로그램. 실무자가 불편해하는 기존 단일 프로그램을 고쳐 만든다.</p></div>
+            <div class="meta"><span>2026.02 ~ · 정우, 이든</span><span>현재 단계 Pipe Asset 분석 보고서</span></div>
+          </a></li>
+          <li class="row"><a href="https://remo-core.notion.site/Moodism-3bd4e56fc73080ba9808ef5c4fc0d15a">
+            <div><h3 class="name">Moodism</h3><p class="one">"불안하면서 꿈꾸는 사람들"을 위한 의류 브랜드. 첫 제품을 텀블벅 펀딩으로 낸다.</p></div>
+            <div class="meta"><span>2026.06 ~ · 정우, 쏠, 겸</span><span>펀딩 2026.09.23 → 10.07 예정</span></div>
+          </a></li>
+          <li class="row"><a href="https://remo-core.notion.site/PLN-3bd4e56fc7308037a596ea10868eefa7">
+            <div><h3 class="name">PLN</h3><p class="one">노션 템플릿을 만들어 크라우드펀딩으로 수요를 검증한다.</p></div>
+            <div class="meta"><span>막스, 이든</span><span>현재 단계 디자인 마감, 펀딩 준비</span></div>
+          </a></li>
+          <li class="row"><a href="https://remo-core.notion.site/DATAFLOW-2-3c34e56fc73080f1ae6fd3d73c78773c">
+            <div><h3 class="name">DATAFLOW 2</h3></div>
+            <div class="meta"><span>2026.08 ~ · 이든, 로</span><span>현재 단계 경쟁사 분석</span></div>
+          </a></li>
+        </ul>
       </div>
-     </div>
     </section>
 
-    <!-- 4. 팀 — 표기명 10 확정(2026-09-17). 포지션·담당·링크는 팀 결정으로 싣지 않는다(2026-09-18). docs/plan-02-team.md -->
+    <!-- 3. 팀 — 표기명 10 확정. 포지션은 팀 결정으로 싣지 않는다. -->
     <section id="team" class="team" aria-labelledby="h-team">
-     <div class="wrap">
-      <div class="lead">
-        <h2 id="h-team">리모의 열 명</h2>
+      <div class="wrap">
+        <figure>
+          <img src="assets/team-ts-2026-06-08-800.jpg" srcset="assets/team-ts-2026-06-08-800.jpg 800w, assets/team-ts-2026-06-08-1600.jpg 1600w" sizes="100vw" width="1600" height="1200" loading="lazy" decoding="async" alt="콘크리트 벽에 붙인 큰 종이 앞에서 다섯 명이 포스트잇을 옮기며 이야기하는 뒷모습">
+          <figcaption>2026년 6월 8일, 프로젝트 실행 경험 TS.</figcaption>
+        </figure>
+        <h2 id="h-team">열 명</h2>
+        <ul class="names"><li>브루노</li><li>쏠</li><li>조이</li><li>정우</li><li>막스</li><li>유진</li><li>로</li><li>겸</li><li>이든</li><li>비크</li></ul>
+        <p class="note">포지션과 담당은 싣지 않는다.</p>
       </div>
-      <!-- 사진: 드라이브 사진 기록 0608 TS. 얼굴 정면 없음. plan-07 -->
-      <figure>
-        <img src="assets/team-ts-2026-06-08-800.jpg" srcset="assets/team-ts-2026-06-08-800.jpg 800w, assets/team-ts-2026-06-08-1600.jpg 1600w" sizes="(max-width: 879px) calc(100vw - 32px), 1120px" width="1600" height="1200" loading="lazy" decoding="async" alt="콘크리트 벽에 붙인 큰 종이 앞에서 다섯 명이 포스트잇을 옮기며 이야기하는 뒷모습">
-        <figcaption>2026년 6월 8일, 프로젝트 실행 경험 TS.</figcaption>
-      </figure>
-      <ul class="members">
-          <li><span class="initial" aria-hidden="true">브</span><span class="name">브루노</span></li>
-          <li><span class="initial" aria-hidden="true">쏠</span><span class="name">쏠</span></li>
-          <li><span class="initial" aria-hidden="true">조</span><span class="name">조이</span></li>
-          <li><span class="initial" aria-hidden="true">정</span><span class="name">정우</span></li>
-          <li><span class="initial" aria-hidden="true">막</span><span class="name">막스</span></li>
-          <li><span class="initial" aria-hidden="true">유</span><span class="name">유진</span></li>
-          <li><span class="initial" aria-hidden="true">로</span><span class="name">로</span></li>
-          <li><span class="initial" aria-hidden="true">겸</span><span class="name">겸</span></li>
-          <li><span class="initial" aria-hidden="true">이</span><span class="name">이든</span></li>
-          <li><span class="initial" aria-hidden="true">비</span><span class="name">비크</span></li>
-      </ul>
-      <p class="note">포지션과 담당은 싣지 않는다.</p>
-     </div>
     </section>
-    <!-- 5. 문의 — Formspree xdekorqo (2026-09-18 켬). docs/plan-04-contact.md · 개인정보 고지 plan-05 F11 -->
+
+    <!-- 4. 문의 — Formspree xdekorqo. 필수는 셋(소속·문제·이메일), 나머지는 선택. plan-09 -->
     <section id="contact" class="contact" aria-labelledby="h-contact">
-     <div class="wrap">
-      <div class="lead">
-        <h2 id="h-contact">다 채워야 보낼 수 있습니다.</h2>
-        <p class="caption">이메일 한 줄 대신 이 폼을 씁니다. 문제를 설명하는 데 시간을 들일 수 있는 분과 일하고 싶어서입니다.</p>
+      <div class="wrap">
+        <h2 id="h-contact">문제를 적어 보내 주세요.</h2>
+        <p class="lead">이메일 한 줄보다 폼이 낫습니다. 문제를 한 단락으로 적어 주시면 그만큼 정확히 답할 수 있어서요. 나머지는 아는 만큼만.</p>
+        <form class="contact-form" method="POST" action="https://formspree.io/f/xdekorqo" data-endpoint="https://formspree.io/f/xdekorqo">
+          <p class="form-msg" role="alert" id="form-error"></p>
+          <div class="field">
+            <label for="f-org">소속과 역할</label>
+            <input id="f-org" name="소속과 역할" type="text" required autocomplete="organization">
+          </div>
+          <div class="field">
+            <label for="f-email">이메일</label>
+            <input id="f-email" name="email" type="email" required autocomplete="email">
+          </div>
+          <div class="field wide">
+            <label for="f-problem">해결하려는 문제</label>
+            <p class="hint" id="f-problem-hint">한 단락. 누구의 어떤 문제인지.</p>
+            <textarea id="f-problem" name="해결하려는 문제" required rows="4" aria-describedby="f-problem-hint"></textarea>
+          </div>
+          <div class="field wide">
+            <label for="f-tried">지금까지 시도한 것 <small>선택</small></label>
+            <textarea id="f-tried" name="지금까지 시도한 것" rows="2"></textarea>
+          </div>
+          <fieldset class="field wide">
+            <legend>기대하는 협업 형태 <small>선택</small></legend>
+            <div class="choices">
+              <label><input type="radio" name="협업 형태" value="프로젝트 의뢰"> 프로젝트 의뢰</label>
+              <label><input type="radio" name="협업 형태" value="협업 제안"> 협업 제안</label>
+              <label><input type="radio" name="협업 형태" value="커피챗"> 커피챗</label>
+            </div>
+          </fieldset>
+          <div class="field">
+            <label for="f-when">일정 범위 <small>선택</small></label>
+            <input id="f-when" name="일정 범위" type="text">
+          </div>
+          <div class="field">
+            <label for="f-budget">예산 범위 <small>선택</small></label>
+            <input id="f-budget" name="예산 범위" type="text">
+          </div>
+          <div class="field consent">
+            <label><input type="checkbox" name="개인정보 동의" value="동의" required>
+              <span>적어 주신 내용과 이메일을 문의 응대 목적으로 수집하고 <b>1년간</b> 보관하는 데 동의합니다. <a href="https://remo-core.notion.site/3bd4e56fc730802b95dfc91ec12d8c41">개인정보처리방침</a></span>
+            </label>
+          </div>
+          <input type="hidden" name="_subject" value="[remo-web] 문의">
+          <input type="text" name="_gotcha" class="gotcha" tabindex="-1" autocomplete="off" aria-hidden="true">
+          <button type="submit">보내기</button>
+          <p class="form-msg" role="status" id="form-ok"></p>
+        </form>
       </div>
-
-      <form class="contact-form" method="POST" action="https://formspree.io/f/xdekorqo" data-endpoint="https://formspree.io/f/xdekorqo" novalidate="false">
-        <p class="req">모든 항목이 필수입니다.</p>
-        <p class="form-msg" role="alert" id="form-error"></p>
-
-        <div class="field">
-          <label for="f-org">소속과 역할</label>
-          <input id="f-org" name="소속과 역할" type="text" required autocomplete="organization">
-        </div>
-        <div class="field">
-          <label for="f-problem">해결하려는 문제</label>
-          <p class="hint" id="f-problem-hint">한 단락. 누구의 어떤 문제인지.</p>
-          <textarea id="f-problem" name="해결하려는 문제" required rows="5" aria-describedby="f-problem-hint"></textarea>
-        </div>
-        <div class="field">
-          <label for="f-tried">지금까지 시도한 것</label>
-          <textarea id="f-tried" name="지금까지 시도한 것" required rows="3"></textarea>
-        </div>
-        <fieldset class="field">
-          <legend>기대하는 협업 형태</legend>
-          <div class="choices">
-            <label><input type="radio" name="협업 형태" value="프로젝트 의뢰" required> 프로젝트 의뢰</label>
-            <label><input type="radio" name="협업 형태" value="협업 제안"> 협업 제안</label>
-            <label><input type="radio" name="협업 형태" value="커피챗"> 커피챗</label>
-          </div>
-        </fieldset>
-        <div class="two">
-          <div class="field">
-            <label for="f-when">일정 범위</label>
-            <p class="hint" id="f-when-hint">예: 11월 시작, 3개월 / 미정이면 '미정'</p>
-            <input id="f-when" name="일정 범위" type="text" required aria-describedby="f-when-hint">
-          </div>
-          <div class="field">
-            <label for="f-budget">예산 범위</label>
-            <p class="hint" id="f-budget-hint">예: 300~500만 원 / 미정이면 '미정'</p>
-            <input id="f-budget" name="예산 범위" type="text" required aria-describedby="f-budget-hint">
-          </div>
-        </div>
-        <div class="field">
-          <label for="f-email">연락처 (이메일)</label>
-          <input id="f-email" name="email" type="email" required autocomplete="email">
-        </div>
-        <div class="field consent">
-          <label><input type="checkbox" name="개인정보 동의" value="동의" required>
-            <span>위 항목(소속·문제·시도·협업 형태·일정·예산·이메일)을 문의 응대 목적으로 수집하고 <b>1년간</b> 보관하는 데 동의합니다. 자세한 내용은 <a href="https://remo-core.notion.site/3bd4e56fc730802b95dfc91ec12d8c41">개인정보처리방침</a>에 있습니다. 동의하지 않으면 보낼 수 없습니다.</span>
-          </label>
-        </div>
-        <input type="hidden" name="_subject" value="[remo-web] 문의">
-        <input type="text" name="_gotcha" class="gotcha" tabindex="-1" autocomplete="off" aria-hidden="true">
-
-        <button type="submit">보내기</button>
-        <p class="form-msg" role="status" id="form-ok"></p>
-      </form>
-     </div>
     </section>
   </main>
 
-  <footer class="site-footer">
-   <div class="wrap">
-    <span>리모(REMO) 협동조합</span>
-    <span style="display: flex; gap: 20px; flex-wrap: wrap;">
-      <a href="https://remo-core.notion.site/3bd4e56fc730802b95dfc91ec12d8c41">개인정보처리방침</a>
-      <a href="https://remo-core.notion.site">REMO.core (노션) →</a>
-    </span>
-   </div>
+  <footer class="site-footer dark">
+    <div class="wrap">
+      <div class="links">
+        <span>리모(REMO) 협동조합</span>
+        <span style="display:flex; gap:20px; flex-wrap:wrap;">
+          <a href="https://remo-core.notion.site/3bd4e56fc730802b95dfc91ec12d8c41">개인정보처리방침</a>
+          <a href="https://remo-core.notion.site">REMO.core (노션) →</a>
+        </span>
+      </div>
+      <div class="big" aria-hidden="true"><img src="assets/remo-wordmark.png" alt="" width="738" height="355" loading="lazy"></div>
+    </div>
   </footer>
 
   <script>
-    // 현재 섹션 표시 — 내비 링크가 가리키는 섹션만 관찰. 근거: plan-01 "현재 섹션 표시"
+    // 헤더: 히어로를 벗어나면 근백색 + 현재 섹션 표시
     (function () {
-      var links = document.querySelectorAll('.site-nav a[href^="#"]');
-      if (!links.length || !('IntersectionObserver' in window)) return;
-      var byId = {};
+      var header = document.getElementById('site-header'), hero = document.getElementById('hero');
+      if (!('IntersectionObserver' in window) || !hero) return;
+      new IntersectionObserver(function (es) { es.forEach(function (e) { header.classList.toggle('on-paper', !e.isIntersecting); }); }, { rootMargin: '-64px 0px 0px 0px', threshold: 0 }).observe(hero);
+      var links = document.querySelectorAll('.site-nav a[href^="#"]'), byId = {};
       links.forEach(function (a) { byId[a.getAttribute('href').slice(1)] = a; });
-      var io = new IntersectionObserver(function (entries) {
-        entries.forEach(function (e) {
-          var a = byId[e.target.id];
-          if (!a) return;
-          if (e.isIntersecting) a.setAttribute('aria-current', 'true');
-          else a.removeAttribute('aria-current');
-        });
-      }, { rootMargin: '-40% 0px -55% 0px' });
-      Object.keys(byId).forEach(function (id) {
-        var el = document.getElementById(id);
-        if (el) io.observe(el);
-      });
+      var io = new IntersectionObserver(function (es) { es.forEach(function (e) { var a = byId[e.target.id]; if (!a) return; if (e.isIntersecting) a.setAttribute('aria-current', 'true'); else a.removeAttribute('aria-current'); }); }, { rootMargin: '-40% 0px -55% 0px' });
+      Object.keys(byId).forEach(function (id) { var el = document.getElementById(id); if (el) io.observe(el); });
     })();
-    // 문의 폼 — AJAX 제출, 실패 시 입력값 유지. 근거: plan-04
+
+    // 관계 맵 — data/relations.json 이 있으면 로고 위에 얹는다. 라벨·명세: plan-06 · plan-09
     (function () {
-      var form = document.querySelector('.contact-form');
-      if (!form || !window.fetch) return;
-      var ok = document.getElementById('form-ok');
-      var err = document.getElementById('form-error');
-      var btn = form.querySelector('button[type="submit"]');
-      form.addEventListener('submit', function (e) {
-        e.preventDefault();
-        if (!form.reportValidity()) return;
-        err.textContent = '';
-        btn.disabled = true; btn.textContent = '보내는 중…';
-        fetch(form.dataset.endpoint, {
-          method: 'POST',
-          body: new FormData(form),
-          headers: { 'Accept': 'application/json' }
-        }).then(function (r) {
-          if (!r.ok) throw new Error(r.status);
-          form.querySelectorAll('.field, .two, .req, button').forEach(function (el) { el.hidden = true; });
-          ok.textContent = '받았습니다. 적어 주신 연락처로 답합니다.';
-        }).catch(function () {
-          err.textContent = '보내지 못했습니다. 잠시 후 다시 시도하거나, 아래 노션 링크로 연락해 주세요.';
-          btn.disabled = false; btn.textContent = '보내기';
-        });
-      });
-    })();
-    // 관계 맵 — data/relations.json 이 있으면 렌더링. 라벨·명세: plan-06
-    (function () {
-      var sec = document.getElementById('relations');
-      if (!sec || !window.fetch) return;
-      var TYPES = [
-        ['synergy', '같이 하면 강해지는', '강점이 겹쳐 서로 증폭되는 사이', false],
-        ['cover',   '서로 메워주는',     '한쪽의 약한 곳을 다른 쪽이 덮어 주는 사이', true],
-        ['collab',  '손발이 맞는',       '일하는 방식이 맞아 같이 굴러가는 사이', true]
-      ];
-      fetch('data/relations.json', { cache: 'no-cache' }).then(function (r) {
-        if (!r.ok) throw new Error(r.status);
-        return r.json();
-      }).then(function (D) {
+      var box = document.getElementById('relations');
+      if (!box || !window.fetch) return;
+      var TYPES = [['synergy', '같이 하면 강해지는'], ['cover', '서로 메워주는'], ['collab', '손발이 맞는']];
+      fetch('data/relations.json', { cache: 'no-cache' }).then(function (r) { if (!r.ok) throw 0; return r.json(); }).then(function (D) {
         var allowed = TYPES.map(function (t) { return t[0]; });
         D.edges = D.edges.filter(function (e) { return allowed.indexOf(e.tp) >= 0; });
         if (!D.nodes || !D.nodes.length || !D.edges.length) return;
-        var stage = document.getElementById('rel-stage'), svg = document.getElementById('rel-lines');
-        var fl = document.getElementById('rel-filters'), st = document.getElementById('rel-status');
-        if (D.caption) document.getElementById('rel-caption').textContent = D.caption;
+        var svg = document.getElementById('rel-lines'), fl = document.getElementById('rel-filters'), st = document.getElementById('rel-status'), cap = document.getElementById('rel-caption');
+        if (D.caption) cap.textContent = D.caption;
         var byN = {}; D.nodes.forEach(function (n) { byN[n.n] = n; });
-        var cur = 'synergy', sel = null;
+        var cur = 'synergy', sel = null, nodeEls = [];
         D.edges.forEach(function (e) {
           var a = byN[e.s], b = byN[e.t]; if (!a || !b) return;
           var l = document.createElementNS('http://www.w3.org/2000/svg', 'line');
           l.setAttribute('x1', a.x); l.setAttribute('y1', a.y); l.setAttribute('x2', b.x); l.setAttribute('y2', b.y);
-          l.setAttribute('stroke-width', [0, 3, 4, 6][e.w] || 4);
+          l.setAttribute('pathLength', '1'); l.setAttribute('stroke-width', [0, 1.2, 1.6, 2.2][e.w] || 1.6); l.setAttribute('vector-effect', 'non-scaling-stroke');
           l.dataset.tp = e.tp; l.dataset.s = e.s; l.dataset.t = e.t; svg.appendChild(l);
         });
-        D.nodes.forEach(function (n) {
-          var b = document.createElement('button'); b.className = 'rel-node'; b.type = 'button';
-          b.style.left = 'calc(var(--px) + (100% - 2 * var(--px)) * ' + (n.x / 640) + ')'; b.style.top = 'calc(var(--py) + (100% - var(--py) - var(--pb)) * ' + (n.y / 440) + ')';
-          b.style.width = b.style.height = (n.r * 2) + 'px'; b.dataset.n = n.n;
+        D.nodes.forEach(function (n, i) {
+          var b = document.createElement('button'); b.className = 'node' + (i % 2 ? ' float' : ''); b.type = 'button'; b.dataset.n = n.n;
+          b.style.left = (n.x / 640 * 100) + '%'; b.style.top = (n.y / 440 * 100) + '%';
+          var d = Math.round(n.r * 1.7); b.style.width = b.style.height = d + 'px';
+          b.style.setProperty('--i', i); b.style.setProperty('--dur', (6 + (i % 4)) + 's');
           b.addEventListener('click', function () { sel = (sel === n.n) ? null : n.n; render(); });
-          stage.appendChild(b);
+          box.appendChild(b); nodeEls.push(b);
         });
         TYPES.forEach(function (t) {
-          var w = document.createElement('div'), b = document.createElement('button'), p = document.createElement('p');
-          b.type = 'button'; b.textContent = t[1]; b.setAttribute('aria-describedby', 'rel-def-' + t[0]);
-          b.addEventListener('click', function () { cur = t[0]; sel = null; render(); });
-          p.className = 'rel-def'; p.id = 'rel-def-' + t[0]; p.textContent = t[2];
-          w.appendChild(b); w.appendChild(p); fl.appendChild(w);
+          var b = document.createElement('button'); b.type = 'button'; b.textContent = t[1];
+          b.addEventListener('click', function () { cur = t[0]; sel = null; render(); }); fl.appendChild(b);
         });
         function render() {
           var T = TYPES.filter(function (t) { return t[0] === cur; })[0];
@@ -631,22 +409,37 @@
           var deg = {}, cnt = 0;
           svg.querySelectorAll('line').forEach(function (l) {
             var on = l.dataset.tp === cur, touch = sel == null || l.dataset.s == sel || l.dataset.t == sel;
-            l.style.opacity = on ? (touch ? 1 : 0.25) : 0;
+            l.style.opacity = on ? (sel == null ? 0.45 : (touch ? 1 : 0.12)) : 0;
             if (on) { cnt++; deg[l.dataset.s] = (deg[l.dataset.s] || 0) + 1; deg[l.dataset.t] = (deg[l.dataset.t] || 0) + 1; }
           });
-          stage.querySelectorAll('.rel-node').forEach(function (b) {
+          nodeEls.forEach(function (b) {
             var n = b.dataset.n;
             b.setAttribute('aria-pressed', String(sel == n));
             b.setAttribute('aria-label', '구성원 ' + n + ', ' + T[1] + ' 관계 ' + (deg[n] || 0) + '개');
           });
           var top = Object.keys(deg).sort(function (a, b) { return deg[b] - deg[a]; }).slice(0, 3).join(', ');
-          st.textContent = sel == null
-            ? T[1] + ' 관계 ' + cnt + '개. 가장 많이 연결된 구성원 셋: ' + (top || '없음') + '.'
-            : '구성원 ' + sel + ': ' + T[1] + ' 관계 ' + (deg[sel] || 0) + '개.';
+          st.textContent = sel == null ? T[1] + ' 관계 ' + cnt + '개. 가장 많이 연결된 구성원 셋: ' + (top || '없음') + '.' : '구성원 ' + sel + ': ' + T[1] + ' 관계 ' + (deg[sel] || 0) + '개.';
         }
         render();
-        sec.hidden = false;
-      }).catch(function () { /* 데이터 없음 → 섹션 유지 hidden */ });
+        box.hidden = false; fl.hidden = false; cap.hidden = false;
+      }).catch(function () {});
+    })();
+
+    // 문의 폼 — AJAX 제출, 실패 시 입력값 유지 (plan-04)
+    (function () {
+      var form = document.querySelector('.contact-form');
+      if (!form || !window.fetch) return;
+      var ok = document.getElementById('form-ok'), err = document.getElementById('form-error'), btn = form.querySelector('button[type="submit"]');
+      form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        if (!form.reportValidity()) return;
+        err.textContent = ''; btn.disabled = true; btn.textContent = '보내는 중…';
+        fetch(form.dataset.endpoint, { method: 'POST', body: new FormData(form), headers: { 'Accept': 'application/json' } })
+          .then(function (r) { if (!r.ok) throw new Error(r.status);
+            form.querySelectorAll('.field, button').forEach(function (el) { el.hidden = true; });
+            ok.textContent = '받았습니다. 적어 주신 이메일로 답합니다.'; })
+          .catch(function () { err.textContent = '보내지 못했습니다. 잠시 후 다시 시도하거나, 아래 노션 링크로 연락해 주세요.'; btn.disabled = false; btn.textContent = '보내기'; });
+      });
     })();
   </script>
 </body>
