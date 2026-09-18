@@ -58,10 +58,10 @@ REMO 팀 웹사이트. 배포: https://rhochoi.github.io/remo-web/ (현재 `noin
 
 ## 현재 상태
 
-배포됨 (`noindex`). 렌더링 순서: 정의문 → 01 방향 → 02 포트폴리오 → 03 팀 → (문의: Formspree 폼 ID 대기, hidden)
+배포됨 (`noindex`). 렌더링 순서: 정의문 → 방향 → 관계 맵 → 포트폴리오 → 팀 → (문의: Formspree 폼 ID 대기, hidden)
 
 첫 화면은 정의문 한 줄: "문제를 받아 실행으로 증명하는 열 명의 학생 협동조합, 리모."
-무텍스트 관계 맵은 조건부 섹션으로 강등 — 사유와 재도입 3조건은 `docs/structure.md`.
+관계 맵은 첫 화면에서 내려와 방향 아래에 있다 — 익명 번호 노드 10, 긍정 3유형 30, 본인 동의 완료(`docs/plan-06`).
 
 ### 최소 공개 단위 (URL 공유 조건)
 
@@ -70,7 +70,7 @@ REMO 팀 웹사이트. 배포: https://rhochoi.github.io/remo-web/ (현재 `noin
 ### 미해결
 
 - 로고 벡터 원본 미확보 — 웹 워드마크는 드라이브의 PNG 원본으로 반영됨(plan-07). 벡터는 인쇄·확대용으로 여전히 필요. 서체는 가이드 v4 원문 확인으로 Pretendard 확정
-- 팀 진단 데이터 스키마·익명화 기준 미정 — 관계 맵 재도입 조건
+- 관계 맵 민감 2유형(부딪히기 쉬운·말이 엇갈리는) — 유형별 동의 시 확장
 - 팀원 포지션·담당·링크 미제출 (10명)
 - 블루 모드의 웹 바탕 해석 — 가이드 원문은 "검정 위 블루", 사이트는 근백색 바탕. A 유지/B 전환 팀 결정 (plan-07 §2)
 - Formspree 폼 ID
@@ -78,4 +78,4 @@ REMO 팀 웹사이트. 배포: https://rhochoi.github.io/remo-web/ (현재 `noin
 - "받지 않습니다" 문구 팀 합의
 - 필터 전제 기각 조건의 N
 
-문서: `docs/structure.md`(IA v3) · `docs/decisions.md`(결정 기록) · `docs/plan-01~04`(섹션별 4칸 결정)
+문서: `docs/structure.md`(IA v3) · `docs/decisions.md`(결정 기록) · `docs/plan-01~07`(섹션·감사·자산별 4칸 결정)
