@@ -147,6 +147,39 @@
     .quarter p.display { font-size: 24px; }
     .quarter .rule { font-size: 15px; color: var(--caption); }
 
+    /* 2. 관계 맵 — 데이터 파일이 있을 때만 표시. 결정: docs/plan-06-relation-map.md */
+    .relations .wrap { display: flex; flex-direction: column; gap: 40px; }
+    .relations .lead { display: flex; flex-direction: column; gap: 16px; }
+    .relations h2 { font-size: 56px; max-width: 1040px; }
+    @media (max-width: 879px) { .relations h2 { font-size: 32px; } }
+    .rel-map { display: grid; grid-template-columns: 1fr 300px; gap: 32px; align-items: start; }
+    @media (max-width: 879px) { .rel-map { grid-template-columns: 1fr; gap: 16px; } }
+    .rel-stage { position: relative; background: var(--blue); border-radius: 40px; padding: 24px; aspect-ratio: 640 / 440; }
+    @media (max-width: 879px) { .rel-stage { border-radius: 28px; padding: 12px; } }
+    .rel-stage svg { position: absolute; inset: 24px; width: calc(100% - 48px); height: calc(100% - 48px); }
+    @media (max-width: 879px) { .rel-stage svg { inset: 12px; width: calc(100% - 24px); height: calc(100% - 24px); } }
+    .rel-stage line { stroke: var(--paper); stroke-linecap: round; transition: opacity 200ms; }
+    @media (prefers-reduced-motion: reduce) { .rel-stage line { transition: none; } }
+    .rel-node {
+      position: absolute; transform: translate(-50%, -50%);
+      border: 4px solid var(--ink); background: var(--paper); border-radius: 50%;
+      padding: 0; min-width: 24px; min-height: 24px; cursor: pointer;
+    }
+    .rel-node[aria-pressed="true"] { background: var(--ink); }
+    .rel-node:focus-visible { outline-color: var(--paper); }
+    .rel-filters { display: flex; flex-direction: column; gap: 10px; }
+    @media (max-width: 879px) { .rel-filters { flex-direction: row; flex-wrap: wrap; } }
+    .rel-filters button {
+      text-align: left; border: 4px solid var(--ink); border-radius: 999px; padding: 12px 20px;
+      font: inherit; font-weight: 700; font-size: 16px; background: var(--paper); color: var(--ink);
+      cursor: pointer; min-height: 44px;
+    }
+    .rel-filters button[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
+    .rel-def { font-size: 15px; color: var(--caption); margin: 6px 0 0; }
+    @media (max-width: 879px) { .rel-def { display: none; } }
+    .rel-status { margin-top: 20px; font-weight: 700; }
+    .rel-note { margin-top: 24px; font-size: 15px; color: var(--caption); }
+
     /* 3. 포트폴리오 — 결정: docs/plan-03-portfolio.md */
     .portfolio .wrap { display: flex; flex-direction: column; gap: 40px; }
     .portfolio .lead { display: flex; flex-direction: column; gap: 16px; }
@@ -339,6 +372,24 @@
       </div>
      </div>
     </section>
+    <!-- 2. 관계 맵 — site/data/relations.json 이 있을 때만 렌더링(본인 동의 후 추가). 안 B: 긍정 3유형, 익명 번호 노드. docs/plan-06-relation-map.md -->
+    <section id="relations" class="relations" aria-labelledby="h-relations" hidden>
+     <div class="wrap">
+      <div class="lead">
+        <h2 id="h-relations">서로 어떻게 연결돼 있는가</h2>
+        <p class="caption" id="rel-caption">팀 진단 도구(REMO OS)의 관계 데이터. 노드에 이름은 없다.</p>
+      </div>
+      <div class="rel-map">
+        <div class="rel-stage" id="rel-stage"><svg viewBox="0 0 640 440" aria-hidden="true" id="rel-lines"></svg></div>
+        <div>
+          <div class="rel-filters" role="group" aria-label="관계 유형" id="rel-filters"></div>
+          <p class="rel-status" role="status" id="rel-status"></p>
+          <p class="rel-note">부딪히기 쉬운 · 말이 엇갈리는 관계는 팀 내부 도구에만 있다.</p>
+        </div>
+      </div>
+     </div>
+    </section>
+
     <!-- 3. 포트폴리오 — 사실은 노션 프로젝트 페이지 4개 원문(2026-09-17). 추정·미확정·개인정보는 싣지 않는다. docs/plan-03-portfolio.md -->
     <section id="portfolio" class="portfolio" aria-labelledby="h-portfolio">
      <div class="wrap">
@@ -514,6 +565,71 @@
           btn.disabled = false; btn.textContent = '보내기';
         });
       });
+    })();
+    // 관계 맵 — data/relations.json 이 있으면 렌더링. 라벨·명세: plan-06
+    (function () {
+      var sec = document.getElementById('relations');
+      if (!sec || !window.fetch) return;
+      var TYPES = [
+        ['synergy', '같이 하면 강해지는', '강점이 겹쳐 서로 증폭되는 사이', false],
+        ['cover',   '서로 메워주는',     '한쪽의 약한 곳을 다른 쪽이 덮어 주는 사이', true],
+        ['collab',  '손발이 맞는',       '일하는 방식이 맞아 같이 굴러가는 사이', true]
+      ];
+      fetch('data/relations.json', { cache: 'no-cache' }).then(function (r) {
+        if (!r.ok) throw new Error(r.status);
+        return r.json();
+      }).then(function (D) {
+        var allowed = TYPES.map(function (t) { return t[0]; });
+        D.edges = D.edges.filter(function (e) { return allowed.indexOf(e.tp) >= 0; });
+        if (!D.nodes || !D.nodes.length || !D.edges.length) return;
+        var stage = document.getElementById('rel-stage'), svg = document.getElementById('rel-lines');
+        var fl = document.getElementById('rel-filters'), st = document.getElementById('rel-status');
+        if (D.caption) document.getElementById('rel-caption').textContent = D.caption;
+        var byN = {}; D.nodes.forEach(function (n) { byN[n.n] = n; });
+        var cur = 'synergy', sel = null;
+        D.edges.forEach(function (e) {
+          var a = byN[e.s], b = byN[e.t]; if (!a || !b) return;
+          var l = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+          l.setAttribute('x1', a.x); l.setAttribute('y1', a.y); l.setAttribute('x2', b.x); l.setAttribute('y2', b.y);
+          l.setAttribute('stroke-width', [0, 3, 4, 6][e.w] || 4);
+          l.dataset.tp = e.tp; l.dataset.s = e.s; l.dataset.t = e.t; svg.appendChild(l);
+        });
+        D.nodes.forEach(function (n) {
+          var b = document.createElement('button'); b.className = 'rel-node'; b.type = 'button';
+          b.style.left = (n.x / 640 * 100) + '%'; b.style.top = (n.y / 440 * 100) + '%';
+          b.style.width = b.style.height = (n.r * 2) + 'px'; b.dataset.n = n.n;
+          b.addEventListener('click', function () { sel = (sel === n.n) ? null : n.n; render(); });
+          stage.appendChild(b);
+        });
+        TYPES.forEach(function (t) {
+          var w = document.createElement('div'), b = document.createElement('button'), p = document.createElement('p');
+          b.type = 'button'; b.textContent = t[1]; b.setAttribute('aria-describedby', 'rel-def-' + t[0]);
+          b.addEventListener('click', function () { cur = t[0]; sel = null; render(); });
+          p.className = 'rel-def'; p.id = 'rel-def-' + t[0]; p.textContent = t[2];
+          w.appendChild(b); w.appendChild(p); fl.appendChild(w);
+        });
+        function render() {
+          var T = TYPES.filter(function (t) { return t[0] === cur; })[0];
+          fl.querySelectorAll('button').forEach(function (b) { b.setAttribute('aria-pressed', String(b.textContent === T[1])); });
+          var deg = {}, cnt = 0;
+          svg.querySelectorAll('line').forEach(function (l) {
+            var on = l.dataset.tp === cur, touch = sel == null || l.dataset.s == sel || l.dataset.t == sel;
+            l.style.opacity = on ? (touch ? 1 : 0.25) : 0;
+            if (on) { cnt++; deg[l.dataset.s] = (deg[l.dataset.s] || 0) + 1; deg[l.dataset.t] = (deg[l.dataset.t] || 0) + 1; }
+          });
+          stage.querySelectorAll('.rel-node').forEach(function (b) {
+            var n = b.dataset.n;
+            b.setAttribute('aria-pressed', String(sel == n));
+            b.setAttribute('aria-label', '구성원 ' + n + ', ' + T[1] + ' 관계 ' + (deg[n] || 0) + '개');
+          });
+          var top = Object.keys(deg).sort(function (a, b) { return deg[b] - deg[a]; }).slice(0, 3).join(', ');
+          st.textContent = sel == null
+            ? T[1] + ' 관계 ' + cnt + '개. 가장 많이 연결된 구성원 셋: ' + (top || '없음') + '.'
+            : '구성원 ' + sel + ': ' + T[1] + ' 관계 ' + (deg[sel] || 0) + '개.';
+        }
+        render();
+        sec.hidden = false;
+      }).catch(function () { /* 데이터 없음 → 섹션 유지 hidden */ });
     })();
   </script>
 </body>
