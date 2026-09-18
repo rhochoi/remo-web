@@ -108,13 +108,54 @@
     .eyebrow { font-size: 15px; font-weight: 700; letter-spacing: 0.08em; color: var(--blue); }
     .caption { font-size: 18px; color: var(--caption); max-width: 640px; }
 
-    /* 0. 정의문 */
-    main > section.hero { min-height: 70vh; min-height: 70dvh; padding-top: 48px; }
-    .hero .wrap { display: flex; flex-direction: column; justify-content: center; gap: 20px; min-height: inherit; }
-    .hero h1 { font-size: clamp(34px, 6.5vw, 72px); max-width: 1100px; }
-    .hero .sub { font-size: 24px; font-weight: 500; max-width: 720px; }
-    /* 모바일: 세로 중앙 정렬 대신 상단 정렬 — 빈 여백 250px은 페이지 시작으로 읽히지 않음 */
-    @media (max-width: 879px) { main > section.hero { min-height: 0; } .hero .sub { font-size: 18px; } }
+    /* 0. 첫 화면 — 관계 맵이 화면을 채운다. 결정: docs/plan-08-hero-map.md */
+    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+    main > section.hero { padding-top: 16px; }
+    .relations { display: block; }
+    .rel-stage {
+      --px: 48px; --py: 48px; --pb: 120px;
+      position: relative; background: var(--blue); border-radius: 40px;
+      height: calc(100dvh - var(--header-h) - 32px); min-height: 480px; max-height: 900px;
+    }
+    @media (max-width: 879px) { .rel-stage { --px: 28px; --py: 36px; --pb: 132px; border-radius: 28px; height: calc(100dvh - var(--header-h) - 24px); min-height: 420px; } }
+    /* 선: 매스 안쪽 여백(노드 반지름 + 필터 높이)을 남기고 스테이지에 맞춰 늘어난다 */
+    .rel-stage svg { position: absolute; left: var(--px); top: var(--py); width: calc(100% - 2 * var(--px)); height: calc(100% - var(--py) - var(--pb)); overflow: visible; }
+    .rel-stage line { stroke: var(--paper); stroke-linecap: round; transition: opacity 200ms; }
+    /* 노드: 열 명이 전부 다른 형태 — "각자의 형태를 잃지 않은 채 하나로"(가이드 v4). 위치는 선과 같은 좌표계(%). */
+    .rel-node {
+      position: absolute; transform: translate(-50%, -50%);
+      border: 4px solid var(--ink); background: var(--paper);
+      padding: 0; min-width: 24px; min-height: 24px; cursor: pointer;
+      border-radius: 50%;
+      transition: transform 150ms ease-out, background-color 150ms;
+    }
+    .rel-node:hover, .rel-node:focus-visible { transform: translate(-50%, -50%) scale(1.12); }
+    @media (prefers-reduced-motion: reduce) { .rel-stage line, .rel-node { transition: none; } .rel-node:hover, .rel-node:focus-visible { transform: translate(-50%, -50%); } }
+    .rel-node:nth-of-type(2)  { border-radius: 52% 48% 46% 54% / 48% 54% 46% 52%; }
+    .rel-node:nth-of-type(3)  { border-radius: 46% 54% 52% 48% / 54% 46% 48% 52%; }
+    .rel-node:nth-of-type(4)  { border-radius: 55% 45% 50% 50% / 45% 50% 50% 55%; }
+    .rel-node:nth-of-type(5)  { border-radius: 48% 52% 55% 45% / 52% 48% 45% 55%; }
+    .rel-node:nth-of-type(6)  { border-radius: 50% 50% 45% 55% / 55% 45% 50% 50%; }
+    .rel-node:nth-of-type(7)  { border-radius: 53% 47% 48% 52% / 47% 53% 52% 48%; }
+    .rel-node:nth-of-type(8)  { border-radius: 45% 55% 53% 47% / 53% 47% 45% 55%; }
+    .rel-node:nth-of-type(9)  { border-radius: 51% 49% 54% 46% / 49% 51% 46% 54%; }
+    .rel-node:nth-of-type(10) { border-radius: 47% 53% 49% 51% / 51% 49% 53% 47%; }
+    .rel-node[aria-pressed="true"] { background: var(--ink); }
+    .rel-node:focus-visible { outline-color: var(--paper); }
+    /* 필터: 매스 안 왼쪽 아래. 설명 없이 이름만 */
+    .rel-filters { position: absolute; left: 24px; right: 24px; bottom: 24px; display: flex; flex-wrap: wrap; gap: 8px; }
+    @media (max-width: 879px) { .rel-filters { left: 16px; right: 16px; bottom: 16px; } }
+    .rel-filters button {
+      border: 4px solid var(--ink); border-radius: 999px; padding: 10px 18px;
+      font: inherit; font-weight: 700; font-size: 15px; background: var(--paper); color: var(--ink);
+      cursor: pointer; min-height: 44px;
+    }
+    .rel-filters button[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
+    .rel-filters button:focus-visible { outline-color: var(--paper); }
+    .rel-def { display: none; }
+    .rel-cap { position: absolute; right: 24px; top: 20px; margin: 0; font-size: 13px; color: #E3ECF5; max-width: 60%; text-align: right; } /* on blue 6.51:1 */
+    @media (max-width: 879px) { .rel-cap { display: none; } }
+    .hero-grid, .hero-text, .hero .sub { display: none; }
 
     /* 1. 방향 */
     .direction .wrap { display: flex; flex-direction: column; gap: 48px; }
@@ -148,51 +189,6 @@
     }
     .quarter p.display { font-size: 24px; }
     .quarter .rule { font-size: 15px; color: var(--caption); }
-
-    /* 첫 화면 관계 맵 — 결정: docs/plan-08-hero-map.md */
-    .hero-grid { display: grid; grid-template-columns: 1fr; gap: 32px; align-items: start; }
-    .hero-text { display: flex; flex-direction: column; gap: 20px; }
-    @media (min-width: 880px) {
-      .hero-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 48px; align-items: center; }
-      .hero h1 { font-size: clamp(34px, 4.6vw, 64px); }   /* 반 폭에서 4줄 이내 */
-    }
-    .relations { display: grid; grid-template-columns: 1fr; gap: 16px; }
-    .rel-stage { position: relative; background: var(--blue); border-radius: 40px; padding: 24px; aspect-ratio: 640 / 440; }
-    @media (max-width: 879px) { .rel-stage { border-radius: 28px; padding: 12px; } }
-    .rel-stage svg { position: absolute; inset: 24px; width: calc(100% - 48px); height: calc(100% - 48px); }
-    @media (max-width: 879px) { .rel-stage svg { inset: 12px; width: calc(100% - 24px); height: calc(100% - 24px); } }
-    .rel-stage line { stroke: var(--paper); stroke-linecap: round; transition: opacity 200ms; }
-    @media (prefers-reduced-motion: reduce) { .rel-stage line { transition: none; } }
-    /* 노드: 열 명이 전부 다른 형태 — "각자의 형태를 잃지 않은 채 하나로"(가이드 v4) */
-    .rel-node {
-      position: absolute; transform: translate(-50%, -50%);
-      border: 4px solid var(--ink); background: var(--paper);
-      padding: 0; min-width: 24px; min-height: 24px; cursor: pointer;
-      border-radius: 50%;
-    }
-    .rel-node:nth-child(2)  { border-radius: 52% 48% 46% 54% / 48% 54% 46% 52%; }
-    .rel-node:nth-child(3)  { border-radius: 46% 54% 52% 48% / 54% 46% 48% 52%; }
-    .rel-node:nth-child(4)  { border-radius: 55% 45% 50% 50% / 45% 50% 50% 55%; }
-    .rel-node:nth-child(5)  { border-radius: 48% 52% 55% 45% / 52% 48% 45% 55%; }
-    .rel-node:nth-child(6)  { border-radius: 50% 50% 45% 55% / 55% 45% 50% 50%; }
-    .rel-node:nth-child(7)  { border-radius: 53% 47% 48% 52% / 47% 53% 52% 48%; }
-    .rel-node:nth-child(8)  { border-radius: 45% 55% 53% 47% / 53% 47% 45% 55%; }
-    .rel-node:nth-child(9)  { border-radius: 51% 49% 54% 46% / 49% 51% 46% 54%; }
-    .rel-node:nth-child(10) { border-radius: 47% 53% 49% 51% / 51% 49% 53% 47%; }
-    .rel-node:nth-child(11) { border-radius: 54% 46% 51% 49% / 46% 54% 49% 51%; }
-    .rel-node[aria-pressed="true"] { background: var(--ink); }
-    .rel-node:focus-visible { outline-color: var(--paper); }
-    .rel-side { display: flex; flex-direction: column; gap: 12px; }
-    .rel-filters { display: flex; flex-wrap: wrap; gap: 8px; }
-    .rel-filters button {
-      border: 4px solid var(--ink); border-radius: 999px; padding: 10px 18px;
-      font: inherit; font-weight: 700; font-size: 15px; background: var(--paper); color: var(--ink);
-      cursor: pointer; min-height: 44px;
-    }
-    .rel-filters button[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
-    .rel-def { display: none; }
-    .rel-status { font-weight: 700; font-size: 16px; }
-    .rel-cap { font-size: 14px; max-width: none; }
 
     /* 3. 포트폴리오 — 결정: docs/plan-03-portfolio.md */
     .portfolio .wrap { display: flex; flex-direction: column; gap: 40px; }
@@ -349,26 +345,18 @@
 
   <main id="main">
     <!-- 0. 정의문 — 구절별 근거: docs/structure.md §0 -->
-    <!-- 첫 화면 = 정의문(글자) + 관계 맵(도구). 맵은 data/relations.json이 있을 때만 나타난다. docs/plan-08-hero-map.md -->
+    <!-- 첫 화면 = 관계 맵. 설명하지 않고 재현한다(가이드 v4 · decisions 2026-09-17). h1·상태 문장은 보조기기용으로만 남긴다. docs/plan-08-hero-map.md -->
     <section class="hero" aria-labelledby="h-hero">
-     <div class="wrap">
-      <div class="hero-grid">
-        <div class="hero-text">
-          <h1 id="h-hero">문제를 받아 실행으로 증명하는 열 명의 학생 협동조합, 리모.</h1>
-          <p class="sub">데이터 분석 · 디자인 · 프로토타입으로 끝까지 풀어냅니다.</p>
+      <h1 id="h-hero" class="sr-only">문제를 받아 실행으로 증명하는 열 명의 학생 협동조합, 리모.</h1>
+      <div id="relations" class="relations" aria-label="열 명의 관계 맵" hidden>
+        <div class="rel-stage" id="rel-stage">
+          <svg viewBox="0 0 640 440" preserveAspectRatio="none" aria-hidden="true" id="rel-lines"></svg>
+          <div class="rel-filters" role="group" aria-label="관계 유형" id="rel-filters"></div>
+          <p class="rel-cap" id="rel-caption">팀 진단 도구(REMO OS)의 관계 데이터. 노드에 이름은 없다.</p>
         </div>
-        <div id="relations" class="relations" aria-label="열 명의 관계 맵" hidden>
-          <div class="rel-stage" id="rel-stage"><svg viewBox="0 0 640 440" aria-hidden="true" id="rel-lines"></svg></div>
-          <div class="rel-side">
-            <div class="rel-filters" role="group" aria-label="관계 유형" id="rel-filters"></div>
-            <p class="rel-status" role="status" id="rel-status"></p>
-            <p class="caption rel-cap" id="rel-caption">팀 진단 도구(REMO OS)의 관계 데이터. 노드에 이름은 없다.</p>
-          </div>
-        </div>
+        <p class="rel-status sr-only" role="status" id="rel-status"></p>
       </div>
-     </div>
     </section>
-
     <!-- 1. 방향 — 문장은 전부 노션 REMO.core TEAM 페이지 원문 (2026-09-17 확인).
          노션이 바뀌면 여기를 바꾼다. 사이트에서 먼저 고치지 않는다.
          다음 갱신: 2027-01 (분기 목표) / 담당: ___ -->
@@ -625,7 +613,7 @@
         });
         D.nodes.forEach(function (n) {
           var b = document.createElement('button'); b.className = 'rel-node'; b.type = 'button';
-          b.style.left = (n.x / 640 * 100) + '%'; b.style.top = (n.y / 440 * 100) + '%';
+          b.style.left = 'calc(var(--px) + (100% - 2 * var(--px)) * ' + (n.x / 640) + ')'; b.style.top = 'calc(var(--py) + (100% - var(--py) - var(--pb)) * ' + (n.y / 440) + ')';
           b.style.width = b.style.height = (n.r * 2) + 'px'; b.dataset.n = n.n;
           b.addEventListener('click', function () { sel = (sel === n.n) ? null : n.n; render(); });
           stage.appendChild(b);
