@@ -31,9 +31,9 @@ REMO 팀 웹사이트.
 
 ## 기술 기준
 
-- 3D / WebGL / Spline 금지 (히어로 하나에 JS 800KB~2MB)
-- backdrop-filter 금지 (실사용 기기에서 FPS 15~30% 하락)
-- 부드러운 스크롤 라이브러리 금지
+- 3D / WebGL / Spline 허용
+- backdrop-filter 허용
+- 부드러운 스크롤 라이브러리 허용
 - 390px에서 가로 스크롤 금지
 - `prefers-reduced-motion` 존중, 키보드 포커스 표시 필수, 명암비 4.5:1 이상
 - 첫 화면의 모든 콘텐츠는 스크롤 없이 도달 가능해야 한다
