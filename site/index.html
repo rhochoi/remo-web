@@ -7,6 +7,14 @@
   <meta name="robots" content="noindex">
   <title>리모 — 문제를 받아 실행으로 증명하는 열 명의 학생 협동조합</title>
   <meta name="description" content="문제를 받아 실행으로 증명하는 열 명의 학생 협동조합, 리모. 데이터 분석 · 디자인 · 프로토타입으로 끝까지 풀어냅니다.">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="리모 — 문제를 받아 실행으로 증명하는 열 명의 학생 협동조합">
+  <meta property="og:description" content="데이터 분석 · 디자인 · 프로토타입으로 끝까지 풀어냅니다.">
+  <meta property="og:url" content="https://rhochoi.github.io/remo-web/">
+  <meta property="og:locale" content="ko_KR">
+  <meta name="twitter:card" content="summary">
+  <!-- 파비콘: 임시값. 로고가 아니라 오션 블루 둥근 사각(형태 앵커 "둥근 매스"의 최소 단위). 로고 벡터 확보 시 교체 — plan-05 F7 -->
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='22' fill='%231E548C'/%3E%3C/svg%3E">
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard-dynamic-subset.min.css">
   <style>
@@ -40,6 +48,11 @@
     }
     a { color: var(--blue); }
     :focus-visible { outline: 3px solid var(--blue); outline-offset: 3px; }
+    /* 눌림 피드백: 입력이 들어갔다는 정보. transform만, 120ms, reduced-motion 시 제거 (plan-05 F4) */
+    .site-nav a, .project .more, .contact-form button, .site-footer a { transition: transform 120ms ease-out; }
+    .site-nav a:active, .project .more:active, .contact-form button:active { transform: translateY(1px); }
+    @media (prefers-reduced-motion: reduce) { .site-nav a, .project .more, .contact-form button, .site-footer a { transition: none; } }
+    .site-nav a:hover { text-decoration: underline; text-underline-offset: 4px; }
 
     h1, h2, h3, .display {
       font-weight: 900;
@@ -66,8 +79,8 @@
       background: var(--paper);
       border-bottom: 4px solid var(--ink);
       padding: 0 var(--gutter);
-      display: flex; align-items: center; justify-content: space-between; gap: 12px;
     }
+    .site-header .wrap { height: 100%; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
     .wordmark-slot {
       width: 168px; height: 56px; flex-shrink: 0;
       border: 3px dashed var(--blue); border-radius: 20px;
@@ -84,20 +97,25 @@
     .site-nav a[aria-current="true"] { background: var(--ink); color: var(--paper); }
     @media (max-width: 879px) { .site-nav a { padding: 12px 8px; font-size: 14px; } }
 
-    /* 공통 섹션 */
+    /* 공통 섹션 — 콘텐츠 폭 상한 1120 (= 1280 뷰포트 − 거터 80×2): plan-01~03의 모든 폭 계산 기준. 그 위에서는 계산이 깨진다 (plan-05 F1) */
+    .wrap { max-width: 1120px; margin: 0 auto; }
     main > section { padding: var(--section-gap) var(--gutter) 0; scroll-margin-top: var(--header-h); }
+    main > section > .wrap { display: block; }
+    h1, h2, h3 { text-wrap: balance; }
+    p { text-wrap: pretty; }
     .eyebrow { font-size: 15px; font-weight: 700; letter-spacing: 0.08em; color: var(--blue); }
     .caption { font-size: 18px; color: var(--caption); max-width: 640px; }
 
     /* 0. 정의문 */
-    .hero { min-height: 70vh; display: flex; flex-direction: column; justify-content: center; gap: 20px; padding-top: 48px !important; }
+    main > section.hero { min-height: 70vh; min-height: 70dvh; padding-top: 48px; }
+    .hero .wrap { display: flex; flex-direction: column; justify-content: center; gap: 20px; min-height: inherit; }
     .hero h1 { font-size: clamp(34px, 6.5vw, 72px); max-width: 1100px; }
     .hero .sub { font-size: 24px; font-weight: 500; max-width: 720px; }
     /* 모바일: 세로 중앙 정렬 대신 상단 정렬 — 빈 여백 250px은 페이지 시작으로 읽히지 않음 */
-    @media (max-width: 879px) { .hero { min-height: 0; } .hero .sub { font-size: 18px; } }
+    @media (max-width: 879px) { main > section.hero { min-height: 0; } .hero .sub { font-size: 18px; } }
 
     /* 1. 방향 */
-    .direction { display: flex; flex-direction: column; gap: 48px; }
+    .direction .wrap { display: flex; flex-direction: column; gap: 48px; }
     .direction .lead { display: flex; flex-direction: column; gap: 20px; }
     .direction h2 { font-size: 56px; max-width: 1040px; }
     @media (max-width: 879px) { .direction h2 { font-size: 32px; } }
@@ -130,7 +148,7 @@
     .quarter .rule { font-size: 15px; color: var(--caption); }
 
     /* 3. 포트폴리오 — 결정: docs/plan-03-portfolio.md */
-    .portfolio { display: flex; flex-direction: column; gap: 40px; }
+    .portfolio .wrap { display: flex; flex-direction: column; gap: 40px; }
     .portfolio .lead { display: flex; flex-direction: column; gap: 16px; }
     .portfolio h2 { font-size: 56px; max-width: 1040px; }
     @media (max-width: 879px) { .portfolio h2 { font-size: 32px; } }
@@ -155,6 +173,7 @@
     @media (max-width: 879px) { .project h3 { font-size: 24px; } }
     .project .one { font-size: 18px; line-height: 1.6; }
     .project .stage { font-size: 15px; }
+    .project .stage b { font-weight: 700; margin-right: 10px; }
     .project .more {
       margin-top: auto; align-self: flex-start;
       display: inline-flex; align-items: center; min-height: 44px; padding: 12px 22px;
@@ -166,7 +185,7 @@
     .project.ink .more:focus-visible, .project.blue .more:focus-visible { outline-color: var(--paper); }
 
     /* 4. 팀 — 결정: docs/plan-02-team.md */
-    .team { display: flex; flex-direction: column; gap: 40px; }
+    .team .wrap { display: flex; flex-direction: column; gap: 40px; }
     .team .lead { display: flex; flex-direction: column; gap: 16px; }
     .team h2 { font-size: 56px; }
     @media (max-width: 879px) { .team h2 { font-size: 32px; } }
@@ -205,8 +224,8 @@
     }
 
     /* 5. 문의 — 결정: docs/plan-04-contact.md */
-    .contact { display: grid; grid-template-columns: 480px 1fr; gap: 64px; align-items: start; }
-    @media (max-width: 879px) { .contact { grid-template-columns: 1fr; gap: 32px; } }
+    .contact .wrap { display: grid; grid-template-columns: 480px 1fr; gap: 64px; align-items: start; }
+    @media (max-width: 879px) { .contact .wrap { grid-template-columns: 1fr; gap: 32px; } }
     .contact .lead { display: flex; flex-direction: column; gap: 20px; }
     .contact h2 { font-size: 56px; }
     @media (max-width: 879px) { .contact h2 { font-size: 32px; } }
@@ -253,9 +272,9 @@
       margin-top: var(--section-gap);
       padding: 40px var(--gutter) 56px;
       border-top: 4px solid var(--ink);
-      display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap;
       font-size: 15px; color: var(--caption);
     }
+    .site-footer .wrap { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
     .site-footer a { font-weight: 700; }
   </style>
 </head>
@@ -263,6 +282,7 @@
   <a class="skip" href="#main">본문으로 건너뛰기</a>
 
   <header class="site-header">
+   <div class="wrap">
     <div class="wordmark-slot" aria-label="REMO 워드마크 자리 — 벡터 원본 확보 대기">REMO 워드마크<br>벡터 원본 대기</div>
     <!-- 내비 링크는 대상 섹션이 실제로 존재할 때만 추가한다 — docs/plan-01-header-direction.md -->
     <nav class="site-nav" aria-label="섹션">
@@ -270,21 +290,24 @@
       <a href="#portfolio">포트폴리오</a>
       <a href="#team">팀</a>
     </nav>
+   </div>
   </header>
 
   <main id="main">
     <!-- 0. 정의문 — 구절별 근거: docs/structure.md §0 -->
     <section class="hero" aria-labelledby="h-hero">
+     <div class="wrap">
       <h1 id="h-hero">문제를 받아 실행으로 증명하는 열 명의 학생 협동조합, 리모.</h1>
       <p class="sub">데이터 분석 · 디자인 · 프로토타입으로 끝까지 풀어냅니다.</p>
+     </div>
     </section>
 
     <!-- 1. 방향 — 문장은 전부 노션 REMO.core TEAM 페이지 원문 (2026-09-17 확인).
          노션이 바뀌면 여기를 바꾼다. 사이트에서 먼저 고치지 않는다.
          다음 갱신: 2027-01 (분기 목표) / 담당: ___ -->
     <section id="direction" class="direction" aria-labelledby="h-direction">
+     <div class="wrap">
       <div class="lead">
-        <p class="eyebrow">01 — 왜, 무엇을, 어디로</p>
         <h2 id="h-direction">우리는 가치와 문제를 비즈니스로 풀어내며 실행으로 증명한다.</h2>
         <p class="caption">리모(REMO) 협동조합의 미션. 팀 노션에 기록된 문장 그대로다.</p>
       </div>
@@ -314,11 +337,12 @@
           </div>
         </div>
       </div>
+     </div>
     </section>
     <!-- 3. 포트폴리오 — 사실은 노션 프로젝트 페이지 4개 원문(2026-09-17). 추정·미확정·개인정보는 싣지 않는다. docs/plan-03-portfolio.md -->
     <section id="portfolio" class="portfolio" aria-labelledby="h-portfolio">
+     <div class="wrap">
       <div class="lead">
-        <p class="eyebrow">02 — 포트폴리오</p>
         <h2 id="h-portfolio">지금 하고 있는 네 가지 일</h2>
         <p class="caption">넷 다 진행 중이다. 상세 기획과 기록은 노션에 있다.</p>
       </div>
@@ -328,13 +352,13 @@
             <p class="meta">진행 중 · 2026.02 ~ · 정우, 이든</p>
             <h3 id="p-kpipe">K-Pipe</h3>
             <p class="one">하수관로 CCTV 조사 보고서 작성 프로그램. 실무자가 불편해하는 기존 단일 프로그램을 고쳐 만든다. 윈도우 설치형.</p>
-            <p class="stage">현재 단계 — Pipe Asset 분석 보고서</p>
+            <p class="stage"><b>현재 단계</b>Pipe Asset 분석 보고서</p>
             <a class="more" href="https://remo-core.notion.site/K-Pipe-3bd4e56fc730801fa19cf713a1ccbfc7">노션에서 자세히 →</a>
           </article>
           <article class="project line" aria-labelledby="p-dataflow">
             <p class="meta">진행 중 · 2026.08 ~ · 이든, 로</p>
             <h3 id="p-dataflow">DATAFLOW 2</h3>
-            <p class="stage">현재 단계 — 경쟁사 분석</p>
+            <p class="stage"><b>현재 단계</b>경쟁사 분석</p>
             <a class="more" href="https://remo-core.notion.site/DATAFLOW-2-3c34e56fc73080f1ae6fd3d73c78773c">노션에서 자세히 →</a>
           </article>
         </div>
@@ -343,24 +367,25 @@
             <p class="meta">진행 중 · 막스, 이든</p>
             <h3 id="p-pln">PLN</h3>
             <p class="one">노션 템플릿을 만들어 크라우드펀딩으로 수요를 검증한다.</p>
-            <p class="stage">현재 단계 — 디자인 마감, 펀딩 준비</p>
+            <p class="stage"><b>현재 단계</b>디자인 마감, 펀딩 준비</p>
             <a class="more" href="https://remo-core.notion.site/PLN-3bd4e56fc7308037a596ea10868eefa7">노션에서 자세히 →</a>
           </article>
           <article class="project blue" aria-labelledby="p-moodism">
             <p class="meta">진행 중 · 2026.06 ~ · 정우, 쏠, 겸</p>
             <h3 id="p-moodism">Moodism 무디즘</h3>
             <p class="one">"불안하면서 꿈꾸는 사람들"을 위한 의류 브랜드. 첫 제품을 텀블벅 펀딩으로 낸다.</p>
-            <p class="stage">현재 단계 — 펀딩 2026.09.23 → 10.07 (예정)</p>
+            <p class="stage"><b>현재 단계</b>펀딩 2026.09.23 → 10.07 (예정)</p>
             <a class="more" href="https://remo-core.notion.site/Moodism-3bd4e56fc73080ba9808ef5c4fc0d15a">노션에서 자세히 →</a>
           </article>
         </div>
       </div>
+     </div>
     </section>
 
     <!-- 4. 팀 — 표기명 10 확정(2026-09-17). 포지션·담당·링크는 본인 제출 전까지 렌더링하지 않는다. docs/plan-02-team.md -->
     <section id="team" class="team" aria-labelledby="h-team">
+     <div class="wrap">
       <div class="lead">
-        <p class="eyebrow">03 — 팀</p>
         <h2 id="h-team">리모의 열 명</h2>
       </div>
       <ul class="members">
@@ -376,11 +401,12 @@
           <li><span class="initial" aria-hidden="true">비</span><span class="name">비크</span></li>
       </ul>
       <p class="note">포지션과 담당은 팀원 본인이 제출한 것만 싣는다. 아직 제출 전이다.</p>
+     </div>
     </section>
     <!-- 5. 문의 — Formspree. 엔드포인트 ID 확보 전까지 hidden. 켜는 절차: docs/plan-04-contact.md -->
     <section id="contact" class="contact" aria-labelledby="h-contact" hidden>
+     <div class="wrap">
       <div class="lead">
-        <p class="eyebrow">04 — 문의</p>
         <h2 id="h-contact">다 채워야 보낼 수 있습니다.</h2>
         <p class="caption">이메일 한 줄 대신 이 폼을 씁니다. 문제를 설명하는 데 시간을 들일 수 있는 분과 일하고 싶어서입니다.</p>
       </div>
@@ -432,12 +458,15 @@
         <button type="submit">보내기</button>
         <p class="form-msg" role="status" id="form-ok"></p>
       </form>
+     </div>
     </section>
   </main>
 
   <footer class="site-footer">
+   <div class="wrap">
     <span>리모(REMO) 협동조합</span>
     <a href="https://remo-core.notion.site">REMO.core (노션) →</a>
+   </div>
   </footer>
 
   <script>

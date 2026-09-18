@@ -69,3 +69,8 @@ Leonxlnx/taste-skill(MIT)에서 `design-taste-frontend`, `redesign-existing-proj
 스킬의 BAN/MUST는 근거 있는 신호로 읽고, 리모 결정과 부딪히는 7곳(스택·CTA·다크 모드·em-dash·아이브로·폰트 로딩·가짜 데이터)의 판정을 `.claude/skills/REMO-OVERRIDES.md`에 4칸으로 기록. 다음 단계는 redesign 프로토콜로 현재 사이트 감사.
 
 **디자인 캔버스 v1 삭제됨** — 아티팩트가 계정에서 조회되지 않음. 결정은 plan-01~04에 전부 이관돼 있어 손실 없음.
+
+**감사 결과 적용 (plan-05 F1~F10)**
+콘텐츠 폭 상한 1120(계산 근거 보존) · dvh · text-wrap · 눌림 피드백만(120ms, transform) · 표시 em-dash 8→0 · 섹션 번호 아이브로 제거(내비 aria-current와 중복) · 임시 파비콘(로고 아님, 둥근 사각) · og 메타 · 404 · !important 제거.
+유지한 것 7건(잉크 매스 규칙, 평면, 굵기 3단계, 원형 아바타, 밑줄 호버, 카드 높이 정렬, 업그레이드 기법 보류)은 각각 이유·재검토 조건과 함께 plan-05에.
+F11 개인정보 고지·동의는 폼 공개 전 필수 — 방침 URL·보유기간 팀 확인 대기.
