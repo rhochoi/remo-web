@@ -1,6 +1,6 @@
 # remo-web
 
-REMO 팀 웹사이트. 배포: https://rhochoi.github.io/remo-web/ (2026-09-18 공개)
+REMO 팀 웹사이트. 배포: https://remo-web.vercel.app/ (2026-09-18 공개)
 
 ## 이 사이트가 하는 일
 
