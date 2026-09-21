@@ -3,12 +3,12 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <!-- 2026-09-18 재설계 — docs/plan-09-redesign.md. 콘텐츠는 노션 원문·팀 확인 사실만. -->
+  <!-- 2026-09-21 — pencil-new.pen "REMO Portfolio" 구현. docs/plan-11-pen.md. 콘텐츠는 노션 원문·팀 확인 사실만. -->
   <title>리모 — 문제를 받아 실행으로 증명하는 열 명의 학생 협동조합</title>
   <meta name="description" content="문제를 받아 실행으로 증명하는 열 명의 학생 협동조합, 리모. 데이터 분석 · 디자인 · 프로토타입으로 끝까지 풀어냅니다.">
   <meta property="og:type" content="website">
   <meta property="og:title" content="리모 — 문제를 받아 실행으로 증명하는 열 명의 학생 협동조합">
-  <meta property="og:description" content="데이터 분석 · 디자인 · 프로토타입으로 끝까지 풀어냅니다.">
+  <meta property="og:description" content="문제를 받아 실행으로 증명하는 열 명의 학생 협동조합, 리모. 데이터 분석 · 디자인 · 프로토타입으로 끝까지 풀어냅니다.">
   <meta property="og:url" content="https://rhochoi.github.io/remo-web/">
   <meta property="og:locale" content="ko_KR">
   <meta property="og:image" content="https://rhochoi.github.io/remo-web/assets/og.jpg">
@@ -19,318 +19,125 @@
   <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
   <link rel="icon" type="image/png" sizes="64x64" href="assets/favicon-64.png">
   <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
-  <link rel="preload" as="image" href="assets/remo-wordmark.png">
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard-dynamic-subset.min.css">
-  <style>
-    /* ===== 토큰 — 가이드 v4 실측값. 결정: docs/plan-09-redesign.md ===== */
-    :root {
-      --ink: #0A0A0A;
-      --blue: #1E548C;
-      --paper: #F8F8F6;
-      --mute-on-paper: #5A5A5A;   /* 6.49:1 */
-      --mute-on-ink: #A8A8A4;     /* 8.9:1 */
-      --mute-on-blue: #E3ECF5;    /* 6.51:1 */
-      --gutter: clamp(16px, 5vw, 80px);
-      --wrap: 1280px;
-      --header-h: 64px;
-    }
-    * { box-sizing: border-box; }
-    html { scroll-behavior: smooth; }
-    @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
-    body {
-      margin: 0; background: var(--paper); color: var(--ink);
-      font-family: Pretendard, -apple-system, system-ui, sans-serif;
-      font-size: 18px; line-height: 1.7; word-break: keep-all; overflow-x: clip;
-    }
-    a { color: inherit; }
-    p { margin: 0; }
-    h1, h2, h3 { margin: 0; letter-spacing: -0.03em; line-height: 1; text-wrap: balance; }
-    :focus-visible { outline: 3px solid var(--blue); outline-offset: 3px; }
-    .dark :focus-visible { outline-color: var(--paper); }
-    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
-    .wrap { max-width: var(--wrap); margin: 0 auto; padding-inline: var(--gutter); }
-    .label { font-size: 13px; font-weight: 600; letter-spacing: 0.04em; }
-
-    /* 스킵 */
-    .skip { position: absolute; left: var(--gutter); top: -100px; z-index: 30; background: var(--paper); color: var(--ink); padding: 12px 20px; border-radius: 999px; font-weight: 700; text-decoration: none; }
-    .skip:focus { top: 12px; }
-
-    /* ===== 헤더: 히어로 위에서는 투명, 스크롤 후 근백색. 직선 룰 없음 ===== */
-    .site-header { position: fixed; inset: 0 0 auto 0; z-index: 20; height: var(--header-h); color: var(--paper); transition: background-color 200ms, color 200ms; }
-    .site-header .wrap { height: 100%; display: flex; align-items: center; justify-content: space-between; }
-    .site-header .brand { font-size: 13px; font-weight: 700; letter-spacing: 0.08em; text-decoration: none; }
-    .site-nav { display: flex; gap: 4px; }
-    .site-nav a { display: inline-flex; align-items: center; min-height: 44px; padding: 10px 12px; font-size: 14px; font-weight: 600; text-decoration: none; opacity: .8; }
-    .site-nav a[aria-current="true"], .site-nav a:hover { opacity: 1; text-decoration: underline; text-underline-offset: 6px; text-decoration-thickness: 2px; }
-    .site-header.on-paper { background: rgba(248, 248, 246, .92); color: var(--ink); }
-    @media (prefers-reduced-motion: reduce) { .site-header { transition: none; } }
-
-    /* ===== 0. 히어로: 잉크 위 블루 로고 하나. 높이는 내용이 정한다(빈 검정 여백은 의도가 아니라 남은 공간) ===== */
-    .hero { background: var(--ink); color: var(--paper); padding-block: calc(var(--header-h) + 6vh) 0; position: relative; overflow: hidden; }
-    .hero .mark { display: block; width: 100%; height: auto; }
-    @keyframes settle { from { transform: scale(1.03); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-    .hero .mark { animation: settle 900ms cubic-bezier(.2,.9,.2,1.05) both; }
-    .hero h1 { margin-top: 5vh; font-size: 20px; font-weight: 500; line-height: 1.45; letter-spacing: -0.01em; max-width: 34ch; color: var(--mute-on-ink); }
-    @media (max-width: 879px) { .hero h1 { font-size: 17px; margin-top: 28px; } }
-    @supports (animation-timeline: scroll()) {
-      @keyframes rise { to { transform: translateY(-8vh) scale(.97); } }
-      .hero .mark { animation: settle 900ms cubic-bezier(.2,.9,.2,1.05) both, rise linear both; animation-timeline: auto, scroll(root); animation-range: normal, 0 80vh; }
-    }
-    @media (prefers-reduced-motion: reduce) { .hero .mark { animation: none !important; } }
-
-    /* ===== 1. 방향: 잉크 위 매니페스토. 계단 들여쓰기가 로고의 상승 리듬 ===== */
-    .direction { background: var(--ink); color: var(--paper); padding-block: 12vh 14vh; }
-    .direction .mission { font-size: clamp(44px, 7vw, 112px); font-weight: 800; line-height: .98; max-width: 14ch; }
-    .direction .mission .step { display: block; padding-left: 1.2em; }
-    @media (max-width: 879px) { .direction .mission { font-size: clamp(30px, 9vw, 44px); max-width: none; } .direction .mission .step { padding-left: .6em; } }
-    .direction .src { margin-top: 24px; color: var(--mute-on-ink); font-size: 14px; }
-    .direction .vision { margin-top: 8vh; max-width: 30ch; }
-    .direction .vision { font-size: clamp(26px, 2.6vw, 34px); font-weight: 500; line-height: 1.3; letter-spacing: -0.02em; }
-    .direction .vision .label { display: block; margin-top: 10px; color: var(--mute-on-ink); }
-    .direction .kv { display: grid; gap: 28px; }
-    .direction .kv .label { color: var(--mute-on-ink); display: block; margin-bottom: 8px; }
-    .direction .values { font-size: 20px; font-weight: 600; }
-    .direction .values span + span::before { content: " / "; color: var(--mute-on-ink); font-weight: 400; }
-    .direction .goal { font-size: 22px; font-weight: 500; line-height: 1.4; }
-
-    /* ===== 2. 포트폴리오: 근백색, 인덱스 행. 이미지 없음은 타이포로 정직하게 ===== */
-    .portfolio { padding-block: 10vh 6vh; }
-    .portfolio .head { display: flex; justify-content: space-between; align-items: baseline; gap: 24px; flex-wrap: wrap; margin-bottom: 40px; }
-    .portfolio h2 { font-size: clamp(32px, 4vw, 56px); font-weight: 800; }
-    .portfolio .head p { color: var(--mute-on-paper); font-size: 16px; }
-    .rows { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--ink); }
-    .row { border-bottom: 1px solid var(--ink); }
-    .row a { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px 32px; align-items: end; padding: 28px 0; text-decoration: none; transition: background-color 200ms, color 200ms, padding 200ms, margin 200ms; }
-    @media (max-width: 879px) { .row a { grid-template-columns: 1fr; gap: 10px; padding: 22px 0; } }
-    .row a:hover, .row a:focus-visible { background: var(--blue); color: var(--paper); padding-inline: 20px; margin-inline: -20px; outline: none; }
-    .row a:focus-visible { box-shadow: inset 0 0 0 3px var(--paper); }
-    .row .name { font-size: clamp(36px, 6vw, 88px); font-weight: 800; line-height: .95; letter-spacing: -0.03em; }
-    .row .one { margin-top: 14px; font-size: 17px; line-height: 1.55; max-width: 44ch; }
-    .row .meta { display: flex; flex-direction: column; gap: 4px; font-size: 13px; letter-spacing: 0.02em; color: var(--mute-on-paper); text-align: right; }
-    .row a:hover .meta, .row a:focus-visible .meta { color: var(--mute-on-blue); }
-    @media (max-width: 879px) { .row .meta { text-align: left; flex-direction: row; flex-wrap: wrap; gap: 4px 14px; } }
-    @media (prefers-reduced-motion: reduce) { .row a { transition: none; } }
-
-    /* ===== 3. 팀: 풀블리드 사진 + 이름의 벽 ===== */
-    .team { padding-block: 6vh 10vh; }
-    .team figure { margin: 0 calc(-1 * var(--gutter)); }
-    .team figure img { display: block; width: 100%; height: auto; aspect-ratio: 21 / 9; object-fit: cover; }
-    @media (max-width: 879px) { .team figure img { aspect-ratio: 4 / 3; } }
-    .team figcaption { padding: 10px var(--gutter) 0; font-size: 13px; color: var(--mute-on-paper); }
-    .team h2 { margin-top: 8vh; font-size: 13px; font-weight: 600; letter-spacing: 0.04em; color: var(--mute-on-paper); }
-    .names { list-style: none; margin: 16px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0 .35em; font-size: clamp(40px, 7vw, 104px); font-weight: 800; line-height: 1.05; letter-spacing: -0.03em; }
-    .team .note { margin-top: 24px; font-size: 15px; color: var(--mute-on-paper); }
-
-    /* ===== 4. 문의: 에디토리얼 폼. 필수 3, 나머지 선택 ===== */
-    .contact { padding-block: 8vh 12vh; border-top: 1px solid var(--ink); }
-    .contact h2 { font-size: clamp(36px, 5vw, 72px); font-weight: 800; }
-    .contact .lead { margin-top: 20px; max-width: 46ch; color: var(--mute-on-paper); font-size: 17px; }
-    .contact-form { margin-top: 48px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 36px 40px; }
-    @media (max-width: 879px) { .contact-form { grid-template-columns: 1fr; gap: 28px; } }
-    .field { display: flex; flex-direction: column; gap: 8px; }
-    .field.wide { grid-column: 1 / -1; }
-    .field label, .field legend { font-size: 17px; font-weight: 700; padding: 0; }
-    .field label small, .field legend small { font-weight: 400; color: var(--mute-on-paper); margin-left: 6px; font-size: 14px; }
-    .field .hint { font-size: 14px; color: var(--mute-on-paper); }
-    .field input[type="text"], .field input[type="email"], .field textarea {
-      background: transparent; color: var(--ink); border: 0; border-bottom: 2px solid var(--ink); border-radius: 0;
-      padding: 10px 0 12px; font: inherit; font-size: 20px; line-height: 1.4; width: 100%;
-    }
-    .field textarea { resize: vertical; min-height: 96px; }
-    .field input:focus-visible, .field textarea:focus-visible { outline: none; border-bottom-color: var(--blue); box-shadow: 0 2px 0 0 var(--blue); }
-    fieldset.field { border: 0; margin: 0; }
-    .choices { display: flex; flex-wrap: wrap; gap: 8px 22px; }
-    .choices label { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; font-size: 17px; font-weight: 500; cursor: pointer; }
-    .choices input { width: 20px; height: 20px; margin: 0; accent-color: var(--blue); }
-    .consent { grid-column: 1 / -1; }
-    .consent label { display: flex; gap: 12px; align-items: flex-start; font-size: 15px; font-weight: 400; line-height: 1.6; cursor: pointer; }
-    .consent input { width: 22px; height: 22px; margin: 4px 0 0; flex-shrink: 0; accent-color: var(--blue); }
-    .contact-form button { grid-column: 1 / -1; background: var(--blue); color: var(--paper); border: 0; border-radius: 999px; min-height: 64px; padding: 16px 36px; font: inherit; font-size: 20px; font-weight: 800; cursor: pointer; transition: transform 120ms ease-out; }
-    .contact-form button:active { transform: translateY(1px); }
-    .contact-form button[disabled] { cursor: progress; opacity: .7; }
-    .form-msg { grid-column: 1 / -1; font-size: 18px; font-weight: 700; }
-    .form-msg:empty { display: none; }
-    .gotcha { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
-
-    /* ===== 푸터: 잉크, 로고 과감한 크롭(가이드 2.4) ===== */
-    .site-footer { background: var(--ink); color: var(--paper); overflow: hidden; padding-top: 10vh; }
-    .site-footer .links { display: flex; justify-content: space-between; gap: 12px 24px; flex-wrap: wrap; font-size: 14px; color: var(--mute-on-ink); }
-    .site-footer .links a { color: var(--paper); text-decoration: none; }
-    .site-footer .links a:hover { text-decoration: underline; text-underline-offset: 4px; }
-    .site-footer .big { margin-top: 6vh; line-height: 0; }
-    .site-footer .big img { width: 140%; max-width: none; height: auto; display: block; margin-left: -6%; margin-bottom: -28%; }
-    @media (max-width: 879px) { .site-footer .big img { width: 170%; margin-left: -12%; margin-bottom: -36%; } }
-  </style>
+  <link rel="stylesheet" href="assets/site.css">
+  <link rel="preload" as="image" href="assets/team-ts-2026-06-08-1600.jpg">
 </head>
-<body>
+<body class="home">
   <a class="skip" href="#main">본문으로 건너뛰기</a>
-
-  <header class="site-header" id="site-header">
+  <header class="nav">
     <div class="wrap">
-      <a class="brand" href="#main">REMO</a>
-      <nav class="site-nav" aria-label="섹션">
-        <a href="#direction">방향</a>
-        <a href="#portfolio">포트폴리오</a>
-        <a href="#team">팀</a>
-        <a href="#contact">문의</a>
+      <a class="brand" href="index.html">REMO CORE</a>
+      <nav class="links" aria-label="주 메뉴">
+        <a href="projects.html">WORK</a>
+        <a href="people.html">PEOPLE</a>
+        <a href="index.html#about">ABOUT</a>
+        <a href="contact.html">문의</a>
       </nav>
+      <button class="menu" id="menu-open" aria-label="메뉴 열기" aria-expanded="false" aria-controls="menu-sheet">≡</button>
     </div>
   </header>
-
+  <div class="sheet" id="menu-sheet" role="dialog" aria-modal="true" aria-label="메뉴">
+    <div class="top"><b>REMO CORE</b><button class="close" id="menu-close" aria-label="메뉴 닫기">×</button></div>
+    <nav>
+      <a href="projects.html"><small>WORK</small>프로젝트</a>
+      <a href="people.html"><small>PEOPLE</small>팀</a>
+      <a href="index.html#about"><small>ABOUT</small>소개</a>
+      <a href="contact.html"><small>CONTACT</small>문의</a>
+    </nav>
+    <p class="foot">리모(REMO) 협동조합 · 열 명의 학생</p>
+  </div>
   <main id="main">
-    <!-- 0. 히어로 — 로고 하나와 한 줄. 관계 맵은 첫 화면에서 뺐다(2026-09-18, 팀장). plan-09 §6 -->
-    <section class="hero dark" id="hero" aria-labelledby="h-hero">
-      <div class="wrap">
-        <img class="mark" src="assets/remo-wordmark.png" alt="REMO" width="738" height="355" fetchpriority="high">
-        <h1 id="h-hero">문제를 받아 실행으로 증명하는 열 명의 학생 협동조합.</h1>
+
+    <!-- 히어로: 사진 풀블리드 (Home Final 560 / Mobile 344). 글은 눈썹 라벨 하나, h1은 보조기기용 -->
+    <section class="hero on-photo" aria-labelledby="h1">
+      <img src="assets/team-ts-2026-06-08-1600.jpg" srcset="assets/team-ts-2026-06-08-800.jpg 800w, assets/team-ts-2026-06-08-1600.jpg 1600w" sizes="100vw" width="1600" height="1200" fetchpriority="high" alt="콘크리트 벽에 붙인 큰 종이 앞에서 다섯 명이 포스트잇을 옮기며 이야기하는 뒷모습">
+      <div class="over">
+        <span class="eyebrow">REMO CORE · WORK / PEOPLE / LEARNING</span>
+        <h1 id="h1" class="sr-only">문제를 받아 실행으로 증명하는 열 명의 학생 협동조합, 리모.</h1>
+        <span class="caption">2026.06.08 · 프로젝트 실행 경험 TS</span>
       </div>
     </section>
 
-    <!-- 1. 방향 — 노션 TEAM 페이지 원문(2026-09-17). 노션이 바뀌면 여기를 바꾼다. 다음 갱신: 2027-01 / 담당: ___ -->
-    <section id="direction" class="direction dark" aria-labelledby="h-direction">
-      <div class="wrap">
-        <h2 id="h-direction" class="mission">우리는 가치와 문제를<span class="step">비즈니스로 풀어내며</span><span class="step">실행으로 증명한다.</span></h2>
-        <p class="src">리모(REMO) 협동조합의 미션. 팀 노션에 기록된 문장 그대로.</p>
-        <p class="vision">혼자가 아닌 팀으로 선순환하며, 시장의 평가 속에서 성장한다.<span class="label">비전 · 2년차</span></p>
-      </div>
-    </section>
-
-    <!-- 2. 포트폴리오 — 노션 프로젝트 페이지 원문. 전부 진행 중. 썸네일 없음은 타이포로 정직하게. -->
-    <section id="portfolio" class="portfolio" aria-labelledby="h-portfolio">
-      <div class="wrap">
-        <div class="head">
-          <h2 id="h-portfolio">지금 하고 있는 네 가지 일</h2>
+    <!-- WHAT WE DO — 팀 확인 산출물 3(데이터 분석·디자인·프로토타입). 카드 문장은 노션 미션 술어에서 -->
+    <section class="section" id="about" aria-labelledby="h-about">
+      <div class="wrap head">
+        <div>
+          <span class="kicker">What we do</span>
+          <h2 id="h-about" class="title">문제를 받아, 실행으로 증명합니다.</h2>
+          <p class="lead">우리는 가치와 문제를 비즈니스로 풀어내며 실행으로 증명한다 — 팀 노션에 적힌 미션 그대로. 열 명의 학생이 세 가지 방법으로 끝까지 풀어냅니다.</p>
         </div>
-        <ul class="rows">
-          <li class="row"><a href="https://remo-core.notion.site/K-Pipe-3bd4e56fc730801fa19cf713a1ccbfc7">
-            <div><h3 class="name">K-Pipe</h3><p class="one">하수관로 CCTV 조사 보고서 작성 프로그램. 실무자가 불편해하는 기존 단일 프로그램을 고쳐 만든다.</p></div>
-            <div class="meta"><span>2026.02 ~ · 정우, 이든</span><span>현재 단계 Pipe Asset 분석 보고서</span></div>
-          </a></li>
-          <li class="row"><a href="https://remo-core.notion.site/Moodism-3bd4e56fc73080ba9808ef5c4fc0d15a">
-            <div><h3 class="name">Moodism</h3><p class="one">"불안하면서 꿈꾸는 사람들"을 위한 의류 브랜드. 첫 제품을 텀블벅 펀딩으로 낸다.</p></div>
-            <div class="meta"><span>2026.06 ~ · 정우, 쏠, 겸</span><span>펀딩 2026.09.23 → 10.07 예정</span></div>
-          </a></li>
-          <li class="row"><a href="https://remo-core.notion.site/PLN-3bd4e56fc7308037a596ea10868eefa7">
-            <div><h3 class="name">PLN</h3><p class="one">노션 템플릿을 만들어 크라우드펀딩으로 수요를 검증한다.</p></div>
-            <div class="meta"><span>막스, 이든</span><span>현재 단계 디자인 마감, 펀딩 준비</span></div>
-          </a></li>
-          <li class="row"><a href="https://remo-core.notion.site/DATAFLOW-2-3c34e56fc73080f1ae6fd3d73c78773c">
-            <div><h3 class="name">DATAFLOW 2</h3></div>
-            <div class="meta"><span>2026.08 ~ · 이든, 로</span><span>현재 단계 경쟁사 분석</span></div>
-          </a></li>
+        <ul class="cards3">
+          <li class="focus"><span class="n">01</span><h3>데이터 분석</h3><p>현장의 기록을 읽어 문제의 크기와 원인을 숫자로 확인합니다.</p><span class="src">K-Pipe · DATAFLOW 2</span></li>
+          <li class="focus"><span class="n">02</span><h3>디자인</h3><p>브랜드·템플릿·화면을 만들어 문제의 해법을 눈에 보이게 합니다.</p><span class="src">Moodism · PLN</span></li>
+          <li class="focus"><span class="n">03</span><h3>프로토타입</h3><p>먼저 작게 만들어 시장의 평가를 받고, 그 결과로 다음을 정합니다.</p><span class="src">텀블벅 · 크라우드펀딩 검증</span></li>
         </ul>
       </div>
     </section>
 
-    <!-- 3. 팀 — 표기명 10 확정. 포지션은 팀 결정으로 싣지 않는다. -->
-    <section id="team" class="team" aria-labelledby="h-team">
+    <!-- SELECTED PROJECTS — 노션 프로젝트 4. 화면·썸네일이 오면 .pcard에 <img>만 넣으면 된다 -->
+    <section class="section soft" aria-labelledby="h-work">
       <div class="wrap">
-        <figure>
-          <img src="assets/team-ts-2026-06-08-800.jpg" srcset="assets/team-ts-2026-06-08-800.jpg 800w, assets/team-ts-2026-06-08-1600.jpg 1600w" sizes="100vw" width="1600" height="1200" loading="lazy" decoding="async" alt="콘크리트 벽에 붙인 큰 종이 앞에서 다섯 명이 포스트잇을 옮기며 이야기하는 뒷모습">
-          <figcaption>2026년 6월 8일, 프로젝트 실행 경험 TS.</figcaption>
-        </figure>
-        <h2 id="h-team">열 명</h2>
-        <ul class="names"><li>브루노</li><li>쏠</li><li>조이</li><li>정우</li><li>막스</li><li>유진</li><li>로</li><li>겸</li><li>이든</li><li>비크</li></ul>
-        <p class="note">포지션과 담당은 싣지 않는다.</p>
+        <div class="head" style="display:flex; justify-content:space-between; align-items:end; gap:20px; flex-wrap:wrap">
+          <div><span class="kicker">Selected projects</span><h2 id="h-work" class="title">지금 하고 있는 네 가지 일</h2></div>
+          <a class="btn" href="projects.html">모든 프로젝트 →</a>
+        </div>
+        <ul class="pgrid four">
+<li><a class="pcard tile blue" data-kind="program" href="https://remo-core.notion.site/K-Pipe-3bd4e56fc730801fa19cf713a1ccbfc7">
+  <span class="kind">프로그램 · 2026.02 ~</span>
+  <h3>K-Pipe</h3><p class="one">하수관로 CCTV 조사 보고서 작성 프로그램. 실무자가 불편해하는 기존 단일 프로그램을 고쳐 만든다.</p>
+  <span class="go">현재 단계 · Pipe Asset 분석 보고서 &nbsp;·&nbsp; 노션에서 보기 →</span>
+</a></li>
+<li><a class="pcard tile orange" data-kind="brand" href="https://remo-core.notion.site/Moodism-3bd4e56fc73080ba9808ef5c4fc0d15a">
+  <span class="kind">브랜드 · 2026.06 ~</span>
+  <h3>Moodism</h3><p class="one">"불안하면서 꿈꾸는 사람들"을 위한 의류 브랜드. 첫 제품을 텀블벅 펀딩으로 낸다.</p>
+  <span class="go">현재 단계 · 펀딩 2026.09.23 → 10.07 예정 &nbsp;·&nbsp; 노션에서 보기 →</span>
+</a></li>
+<li><a class="pcard tile green" data-kind="template" href="https://remo-core.notion.site/PLN-3bd4e56fc7308037a596ea10868eefa7">
+  <span class="kind">템플릿</span>
+  <h3>PLN</h3><p class="one">노션 템플릿을 만들어 크라우드펀딩으로 수요를 검증한다.</p>
+  <span class="go">현재 단계 · 디자인 마감, 펀딩 준비 &nbsp;·&nbsp; 노션에서 보기 →</span>
+</a></li>
+<li><a class="pcard tile paper" data-kind="data" href="https://remo-core.notion.site/DATAFLOW-2-3c34e56fc73080f1ae6fd3d73c78773c">
+  <span class="kind">데이터 · 2026.08 ~</span>
+  <h3>DATAFLOW 2</h3>
+  <span class="go">현재 단계 · 경쟁사 분석 &nbsp;·&nbsp; 노션에서 보기 →</span>
+</a></li>
+        </ul>
+        <ul class="plist">
+<li><a href="https://remo-core.notion.site/K-Pipe-3bd4e56fc730801fa19cf713a1ccbfc7"><b>K-Pipe</b><span>프로그램 · 2026.02 ~ →</span></a></li>
+<li><a href="https://remo-core.notion.site/Moodism-3bd4e56fc73080ba9808ef5c4fc0d15a"><b>Moodism</b><span>브랜드 · 2026.06 ~ →</span></a></li>
+<li><a href="https://remo-core.notion.site/PLN-3bd4e56fc7308037a596ea10868eefa7"><b>PLN</b><span>템플릿 →</span></a></li>
+<li><a href="https://remo-core.notion.site/DATAFLOW-2-3c34e56fc73080f1ae6fd3d73c78773c"><b>DATAFLOW 2</b><span>데이터 · 2026.08 ~ →</span></a></li>
+        </ul>
       </div>
     </section>
 
-    <!-- 4. 문의 — Formspree xdekorqo. 필수는 셋(소속·문제·이메일), 나머지는 선택. plan-09 -->
-    <section id="contact" class="contact" aria-labelledby="h-contact">
+    <!-- 팀 CTA 밴드 -->
+    <section class="band" aria-label="팀">
       <div class="wrap">
-        <h2 id="h-contact">문제를 적어 보내 주세요.</h2>
-        <p class="lead">문제를 한 단락으로. 나머지는 아는 만큼만.</p>
-        <form class="contact-form" method="POST" action="https://formspree.io/f/xdekorqo" data-endpoint="https://formspree.io/f/xdekorqo">
-          <p class="form-msg" role="alert" id="form-error"></p>
-          <div class="field">
-            <label for="f-org">소속과 역할</label>
-            <input id="f-org" name="소속과 역할" type="text" required autocomplete="organization">
-          </div>
-          <div class="field">
-            <label for="f-email">이메일</label>
-            <input id="f-email" name="email" type="email" required autocomplete="email">
-          </div>
-          <div class="field wide">
-            <label for="f-problem">해결하려는 문제</label>
-            <p class="hint" id="f-problem-hint">한 단락. 누구의 어떤 문제인지.</p>
-            <textarea id="f-problem" name="해결하려는 문제" required rows="4" aria-describedby="f-problem-hint"></textarea>
-          </div>
-          <div class="field wide">
-            <label for="f-tried">지금까지 시도한 것 <small>선택</small></label>
-            <textarea id="f-tried" name="지금까지 시도한 것" rows="2"></textarea>
-          </div>
-          <fieldset class="field wide">
-            <legend>기대하는 협업 형태 <small>선택</small></legend>
-            <div class="choices">
-              <label><input type="radio" name="협업 형태" value="프로젝트 의뢰"> 프로젝트 의뢰</label>
-              <label><input type="radio" name="협업 형태" value="협업 제안"> 협업 제안</label>
-              <label><input type="radio" name="협업 형태" value="커피챗"> 커피챗</label>
-            </div>
-          </fieldset>
-          <div class="field">
-            <label for="f-when">일정 범위 <small>선택</small></label>
-            <input id="f-when" name="일정 범위" type="text">
-          </div>
-          <div class="field">
-            <label for="f-budget">예산 범위 <small>선택</small></label>
-            <input id="f-budget" name="예산 범위" type="text">
-          </div>
-          <div class="field consent">
-            <label><input type="checkbox" name="개인정보 동의" value="동의" required>
-              <span>적어 주신 내용과 이메일을 문의 응대 목적으로 수집하고 <b>1년간</b> 보관하는 데 동의합니다. <a href="https://remo-core.notion.site/3bd4e56fc730802b95dfc91ec12d8c41">개인정보처리방침</a></span>
-            </label>
-          </div>
-          <input type="hidden" name="_subject" value="[remo-web] 문의">
-          <input type="text" name="_gotcha" class="gotcha" tabindex="-1" autocomplete="off" aria-hidden="true">
-          <button type="submit">보내기</button>
-          <p class="form-msg" role="status" id="form-ok"></p>
-        </form>
+        <p>포지션 없이, 열 명이 문제 하나를 끝까지 봅니다.</p>
+        <a class="arrow" href="people.html">팀 만나기</a>
+      </div>
+    </section>
+    <section class="band orange" aria-label="문의">
+      <div class="wrap">
+        <p>문제를 적어 보내 주세요.</p>
+        <a class="arrow" href="contact.html">문의하기</a>
       </div>
     </section>
   </main>
-
-  <footer class="site-footer dark">
+  <footer class="footer">
     <div class="wrap">
-      <div class="links">
-        <span>리모(REMO) 협동조합</span>
-        <span style="display:flex; gap:20px; flex-wrap:wrap;">
-          <a href="https://remo-core.notion.site/3bd4e56fc730802b95dfc91ec12d8c41">개인정보처리방침</a>
-          <a href="https://remo-core.notion.site">REMO.core (노션) →</a>
-        </span>
-      </div>
-      <div class="big" aria-hidden="true"><img src="assets/remo-wordmark.png" alt="" width="738" height="355" loading="lazy"></div>
+      <span>© 리모(REMO) 협동조합</span>
+      <span class="row">
+        <a href="https://remo-core.notion.site/3bd4e56fc730802b95dfc91ec12d8c41">개인정보처리방침</a>
+        <a href="https://remo-core.notion.site">REMO.core (노션) →</a>
+      </span>
     </div>
   </footer>
-
-  <script>
-    // 헤더: 히어로를 벗어나면 근백색 + 현재 섹션 표시
-    (function () {
-      var header = document.getElementById('site-header'), hero = document.getElementById('hero');
-      if (!('IntersectionObserver' in window) || !hero) return;
-      new IntersectionObserver(function (es) { es.forEach(function (e) { header.classList.toggle('on-paper', !e.isIntersecting); }); }, { rootMargin: '-64px 0px 0px 0px', threshold: 0 }).observe(hero);
-      var links = document.querySelectorAll('.site-nav a[href^="#"]'), byId = {};
-      links.forEach(function (a) { byId[a.getAttribute('href').slice(1)] = a; });
-      var io = new IntersectionObserver(function (es) { es.forEach(function (e) { var a = byId[e.target.id]; if (!a) return; if (e.isIntersecting) a.setAttribute('aria-current', 'true'); else a.removeAttribute('aria-current'); }); }, { rootMargin: '-40% 0px -55% 0px' });
-      Object.keys(byId).forEach(function (id) { var el = document.getElementById(id); if (el) io.observe(el); });
-    })();
-
-    // 문의 폼 — AJAX 제출, 실패 시 입력값 유지 (plan-04)
-    (function () {
-      var form = document.querySelector('.contact-form');
-      if (!form || !window.fetch) return;
-      var ok = document.getElementById('form-ok'), err = document.getElementById('form-error'), btn = form.querySelector('button[type="submit"]');
-      form.addEventListener('submit', function (e) {
-        e.preventDefault();
-        if (!form.reportValidity()) return;
-        err.textContent = ''; btn.disabled = true; btn.textContent = '보내는 중…';
-        fetch(form.dataset.endpoint, { method: 'POST', body: new FormData(form), headers: { 'Accept': 'application/json' } })
-          .then(function (r) { if (!r.ok) throw new Error(r.status);
-            form.querySelectorAll('.field, button').forEach(function (el) { el.hidden = true; });
-            ok.textContent = '받았습니다. 적어 주신 이메일로 답합니다.'; })
-          .catch(function () { err.textContent = '보내지 못했습니다. 잠시 후 다시 시도하거나, 아래 노션 링크로 연락해 주세요.'; btn.disabled = false; btn.textContent = '보내기'; });
-      });
-    })();
-  </script>
+  <div class="toast" id="toast" hidden role="status"></div>
+  <script src="assets/site.js"></script>
 </body>
 </html>

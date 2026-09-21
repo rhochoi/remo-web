@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- 2026-09-21 — pencil-new.pen "REMO Portfolio" 구현. docs/plan-11-pen.md. 콘텐츠는 노션 원문·팀 확인 사실만. -->
+  <title>프로젝트 — 리모</title>
+  <meta name="description" content="리모가 지금 하고 있는 네 가지 일. 모두 진행 중.">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="프로젝트 — 리모">
+  <meta property="og:description" content="리모가 지금 하고 있는 네 가지 일. 모두 진행 중.">
+  <meta property="og:url" content="https://rhochoi.github.io/remo-web/projects.html">
+  <meta property="og:locale" content="ko_KR">
+  <meta property="og:image" content="https://rhochoi.github.io/remo-web/assets/og.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="콘크리트 벽에 붙인 종이 앞에서 포스트잇을 옮기는 리모 팀원들의 뒷모습">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="64x64" href="assets/favicon-64.png">
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard-dynamic-subset.min.css">
+  <link rel="stylesheet" href="assets/site.css">
+  
+</head>
+<body class="">
+  <a class="skip" href="#main">본문으로 건너뛰기</a>
+  <header class="nav">
+    <div class="wrap">
+      <a class="brand" href="index.html">REMO CORE</a>
+      <nav class="links" aria-label="주 메뉴">
+        <a href="projects.html" aria-current="page">WORK</a>
+        <a href="people.html">PEOPLE</a>
+        <a href="index.html#about">ABOUT</a>
+        <a href="contact.html">문의</a>
+      </nav>
+      <button class="menu" id="menu-open" aria-label="메뉴 열기" aria-expanded="false" aria-controls="menu-sheet">≡</button>
+    </div>
+  </header>
+  <div class="sheet" id="menu-sheet" role="dialog" aria-modal="true" aria-label="메뉴">
+    <div class="top"><b>REMO CORE</b><button class="close" id="menu-close" aria-label="메뉴 닫기">×</button></div>
+    <nav>
+      <a href="projects.html"><small>WORK</small>프로젝트</a>
+      <a href="people.html"><small>PEOPLE</small>팀</a>
+      <a href="index.html#about"><small>ABOUT</small>소개</a>
+      <a href="contact.html"><small>CONTACT</small>문의</a>
+    </nav>
+    <p class="foot">리모(REMO) 협동조합 · 열 명의 학생</p>
+  </div>
+  <main id="main">
+
+    <section class="section" aria-labelledby="h-index">
+      <div class="wrap">
+        <span class="kicker">Project index</span>
+        <h1 id="h-index" class="title xl">지금 하고 있는 네 가지 일</h1>
+        <p class="lead">모두 진행 중입니다. 완료 사례는 아직 없고, 생기면 여기 먼저 올립니다. 카드를 누르면 노션의 프로젝트 페이지로 갑니다.</p>
+        <div class="filters" role="group" aria-label="분류">
+          <button type="button" data-filter="all" aria-pressed="true">전체</button>
+          <button type="button" data-filter="program" aria-pressed="false">프로그램</button>
+          <button type="button" data-filter="brand" aria-pressed="false">브랜드</button>
+          <button type="button" data-filter="template" aria-pressed="false">템플릿</button>
+          <button type="button" data-filter="data" aria-pressed="false">데이터</button>
+        </div>
+        <ul class="pgrid">
+<li><a class="pcard tile blue tall" data-kind="program" href="https://remo-core.notion.site/K-Pipe-3bd4e56fc730801fa19cf713a1ccbfc7">
+  <span class="kind">프로그램 · 2026.02 ~</span>
+  <h3>K-Pipe</h3><p class="one">하수관로 CCTV 조사 보고서 작성 프로그램. 실무자가 불편해하는 기존 단일 프로그램을 고쳐 만든다.</p>
+  <span class="go">현재 단계 · Pipe Asset 분석 보고서 &nbsp;·&nbsp; 노션에서 보기 →</span>
+</a></li>
+<li><a class="pcard tile orange tall" data-kind="brand" href="https://remo-core.notion.site/Moodism-3bd4e56fc73080ba9808ef5c4fc0d15a">
+  <span class="kind">브랜드 · 2026.06 ~</span>
+  <h3>Moodism</h3><p class="one">"불안하면서 꿈꾸는 사람들"을 위한 의류 브랜드. 첫 제품을 텀블벅 펀딩으로 낸다.</p>
+  <span class="go">현재 단계 · 펀딩 2026.09.23 → 10.07 예정 &nbsp;·&nbsp; 노션에서 보기 →</span>
+</a></li>
+<li><a class="pcard tile green tall" data-kind="template" href="https://remo-core.notion.site/PLN-3bd4e56fc7308037a596ea10868eefa7">
+  <span class="kind">템플릿</span>
+  <h3>PLN</h3><p class="one">노션 템플릿을 만들어 크라우드펀딩으로 수요를 검증한다.</p>
+  <span class="go">현재 단계 · 디자인 마감, 펀딩 준비 &nbsp;·&nbsp; 노션에서 보기 →</span>
+</a></li>
+<li><a class="pcard tile paper tall" data-kind="data" href="https://remo-core.notion.site/DATAFLOW-2-3c34e56fc73080f1ae6fd3d73c78773c">
+  <span class="kind">데이터 · 2026.08 ~</span>
+  <h3>DATAFLOW 2</h3>
+  <span class="go">현재 단계 · 경쟁사 분석 &nbsp;·&nbsp; 노션에서 보기 →</span>
+</a></li>
+        </ul>
+        <div class="empty">조건에 맞는 프로젝트가 없어요.<br><a class="btn" href="projects.html" data-reset>필터 초기화</a></div>
+      </div>
+    </section>
+    <section class="band" aria-label="문의">
+      <div class="wrap"><p>비슷한 문제를 갖고 계신가요?</p><a class="arrow" href="contact.html">문제 보내기</a></div>
+    </section>
+  </main>
+  <footer class="footer">
+    <div class="wrap">
+      <span>© 리모(REMO) 협동조합</span>
+      <span class="row">
+        <a href="https://remo-core.notion.site/3bd4e56fc730802b95dfc91ec12d8c41">개인정보처리방침</a>
+        <a href="https://remo-core.notion.site">REMO.core (노션) →</a>
+      </span>
+    </div>
+  </footer>
+  <div class="toast" id="toast" hidden role="status"></div>
+  <script src="assets/site.js"></script>
+</body>
+</html>

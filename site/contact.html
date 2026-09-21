@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- 2026-09-21 — pencil-new.pen "REMO Portfolio" 구현. docs/plan-11-pen.md. 콘텐츠는 노션 원문·팀 확인 사실만. -->
+  <title>문의 — 리모</title>
+  <meta name="description" content="문제를 한 단락으로 적어 보내 주세요. 필수는 셋.">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="문의 — 리모">
+  <meta property="og:description" content="문제를 한 단락으로 적어 보내 주세요. 필수는 셋.">
+  <meta property="og:url" content="https://rhochoi.github.io/remo-web/contact.html">
+  <meta property="og:locale" content="ko_KR">
+  <meta property="og:image" content="https://rhochoi.github.io/remo-web/assets/og.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="콘크리트 벽에 붙인 종이 앞에서 포스트잇을 옮기는 리모 팀원들의 뒷모습">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="64x64" href="assets/favicon-64.png">
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard-dynamic-subset.min.css">
+  <link rel="stylesheet" href="assets/site.css">
+  
+</head>
+<body class="">
+  <a class="skip" href="#main">본문으로 건너뛰기</a>
+  <header class="nav">
+    <div class="wrap">
+      <a class="brand" href="index.html">REMO CORE</a>
+      <nav class="links" aria-label="주 메뉴">
+        <a href="projects.html">WORK</a>
+        <a href="people.html">PEOPLE</a>
+        <a href="index.html#about">ABOUT</a>
+        <a href="contact.html" aria-current="page">문의</a>
+      </nav>
+      <button class="menu" id="menu-open" aria-label="메뉴 열기" aria-expanded="false" aria-controls="menu-sheet">≡</button>
+    </div>
+  </header>
+  <div class="sheet" id="menu-sheet" role="dialog" aria-modal="true" aria-label="메뉴">
+    <div class="top"><b>REMO CORE</b><button class="close" id="menu-close" aria-label="메뉴 닫기">×</button></div>
+    <nav>
+      <a href="projects.html"><small>WORK</small>프로젝트</a>
+      <a href="people.html"><small>PEOPLE</small>팀</a>
+      <a href="index.html#about"><small>ABOUT</small>소개</a>
+      <a href="contact.html"><small>CONTACT</small>문의</a>
+    </nav>
+    <p class="foot">리모(REMO) 협동조합 · 열 명의 학생</p>
+  </div>
+  <main id="main">
+
+    <section class="section" aria-labelledby="h-contact">
+      <div class="wrap">
+        <span class="kicker">Contact</span>
+        <h1 id="h-contact" class="title xl">문제를 적어 보내 주세요.</h1>
+        <p class="lead">문제를 한 단락으로. 나머지는 아는 만큼만.</p>
+        <div class="form-grid">
+          <ul class="specs">
+            <li class="spec"><span class="k">필수 3</span><span class="v">소속과 역할 · 이메일 · 해결하려는 문제</span></li>
+            <li class="spec"><span class="k">받은 뒤</span><span class="v">적어 주신 이메일로 답합니다.</span></li>
+            <li class="spec"><span class="k">보관</span><span class="v">문의 응대 목적으로 1년간 보관합니다.</span></li>
+            <li class="spec"><span class="k">다른 길</span><span class="v"><a href="https://remo-core.notion.site">REMO.core (노션) →</a></span></li>
+          </ul>
+          <form class="form" method="POST" action="https://formspree.io/f/xdekorqo" data-endpoint="https://formspree.io/f/xdekorqo">
+            <p class="form-msg" role="alert" id="form-error"></p>
+            <div class="field"><label for="f-org">소속과 역할</label><input id="f-org" name="소속과 역할" type="text" required autocomplete="organization"></div>
+            <div class="field"><label for="f-email">이메일</label><input id="f-email" name="email" type="email" required autocomplete="email"></div>
+            <div class="field wide"><label for="f-problem">해결하려는 문제</label><p class="hint" id="f-problem-hint">한 단락. 누구의 어떤 문제인지.</p><textarea id="f-problem" name="해결하려는 문제" required rows="4" aria-describedby="f-problem-hint"></textarea></div>
+            <div class="field wide"><label for="f-tried">지금까지 시도한 것 <small>선택</small></label><textarea id="f-tried" name="지금까지 시도한 것" rows="2"></textarea></div>
+            <fieldset class="field wide"><legend>기대하는 협업 형태 <small>선택</small></legend>
+              <div class="choices">
+                <label><input type="radio" name="협업 형태" value="프로젝트 의뢰"> 프로젝트 의뢰</label>
+                <label><input type="radio" name="협업 형태" value="협업 제안"> 협업 제안</label>
+                <label><input type="radio" name="협업 형태" value="커피챗"> 커피챗</label>
+              </div>
+            </fieldset>
+            <div class="field"><label for="f-when">일정 범위 <small>선택</small></label><input id="f-when" name="일정 범위" type="text"></div>
+            <div class="field"><label for="f-budget">예산 범위 <small>선택</small></label><input id="f-budget" name="예산 범위" type="text"></div>
+            <div class="consent"><label><input type="checkbox" name="개인정보 동의" value="동의" required><span>적어 주신 내용과 이메일을 문의 응대 목적으로 수집하고 <b>1년간</b> 보관하는 데 동의합니다. <a href="https://remo-core.notion.site/3bd4e56fc730802b95dfc91ec12d8c41">개인정보처리방침</a></span></label></div>
+            <input type="hidden" name="_subject" value="[remo-web] 문의">
+            <input type="text" name="_gotcha" class="gotcha" tabindex="-1" autocomplete="off" aria-hidden="true">
+            <button type="submit" class="btn orange">보내기</button>
+            <p class="form-msg" role="status" id="form-ok"></p>
+          </form>
+        </div>
+      </div>
+    </section>
+    <section class="section soft" aria-labelledby="h-sheet">
+      <div class="wrap">
+        <div class="sheet-hero" style="margin-top:0">
+          <figure>
+            <img src="assets/team-ts-2026-06-08-1600.jpg" srcset="assets/team-ts-2026-06-08-800.jpg 800w, assets/team-ts-2026-06-08-1600.jpg 1600w" sizes="(min-width: 1024px) 60vw, 100vw" width="1600" height="1200" loading="lazy" decoding="async" alt="콘크리트 벽에 붙인 큰 종이 앞에서 다섯 명이 포스트잇을 옮기며 이야기하는 뒷모습">
+            <figcaption>REMO CORE / PEOPLE AT WORK / 2026</figcaption>
+          </figure>
+          <div class="copy">
+            <span class="kicker">Contact sheet</span>
+            <h2 id="h-sheet" style="margin-top:12px">우리는 함께 일한 시간과 현장을 기록합니다.</h2>
+            <p>사진은 결과의 장식이 아니라 프로젝트가 실제로 어떻게 사람과 만나고 움직였는지 보여주는 기록입니다. 지금은 한 장 — 프로젝트 화면이 모이는 대로 채웁니다.</p>
+            <div class="thumbs" aria-label="기록">
+              <div class="t"><b>01</b></div><div class="t"><b>02</b></div><div class="t"><b>03</b></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+  <footer class="footer">
+    <div class="wrap">
+      <span>© 리모(REMO) 협동조합</span>
+      <span class="row">
+        <a href="https://remo-core.notion.site/3bd4e56fc730802b95dfc91ec12d8c41">개인정보처리방침</a>
+        <a href="https://remo-core.notion.site">REMO.core (노션) →</a>
+      </span>
+    </div>
+  </footer>
+  <div class="toast" id="toast" hidden role="status"></div>
+  <script src="assets/site.js"></script>
+</body>
+</html>
