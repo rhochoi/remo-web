@@ -2,7 +2,8 @@
 import { neon } from '@neondatabase/serverless';
 
 const KINDS = ['프로젝트 의뢰', '협업 제안', '커피챗'];
-const MAX = { org: 200, email: 254, problem: 5000, tried: 3000, timeline: 200, budget: 200 };
+let ready; // 테이블 생성은 인스턴스당 한 번 — db/schema.sql과 같은 정의
+const MAX ={ org: 200, email: 254, problem: 5000, tried: 3000, timeline: 200, budget: 200 };
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') { res.setHeader('Allow', 'POST'); return res.status(405).json({ ok: false }); }
@@ -22,6 +23,12 @@ export default async function handler(req, res) {
 
   try {
     const sql = neon(process.env.DATABASE_URL || process.env.POSTGRES_URL);
+    ready ||= sql`create table if not exists inquiries (
+      id bigint generated always as identity primary key,
+      created_at timestamptz not null default now(),
+      org text not null, email text not null, problem text not null,
+      tried text, kind text, timeline text, budget text)`.catch((e) => { ready = null; throw e; });
+    await ready;
     await sql`insert into inquiries (org, email, problem, tried, kind, timeline, budget)
       values (${row.org}, ${row.email}, ${row.problem}, ${row.tried || null}, ${row.kind || null}, ${row.timeline || null}, ${row.budget || null})`;
     return res.status(201).json({ ok: true });
