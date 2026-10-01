@@ -1,0 +1,22 @@
+[
+  {
+    "file": "site/assets/moodism-sample.jpg",
+    "sha256": "69712dc81d2285e32206dd58e36d6aa24f2c1522832aa08ac6490feac43b73fe",
+    "bytes": 537106
+  },
+  {
+    "file": "site/assets/moodism-detail.jpg",
+    "sha256": "e8ea132ea90bdedcb7b2b27e974beb827b4e055c6f72db53d34f089bd2e03cac",
+    "bytes": 664258
+  },
+  {
+    "file": "site/assets/moodism-first.jpg",
+    "sha256": "9fa2853beee03b8cf4fbf60bc0ae1ae92abcaaab9b991714f2a872215fe65a72",
+    "bytes": 142263
+  },
+  {
+    "file": "site/assets/pln-main.png",
+    "sha256": "55456dda54dd48ac02d7c0a21a2ca3d291d33f2bf49f58f5219841dfd63d28ed",
+    "bytes": 1074832
+  }
+]

@@ -1,0 +1,40 @@
+{
+  "date": "2026-09-17",
+  "browser": "Chrome headless",
+  "viewports": [
+    [
+      320,
+      568
+    ],
+    [
+      390,
+      667
+    ],
+    [
+      667,
+      390
+    ],
+    [
+      768,
+      1024
+    ],
+    [
+      1024,
+      768
+    ],
+    [
+      1440,
+      960
+    ]
+  ],
+  "axe_version": "4.10.3",
+  "violations": [],
+  "manual_review_required": [
+    {
+      "id": "color-contrast",
+      "impact": "serious"
+    }
+  ],
+  "external_form_submission": false,
+  "deployed": false
+}
