@@ -11,5 +11,5 @@ create table if not exists inquiries (
   budget     text             -- 예산 범위
 );
 
--- 동의문의 "1년간 보관" — 만료분 삭제 (월 1회 수동 실행)
+-- 동의문의 "1년간 보관" — 만료분 삭제. api/purge-inquiries.js가 매일 03:00 KST(Vercel Cron) 실행
 -- delete from inquiries where created_at < now() - interval '1 year';
