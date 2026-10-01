@@ -106,7 +106,11 @@ img { display: block; max-width: 100%; height: auto; }
 @media (max-width: 767px) { .pgrid, .pgrid.four { grid-template-columns: 1fr; } }
 .pcard { position: relative; display: flex; flex-direction: column; justify-content: flex-end; gap: 6px; min-height: 220px; padding: 18px; border-radius: 10px; overflow: hidden; color: var(--white); text-decoration: none; background: var(--ink-2); isolation: isolate; transition: transform 200ms ease-out; }
 .pcard.tall { min-height: 380px; border-radius: var(--r); }
-.pcard img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: -2; transition: transform 500ms ease-out; }
+.pcard img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 40%; z-index: -2; transition: transform 500ms ease-out; }
+/* 화면 캡처는 가로로 길어 가운데를 자르면 내용이 사라진다 — 왼쪽 기준 */
+.pcard img.fit-left { object-position: left center; }
+/* 밝은 화면 캡처 위에서는 흰 글자가 4.4:1 — 오버레이를 .66으로 올려 7.3:1 */
+.pcard.shot::before { background: rgba(0, 0, 0, .66); }
 .pcard::before { content: ""; position: absolute; inset: 0; z-index: -1; background: rgba(0,0,0,.53); }
 .pcard.tile::before { background: transparent; }
 .pcard.tile.blue { background: var(--blue); }

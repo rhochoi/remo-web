@@ -56,4 +56,4 @@ Project Detail Template은 만들지 않았다 — 상세 본문이 노션에 �
 | `moodism-first.jpg` | 1차 샘플(2026.08.25) | 1440×860 | Moodism 카드 보조 |
 | `pln-main.png` | PLN 노션 템플릿 화면(PLAN/LEARN/MANAGE/REVIEW) | 3040×1244 | PLN 카드 |
 
-아직 **파일만 반입했고 페이지에는 연결하지 않았다**. 카드에 끼우는 작업은 별도 결정으로 한다. `team-day.jpg`는 열 명의 얼굴이 식별되므로 공개 전 동의 확인이 선행 조건(개인정보 게이트, 결정 권한 1).
+**연결 (2026-10-01)**: Moodism 카드 → `moodism-sample-800.jpg`(원본 리사이즈, 149KB), PLN 카드 → `pln-main-1200.png`(239KB). 홈·프로젝트 두 페이지 모두. K-Pipe·DATAFLOW 2는 화면이 없어 색 타일 유지. 밝은 화면 캡처 위 흰 글자가 4.42:1이라 PLN 카드만 오버레이를 `.53`→`.66`으로 올려 7.26:1(`.pcard.shot`). 가로로 긴 캡처는 가운데를 자르면 내용이 사라져 `object-position: left`(`.fit-left`). `team-day.jpg`는 열 명의 얼굴이 식별되므로 공개 전 동의 확인이 선행 조건(개인정보 게이트, 결정 권한 1).
