@@ -38,8 +38,15 @@
       e.preventDefault();
       if (!form.reportValidity()) return;
       err.textContent = ''; btn.disabled = true; btn.textContent = '보내는 중…';
-      fetch(form.dataset.endpoint, { method: 'POST', body: new FormData(form), headers: { 'Accept': 'application/json' } })
-        .then(function (r) { if (!r.ok) throw new Error(r.status);
+      // Formspree(메일 알림)와 DB(/api/inquiry)에 동시에 보낸다. 하나라도 받으면 성공
+      var data = new FormData(form), send = function (url, body) {
+        return fetch(url, { method: 'POST', body: body, headers: { 'Accept': 'application/json' } })
+          .then(function (r) { return r.ok; }, function () { return false; });
+      };
+      var sent = [send(form.dataset.endpoint, data)];
+      if (form.dataset.db) sent.push(send(form.dataset.db, new URLSearchParams(data)));
+      Promise.all(sent)
+        .then(function (r) { if (r.indexOf(true) < 0) throw new Error('send');
           form.querySelectorAll('.field, .consent, button').forEach(function (el) { el.hidden = true; });
           ok.textContent = '받았습니다. 적어 주신 이메일로 답합니다.'; window.remoToast('문의를 보냈습니다.'); })
         .catch(function () { err.textContent = '보내지 못했습니다. 잠시 후 다시 시도하거나, 노션 링크로 연락해 주세요.'; btn.disabled = false; btn.textContent = '보내기'; });

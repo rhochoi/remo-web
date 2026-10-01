@@ -2,6 +2,7 @@
 
 형식: 결정 / 이유 / 근거 / 기각안. 공통 토큰은 [plan-01](plan-01-header-direction.md).
 백엔드: **Formspree** `xdekorqo` (2026-09-18 켬). 테스트 제출 1건 성공(`{"ok":true}`, HTTP 200, AJAX). 개인정보 동의 체크박스 포함 — plan-05 F11.
+저장: **Vercel Neon** `inquiries` 테이블 (2026-10-01). 폼이 Formspree(메일 알림)와 `/api/inquiry`(Vercel 함수 → Neon)에 동시에 보내고 하나라도 받으면 성공. 이유: 메일함은 검색·집계(문의 대비 계약률)가 안 되고, DB 장애로 문의를 잃지 않게 메일을 남긴다. 스키마 `db/schema.sql`, 동의문 "1년 보관"에 맞춰 만료분 삭제 쿼리를 월 1회 실행한다. IP·UA는 저장하지 않는다(동의 항목 밖).
 
 ## 결정
 
