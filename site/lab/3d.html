@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>리모 3D 실험 · 프로토타입</title>
+  <!-- 실험실: 사이트 내비·sitemap에 연결하지 않는다. 설계는 docs/plan-13-landing-3d.md.
+       three.js r160은 이 파일에서만 CDN으로 불러온다(본 사이트 라이브러리 0 예산 밖, 도입 여부는 plan-13 결정 대기). -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard-dynamic-subset.min.css">
+  <style>
+    :root { --ink:#151515; --paper:#F7F6F2; --line:#D8D6CE; --orange:#FF5A1F; --orange-text:#B93A08; --muted:#6C6A64; --blue:#1E548C; --stage:#F7F6F2; }
+    * { box-sizing: border-box; }
+    body { margin:0; background:var(--paper); color:var(--ink); font-family:Pretendard,-apple-system,system-ui,sans-serif; line-height:1.5; word-break:keep-all; }
+    :focus-visible { outline:3px solid var(--orange); outline-offset:3px; }
+    .wrap { max-width:1440px; margin:0 auto; padding-inline:clamp(20px,4.2vw,60px); }
+    .tag { font-size:12px; font-weight:800; letter-spacing:.12em; color:var(--orange-text); }
+    h1,h2 { margin:8px 0 0; letter-spacing:-.04em; line-height:1.08; text-wrap:balance; }
+    h1 { font-size:clamp(30px,4vw,48px); } h2 { font-size:clamp(26px,3.2vw,38px); }
+    p { margin:12px 0 0; max-width:52ch; color:var(--muted); font-size:15px; }
+    header.top { padding-block:28px 20px; }
+    .stage { position:relative; overflow:hidden; background:var(--stage); transition:background-color 400ms ease-out; }
+    .stage canvas { display:block; width:100%; height:100%; touch-action:pan-y; }
+    #hero { height:min(70vh,640px); } #map { height:min(64vh,600px); background:var(--ink); }
+    .ctl { display:flex; flex-wrap:wrap; gap:8px; padding-block:18px; }
+    .ctl button { min-height:44px; padding:0 16px; border-radius:999px; border:1px solid var(--line); background:#fff; color:var(--ink); font:inherit; font-size:13px; font-weight:800; cursor:pointer; }
+    .ctl button[aria-pressed="true"] { background:var(--ink); color:#fff; border-color:var(--ink); }
+    .read { min-height:1.5em; font-size:14px; font-weight:700; padding-bottom:40px; }
+    .fallback { display:none; position:absolute; inset:0; align-items:center; justify-content:center; padding:24px; text-align:center; color:#fff; background:var(--ink); }
+    .no-gl .fallback { display:flex; }
+    .note { padding-block:30px 60px; font-size:13px; color:var(--muted); border-top:1px solid var(--line); }
+    @media (prefers-reduced-motion: reduce) { .stage { transition:none; } }
+  </style>
+  <script type="importmap">{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js", "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/" } }</script>
+</head>
+<body>
+  <header class="top wrap">
+    <span class="tag">LAB · 프로토타입 · 사이트에 연결되지 않음</span>
+    <h1>로고가 부풀고, 관계가 맞물린다.</h1>
+    <p>브랜드 가이드 v4의 두 폴(소프트·글로시)과 관계 맵 데이터를 3D로 옮긴 실험입니다. 마우스나 손가락으로 움직여 보세요.</p>
+  </header>
+
+  <section aria-labelledby="h-hero">
+    <div class="wrap"><h2 id="h-hero" class="sr-only" style="position:absolute;left:-9999px">풍선 로고</h2></div>
+    <div class="stage" id="hero-stage"><div id="hero"><canvas id="hero-c" aria-label="실제 로고 이미지에서 부풀려 만든 3D REMO 로고. 마우스를 따라 기울고 누르면 튕깁니다" role="img"></canvas></div><div class="fallback">3D를 불러올 수 없어 정적 로고를 보여 드립니다.<br><img src="../assets/remo-wordmark.png" alt="REMO 로고" width="240"></div></div>
+    <div class="wrap ctl" role="group" aria-label="재질">
+      <button type="button" data-mode="soft" aria-pressed="true">소프트 · 주황 · 종이</button>
+      <button type="button" data-mode="glossy" aria-pressed="false">글로시 · 블루 · 어둠</button>
+    </div>
+  </section>
+
+  <section aria-labelledby="h-map">
+    <div class="wrap"><span class="tag">REMO OS · 구성원 10명 자기보고, 2026년 9월 기준</span><h2 id="h-map">이름 없이 관계만 만진다.</h2></div>
+    <div class="stage" id="map-stage" style="margin-top:20px"><div id="map"><canvas id="map-c" aria-label="구성원 10명의 관계를 보여 주는 3D 그래프. 아래 버튼으로 관계 유형을 고릅니다" role="img"></canvas></div><div class="fallback">3D를 불러올 수 없습니다.</div></div>
+    <div class="wrap ctl" role="group" aria-label="관계 유형" id="filters">
+      <button type="button" data-t="synergy" aria-pressed="true">같이 하면 강해지는</button>
+      <button type="button" data-t="cover" aria-pressed="false">서로 메워주는</button>
+      <button type="button" data-t="collab" aria-pressed="false">손발이 맞는</button>
+    </div>
+    <div class="wrap read" id="read" role="status" aria-live="polite"></div>
+  </section>
+
+  <footer class="wrap note">
+    판단 근거와 이 프로토타입이 하지 않는 것은 docs/plan-13-landing-3d.md에 있습니다. 노드는 데이터상 사람 한 명이지만 이름·역할은 표시하지 않습니다(plan-06).
+  </footer>
+
+<script type="module">
+import * as THREE from 'three';
+
+// 스튜디오 환경: 어두운 방에 밝은 소프트박스 몇 장. RoomEnvironment는 어두운 무대에서 크롬이 검게 읽혀 직접 만든다.
+function studio() {
+  const s = new THREE.Scene(); s.background = new THREE.Color('#222a38');
+  const box = (w, h, p, v) => { const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ color: new THREE.Color(v, v, v), side: THREE.DoubleSide })); m.position.set(...p); m.lookAt(0, 0, 0); s.add(m); };
+  box(9, 5, [0, 6, 3], 7); box(3, 9, [-7, 1, 3], 5); box(3, 9, [7, 1, 4], 5); box(12, 2, [0, -5, 4], 2); box(8, 8, [0, 2, -9], 3);
+  return s;
+}
+
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+
+function stage(canvas, fov, camZ) {
+  const r = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+  r.setPixelRatio(Math.min(devicePixelRatio, 2));
+  r.toneMapping = THREE.ACESFilmicToneMapping;
+  const scene = new THREE.Scene();
+  const pm = new THREE.PMREMGenerator(r);
+  scene.environment = pm.fromScene(studio(), 0.02).texture;
+  const cam = new THREE.PerspectiveCamera(fov, 1, 0.1, 100); cam.position.set(0, 0, camZ);
+  const size = () => { const b = canvas.parentElement.getBoundingClientRect(); r.setSize(b.width, b.height, false); cam.aspect = b.width / b.height; cam.updateProjectionMatrix(); };
+  new ResizeObserver(size).observe(canvas.parentElement); size();
+  const ptr = { x: 0, y: 0, tx: 0, ty: 0, down: false };
+  const el = canvas.parentElement.parentElement;
+  el.addEventListener('pointermove', e => { const b = canvas.getBoundingClientRect(); ptr.tx = ((e.clientX - b.left) / b.width) * 2 - 1; ptr.ty = -(((e.clientY - b.top) / b.height) * 2 - 1); });
+  el.addEventListener('pointerleave', () => { ptr.tx = 0; ptr.ty = 0; });
+  return { r, scene, cam, ptr, canvas };
+}
+
+function loop(fn) {
+  let vis = true; new IntersectionObserver(([e]) => { vis = e.isIntersecting; }).observe(fn.canvas);
+  const t0 = performance.now(); let last = t0;
+  (function frame(now) { requestAnimationFrame(frame); if (!vis && !reduce) return; const dt = Math.min(.05, (now - last) / 1000); last = now; fn(dt, (now - t0) / 1000); })(t0);
+}
+
+/* ── 1. 로고 부풀리기: PNG의 알파를 블러해 높이로 쓴다 ── */
+async function hero() {
+  const S = stage(document.getElementById('hero-c'), 30, 11);
+  const img = new Image(); img.src = '../assets/remo-wordmark.png'; await img.decode();
+  const W = 360, H = Math.round(W * img.height / img.width);
+  const cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+  const cx = cv.getContext('2d', { willReadFrequently: true }); cx.drawImage(img, 0, 0, W, H);
+  const px = cx.getImageData(0, 0, W, H).data, a = new Float32Array(W * H);
+  for (let i = 0; i < W * H; i++) a[i] = px[i * 4 + 3] / 255;
+  // 박스 블러 3회(가우시안 근사), 반경 9px
+  let b = a.slice(), t = new Float32Array(W * H); const R = 9;
+  const pass = (src, dst, horiz) => { const n = horiz ? W : H, m = horiz ? H : W; for (let j = 0; j < m; j++) { let s = 0; const at = k => horiz ? j * W + k : k * W + j; for (let k = -R; k <= R; k++) s += src[at(Math.min(n - 1, Math.max(0, k)))]; for (let k = 0; k < n; k++) { dst[at(k)] = s / (2 * R + 1); s += src[at(Math.min(n - 1, k + R + 1))] - src[at(Math.max(0, k - R))]; } } };
+  for (let i = 0; i < 3; i++) { pass(b, t, true); pass(t, b, false); }
+  const worldW = 6.4, worldH = worldW * H / W, depth = 0.9;
+  const geo = new THREE.PlaneGeometry(worldW, worldH, W - 1, H - 1);
+  const pos = geo.attributes.position;
+  for (let i = 0; i < W * H; i++) { const v = Math.max(0, (b[i] - 0.5) * 2); pos.setZ(i, depth * Math.sqrt(v)); }
+  geo.computeVertexNormals();
+  // alphaMap은 초록 채널을 읽는다 → 알파를 회색으로 옮긴 마스크를 따로 만든다
+  const mk = document.createElement('canvas'); mk.width = W; mk.height = H; const mx = mk.getContext('2d'), md = mx.createImageData(W, H);
+  for (let i = 0; i < W * H; i++) { const v = a[i] * 255; md.data[i*4] = md.data[i*4+1] = md.data[i*4+2] = v; md.data[i*4+3] = 255; }
+  mx.putImageData(md, 0, 0);
+  const alpha = new THREE.CanvasTexture(mk); alpha.colorSpace = THREE.NoColorSpace;
+  const mat = new THREE.MeshPhysicalMaterial({ alphaMap: alpha, alphaTest: .5, side: THREE.DoubleSide });
+  const g = new THREE.Group(); const front = new THREE.Mesh(geo, mat), back = new THREE.Mesh(geo, mat); back.scale.z = -1; g.add(front, back); S.scene.add(g);
+  const modes = {
+    soft:   { color: '#FF5A1F', metalness: 0,   roughness: .55, clearcoat: .15, clearcoatRoughness: .5, stage: '#F7F6F2', env: .55 },
+    glossy: { color: '#9DB8DA', metalness: 1,   roughness: .06, clearcoat: 1,   clearcoatRoughness: .05, stage: '#0B0F14', env: 1.2 },
+  };
+  let cur = 'soft', mixT = 1;
+  const apply = k => { const m = modes[k]; mat.color.set(m.color); mat.metalness = m.metalness; mat.roughness = m.roughness; mat.clearcoat = m.clearcoat; mat.clearcoatRoughness = m.clearcoatRoughness; S.r.toneMappingExposure = m.env; document.getElementById('hero-stage').style.setProperty('--stage', m.stage); document.getElementById('hero-stage').style.background = m.stage; };
+  apply('soft');
+  document.querySelectorAll('[data-mode]').forEach(btn => btn.addEventListener('click', () => { cur = btn.dataset.mode; apply(cur); document.querySelectorAll('[data-mode]').forEach(x => x.setAttribute('aria-pressed', x === btn)); inflate = reduce ? 1 : 0; }));
+  let inflate = reduce ? 1 : 0, pop = 0, popV = 0;
+  S.canvas.addEventListener('pointerdown', () => { popV = 2.2; });
+  const key = new THREE.DirectionalLight('#fff', 1.4); key.position.set(3, 4, 6); S.scene.add(key);
+  loop(Object.assign((dt, t) => {
+    inflate = Math.min(1, inflate + dt / .9); const e = 1 - Math.pow(1 - inflate, 3);
+    popV += (-pop * 60 - popV * 9) * dt; pop += popV * dt;           // 눌렀을 때 한 번 눌렸다 돌아옴(감쇠 스프링)
+    S.ptr.x += (S.ptr.tx - S.ptr.x) * Math.min(1, dt * 6); S.ptr.y += (S.ptr.ty - S.ptr.y) * Math.min(1, dt * 6);
+    const idle = reduce ? 0 : Math.sin(t * .8) * .06;
+    g.rotation.y = S.ptr.x * .45 + idle; g.rotation.x = -S.ptr.y * .25;
+    g.scale.set(1 + pop * .04, 1 + pop * .04, Math.max(.02, e * (1 - pop * .12)));
+    g.position.y = reduce ? 0 : Math.sin(t * 1.1) * .06;
+    S.r.render(S.scene, S.cam);
+  }, { canvas: S.canvas }));
+}
+
+/* ── 2. 관계 그래프: relations.json 그대로 ── */
+async function map() {
+  const S = stage(document.getElementById('map-c'), 35, 11);
+  const data = await (await fetch('../data/relations.json')).json();
+  const sx = 1 / 58, cxm = 280, cym = 223;
+  const P = new Map(data.nodes.map(n => [n.n, new THREE.Vector3((n.x - cxm) * sx, -(n.y - cym) * sx, (((n.n * 37) % 11) - 5) * .16)]));
+  const g = new THREE.Group(); S.scene.add(g);
+  const nodeMat = () => new THREE.MeshPhysicalMaterial({ color: '#9DB8DA', metalness: 1, roughness: .08, clearcoat: 1, clearcoatRoughness: .05 });
+  const nodes = data.nodes.map(n => { const m = new THREE.Mesh(new THREE.SphereGeometry(n.r / 58 * 1.25, 48, 32), nodeMat()); m.position.copy(P.get(n.n)); m.userData = { n: n.n, base: n.r / 58 * 1.25, s: 1, ts: 1 }; g.add(m); return m; });
+  const tubeMat = new THREE.MeshStandardMaterial({ color: '#FF5A1F', emissive: '#FF5A1F', emissiveIntensity: .35, roughness: .4 });
+  let edgeGroup = new THREE.Group(); g.add(edgeGroup);
+  let type = 'synergy', hover = 0;
+  const label = { synergy: '같이 하면 강해지는', cover: '서로 메워주는', collab: '손발이 맞는' };
+  const deg = n => data.edges.filter(e => e.tp === type && (e.s === n || e.t === n)).length;
+  function build() {
+    edgeGroup.children.forEach(c => c.geometry.dispose()); g.remove(edgeGroup); edgeGroup = new THREE.Group(); g.add(edgeGroup);
+    const on = new Set();
+    data.edges.filter(e => e.tp === type).forEach(e => {
+      const a = P.get(e.s), b = P.get(e.t), mid = a.clone().add(b).multiplyScalar(.5); const d = b.clone().sub(a); mid.add(new THREE.Vector3(-d.y, d.x, 0).normalize().multiplyScalar(d.length() * .12));
+      const tube = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3([a, mid, b]), 24, e.w === 3 ? .035 : .022, 8), tubeMat); tube.userData.grow = reduce ? 1 : 0; edgeGroup.add(tube); on.add(e.s); on.add(e.t);
+    });
+    nodes.forEach(m => { m.userData.ts = on.has(m.userData.n) ? 1.12 : .8; });
+    document.getElementById('read').textContent = `${label[type]}: 관계 ${edgeGroup.children.length}개. 연결된 사람 ${on.size}명.`;
+  }
+  build();
+  document.querySelectorAll('[data-t]').forEach(btn => btn.addEventListener('click', () => { type = btn.dataset.t; document.querySelectorAll('[data-t]').forEach(x => x.setAttribute('aria-pressed', x === btn)); build(); }));
+  const ray = new THREE.Raycaster(), v2 = new THREE.Vector2(); let hov = null;
+  S.canvas.addEventListener('pointermove', e => { const b = S.canvas.getBoundingClientRect(); v2.set(((e.clientX - b.left) / b.width) * 2 - 1, -(((e.clientY - b.top) / b.height) * 2 - 1)); ray.setFromCamera(v2, S.cam); const h = ray.intersectObjects(nodes)[0]?.object || null; if (h !== hov) { hov = h; S.canvas.style.cursor = h ? 'pointer' : ''; if (h) document.getElementById('read').textContent = `이 사람은 "${label[type]}" 관계가 ${deg(h.userData.n)}개입니다.`; } });
+  const key = new THREE.DirectionalLight('#fff', 1.2); key.position.set(3, 4, 6); S.scene.add(key);
+  loop(Object.assign((dt, t) => {
+    S.ptr.x += (S.ptr.tx - S.ptr.x) * Math.min(1, dt * 5); S.ptr.y += (S.ptr.ty - S.ptr.y) * Math.min(1, dt * 5);
+    g.rotation.y = S.ptr.x * .5 + (reduce ? 0 : Math.sin(t * .35) * .12); g.rotation.x = -S.ptr.y * .3;
+    nodes.forEach((m, i) => { const u = m.userData, target = u.ts * (m === hov ? 1.18 : 1); u.s += (target - u.s) * Math.min(1, dt * 10); const w = reduce ? 0 : Math.sin(t * 1.6 + i) * .03; m.scale.set(u.s * (1 + w), u.s * (1 - w), u.s * (1 + w)); });
+    edgeGroup.children.forEach(c => { c.userData.grow = Math.min(1, c.userData.grow + dt / .5); const k = 1 - Math.pow(1 - c.userData.grow, 3); c.scale.set(k, k, k); c.visible = k > .01; });
+    S.r.render(S.scene, S.cam);
+  }, { canvas: S.canvas }));
+}
+
+try { await Promise.all([hero(), map()]); }
+catch (err) { console.error(err); document.body.classList.add('no-gl'); }
+</script>
+</body>
+</html>
