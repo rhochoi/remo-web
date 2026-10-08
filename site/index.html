@@ -21,7 +21,7 @@
   <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard-dynamic-subset.min.css">
-  <link rel="stylesheet" href="assets/landing.css?v=1">
+  <link rel="stylesheet" href="assets/landing.css?v=2">
 </head>
 <body>
   <a class="skip" href="#main">본문으로 건너뛰기</a>
@@ -82,15 +82,17 @@
         <div class="map-head">
           <span class="kicker">REMO OS</span>
           <h2 id="h-map">열 명이 맞물린 방식을<br>이름 없이 봅니다.</h2>
-          <p class="lead" id="cap">구성원 10명 자기보고, 2026년 9월 기준.</p>
+          <p class="lead">모양도 크기도 다른 열 명이 각자의 모습 그대로 선 하나로 맞물립니다. 잡아서 던져 보고, 관계 유형을 바꿔 보세요.</p>
+          <p class="lead cap" id="cap">구성원 10명 자기보고, 2026년 9월 기준.</p>
           <div class="chips" role="group" aria-label="관계 유형" id="filters">
             <button type="button" data-t="synergy" aria-pressed="true">같이 하면 강해지는</button>
             <button type="button" data-t="cover" aria-pressed="false">서로 메워주는</button>
             <button type="button" data-t="collab" aria-pressed="false">손발이 맞는</button>
           </div>
+          <div class="chips tools"><button type="button" id="shake">흔들어 보기</button><button type="button" id="tilt" hidden>기울여 보기</button></div>
           <p class="read" id="read" role="status" aria-live="polite"></p>
         </div>
-        <svg id="graph" class="graph" viewBox="30 20 500 400" role="img" aria-label="구성원 10명의 관계 그래프. 아래 버튼으로 관계 유형을 고르면 선이 바뀝니다"></svg>
+        <div class="play" id="play"><svg role="group" aria-label="구성원 10명이 서로 다른 모양으로 맞물려 있는 놀이터. 캐릭터를 잡아 던질 수 있고, 위 버튼으로 관계 유형을 고르면 서로 끌어당깁니다"></svg></div>
       </div>
     </section>
 
@@ -140,6 +142,7 @@
   </main>
 
   <footer class="footer"><div class="wrap"><span>© 리모(REMO) 협동조합</span><span class="row"><a href="https://remo-core.notion.site/3bd4e56fc730802b95dfc91ec12d8c41">개인정보처리방침</a><a href="https://remo-core.notion.site">REMO.core (노션) →</a></span></div></footer>
-  <script src="assets/landing.js?v=1"></script>
+  <script src="assets/landing.js?v=2"></script>
+  <script src="assets/playground.js?v=2" defer></script>
 </body>
 </html>

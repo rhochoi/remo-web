@@ -28,6 +28,7 @@ img { display: block; max-width: 100%; height: auto; }
 .blue .kicker { color: var(--white); }
 .lead { max-width: 52ch; margin-top: var(--s3); font-size: var(--t0); color: var(--muted); }
 .blue .lead { color: var(--white); }
+.lead.cap { margin-top: var(--s1); font-size: 13px; opacity: .9; }
 
 /* 내비 */
 .nav { position: sticky; top: 0; z-index: 30; height: var(--nav); background: rgba(247, 246, 242, .94); border-bottom: var(--line) solid var(--ink); backdrop-filter: blur(8px); }
@@ -82,19 +83,37 @@ img { display: block; max-width: 100%; height: auto; }
 
 /* 2. 관계 맵 (블루 모드) */
 .map-head { grid-column: 1 / span 5; align-self: center; }
-.graph { grid-column: 6 / -1; width: 100%; height: auto; overflow: visible; }
+.play { grid-column: 6 / -1; position: relative; width: 100%; aspect-ratio: 7 / 6; min-height: 340px; max-height: 640px; border: var(--line) solid var(--ink); border-radius: 36px; background: rgba(26, 26, 26, .14); overflow: hidden; }
+.play svg { position: absolute; inset: 0; display: block; }
 .chips { display: flex; flex-wrap: wrap; gap: var(--s1); margin-top: var(--s4); }
 .chips button { min-height: 44px; padding: 0 18px; border-radius: 999px; border: var(--line) solid var(--ink); background: var(--white); color: var(--ink); font: inherit; font-size: 14px; font-weight: 800; cursor: pointer; transition: background-color 160ms ease-out; }
 .chips button:hover { background: var(--soft); }
 .chips button[aria-pressed="true"] { background: var(--orange); }
 .read { margin-top: var(--s3); min-height: 3em; font-weight: 700; }
-.graph .edge { fill: none; stroke: var(--white); stroke-linecap: round; transition: opacity 200ms ease-out; }
-.graph .edge.dim { opacity: .18; }
-.graph .person { cursor: default; }
-.graph .person .face { fill: var(--white); stroke: var(--ink); stroke-width: 4; transition: fill 160ms ease-out; }
-.graph .person.on .face { fill: var(--orange); }
-.graph .person .pupil { fill: var(--ink); }
-@media (max-width: 899px) { .map-head, .graph { grid-column: 1 / -1; } }
+/* 놀이터 */
+.chips.tools { margin-top: var(--s2); }
+.chips.tools button[aria-pressed="true"] { background: var(--orange); }
+.play .person { cursor: grab; touch-action: none; outline: none; }
+.play .person.held { cursor: grabbing; }
+.play .person * { vector-effect: non-scaling-stroke; }
+.play .body { fill: #fff; stroke: var(--ink); stroke-width: 3.5px; stroke-linejoin: round; transition: fill-opacity 240ms ease-out; }
+.play .person.solo .body { fill-opacity: .74; }
+.play .person:focus-visible .body { stroke: var(--orange); stroke-width: 6px; }
+.play .ln, .play .band, .play .wh, .play .hot, .play .dot { stroke: var(--ink); stroke-width: 3px; stroke-linecap: round; stroke-linejoin: round; fill: none; }
+.play .wh { fill: #fff; } .play .hot { fill: var(--orange); } .play .dot { fill: var(--ink); stroke: none; }
+.play .band { stroke: var(--orange); stroke-width: 7px; }
+.play .eye { fill: var(--ink); } .play .cheek { fill: var(--orange); opacity: .55; }
+.play .person.solo .cheek { opacity: .2; }
+.play .mouth { fill: none; stroke: var(--ink); stroke-width: 2.6px; stroke-linecap: round; stroke-linejoin: round; }
+.play .rope-o { fill: none; stroke: var(--ink); stroke-linecap: round; }
+.play .rope-i { fill: none; stroke: var(--white); stroke-linecap: round; }
+.play .rope-i.collab { stroke-dasharray: 1 9; }
+.play .chev { fill: var(--white); stroke: var(--ink); stroke-width: 2.4px; stroke-linejoin: round; }
+.play .bubble { pointer-events: none; transition: opacity 120ms ease-out; }
+.play .bubble rect { fill: var(--white); stroke: var(--ink); stroke-width: 3px; }
+.play .bubble text { font: 800 14px Pretendard, sans-serif; fill: var(--ink); letter-spacing: -.02em; }
+.play.static::after { content: "물리 엔진을 불러오지 못해 정지 그림으로 보여 드립니다."; position: absolute; left: 16px; bottom: 12px; font-size: 13px; font-weight: 700; color: var(--white); }
+@media (max-width: 899px) { .map-head, .play { grid-column: 1 / -1; } .play { aspect-ratio: 1 / 1; } }
 
 /* 3. 프로젝트: 손으로 붙인 스티커처럼 살짝 기울고, 가리키면 반듯해진다 */
 .proj-grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: var(--s4) var(--s3); margin-top: var(--s5); align-items: start; }
