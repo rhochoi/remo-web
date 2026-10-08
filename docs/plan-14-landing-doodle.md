@@ -1,4 +1,6 @@
-# 계획 14 — 두들 워드마크 인터랙티브 랜딩 (시안)
+# 계획 14 — 두들 워드마크 인터랙티브 랜딩
+
+> 2026-10-08 갱신: 사용자 지시로 이 랜딩을 **운영 홈(`site/index.html`)으로 승격**했다. 코드는 `site/assets/landing.{css,js}`. 이전 홈(V10 사진 히어로)은 git 기록(`025218d`)에 남아 있다. 서브페이지(`projects`·`people`·`contact`)는 기존 스타일 그대로라 홈과 색·모양이 다르다(C1). 아래 "시안" 표현은 승격 전 서술이다.
 
 날짜: 2026-10-08. 시안: [`site/lab/landing.html`](../site/lab/landing.html) (+ `landing.css`, `landing.js`). 사이트 본체와 연결하지 않음, `noindex`.
 실행: `python3 -m http.server 8766 --directory site` 후 `/lab/landing.html`.

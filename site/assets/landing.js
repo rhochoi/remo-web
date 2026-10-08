@@ -71,7 +71,7 @@
     G.active = active; G.count = count; sayDefault();
   };
   const sayDefault = () => { read.textContent = `${label[type]} 관계 ${G.count}개. 연결된 사람 ${G.active.size}명.`; };
-  fetch('../data/relations.json').then(r => r.json()).then(d => {
+  fetch('data/relations.json').then(r => r.json()).then(d => {
     $('#cap').textContent = d.caption.replace('팀 진단 도구(REMO OS)의 관계 데이터. ', '').replace(' 노드에 이름은 없다.', '') + ' 노드에 이름은 없습니다.';
     G = { pos: {}, edges: d.edges };
     const eg = mk('g', { id: 'edges' }); graph.appendChild(eg);
