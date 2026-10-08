@@ -4,18 +4,18 @@ name: REMO-web
 description: 리모(REMO) 학생 협동조합 포트폴리오 사이트의 디자인 시스템. 종이색 바탕, 잉크 글자, 주황 한 가지 강조색. 둥근 모서리와 굵은 Pretendard. 목적은 설득이 아니라 필터이므로 장식은 정보를 나를 때만 쓴다.
 
 colors:
-  ink: "#151515"
-  ink-2: "#1D1D1B"
+  ink: "#1A1A1A"
   paper: "#F7F6F2"
   soft: "#EEECE5"
   line: "#D8D6CE"
-  white: "#FFFFFF"
-  orange: "#FF5A1F"
-  orange-text: "#B93A08"
   muted: "#6C6A64"
-  blue: "#1E548C"
-  green: "#C8E8D1"
-  on-dark-muted: "#C1C0BB"
+  white: "#FFFFFF"
+  orange-500: "#FF6A00"
+  orange-700: "#9A3D00"
+  orange-100: "#FFDACB"
+  blue-600: "#3659E3"
+  blue-700: "#2742B5"
+  blue-200: "#ABC4FF"
 
 typography:
   display:   { fontFamily: Pretendard, fontSize: "clamp(34px, 4vw, 48px)", fontWeight: 800, lineHeight: 1.06, letterSpacing: -0.04em }
@@ -30,7 +30,7 @@ spacing: { gutter: "clamp(20px, 4.2vw, 60px)", grid-gap: 14px, section: "50px 60
 
 components:
   button-primary: { backgroundColor: "{colors.ink}", textColor: "{colors.white}", rounded: "{rounded.pill}", height: 44px, padding: "11px 17px" }
-  button-accent:  { backgroundColor: "{colors.orange}", textColor: "{colors.ink}", rounded: "{rounded.pill}" }
+  button-accent:  { backgroundColor: "{colors.orange-500}", textColor: "{colors.ink}", rounded: "{rounded.pill}" }
   card-info:      { backgroundColor: "{colors.white}", border: "1px solid {colors.line}", rounded: "{rounded.card}", padding: 18px }
   card-project:   { backgroundColor: "{colors.ink-2}", textColor: "{colors.white}", rounded: "{rounded.tile}", padding: 18px }
   field:          { backgroundColor: "{colors.paper}", border: "1px solid {colors.line}", rounded: "{rounded.field}", padding: "12px 14px" }
@@ -47,21 +47,29 @@ components:
 - **다이얼(taste-skill):** DESIGN_VARIANCE 6 · MOTION_INTENSITY 3 · VISUAL_DENSITY 3. 근거는 [REMO-OVERRIDES](.claude/skills/REMO-OVERRIDES.md).
 - **대상:** 잠재 클라이언트·파트너. 사이트는 설득이 아니라 필터다([decisions.md](docs/decisions.md)).
 - **한 문장:** 형태는 유쾌하게, 운용은 절제되게.
+- **색 비율(홈 배경 면적):** 종이 약 63% · 블루 13% · 구획 11% · 주황 12%. 글자와 선(잉크)은 별도.
 
 ## Colors
 
-| 토큰 | 값 | 용도 |
-|---|---|---|
-| ink | `#151515` | 글자, 기본 버튼, 어두운 밴드. 순흑 아님 |
-| paper | `#F7F6F2` | 페이지 바탕 |
-| soft | `#EEECE5` | 구획 바탕 |
-| line | `#D8D6CE` | 1px 구분선과 카드 테두리 |
-| orange | `#FF5A1F` | 채움, 잉크·사진 위 글자. 밝은 바탕 위 작은 글자에는 쓰지 않는다 |
-| orange-text | `#B93A08` | 밝은 바탕 위 주황 글자(5.4:1) |
-| muted | `#6C6A64` | 보조 글자(5.0:1) |
-| blue / green | `#1E548C` / `#C8E8D1` | 프로젝트 타일 전용 |
+원값은 로고 파일(820px PNG)에서 실측한 3색뿐이고, 나머지는 OKLCH에서 명도만 바꿔 만든 파생 스케일이다. 정의와 검사는 `docs/tools/color-tokens.py` → `site/assets/tokens.css`(자동 생성, 직접 고치지 않는다). 근거와 이론은 [plan-18](docs/plan-18-color.md).
 
-규칙: 강조색은 주황 하나. 회색 글자를 색 바탕 위에 얹지 않는다(바탕에 맞춘 불투명도 대신 명시 색을 쓴다). 다크 모드는 정의하지 않는다(라이트 단일).
+| 역할 | 토큰 | 값 | 용도 |
+|---|---|---|---|
+| 잉크 | `--ink` | `#1A1A1A` | 글자, 외곽선 3px, 기본 버튼. 순흑 아님 |
+| 종이 | `--paper` / `--soft` | `#F7F6F2` / `#EEECE5` | 바탕 / 구획 바탕 |
+| 주황 | `--orange` (= orange-500) | `#FF6A00` | **채움면**과 포인트. 글자 색으로 밝은 바탕에 쓰지 않는다 |
+| 주황 글자 | `--orange-text` (= orange-700) | `#9A3D00` | 밝은 바탕 위 작은 주황 라벨. 종이·구획·흰 바탕 모두 4.5:1 이상 |
+| 블루 | `--blue` (= blue-600) | `#3659E3` | 섹션 모드(관계)와 타일. 위 글자는 흰색만 |
+| 블루 톤 | `--blue-tint` (= blue-200) | `#ABC4FF` | 블루 위 비활성 도형(투명도 대신) |
+| 보조 글자 | `--muted` | `#6C6A64` | 종이 5.0, 구획 4.6 |
+
+규칙:
+- **한 번에 한 색.** 종이 위에서는 주황이 포인트, 블루 섹션 안에서는 블루가 바탕이고 주황은 상태 표시에만 쓴다.
+- **주황과 블루를 맞닿게 두지 않는다.** 두 색은 보색에 가까워(색상각 차 137°) 경계에서 진동한다. 사이에 잉크 3px 선이나 종이 구획을 둔다.
+- **주황 면에는 잉크 외곽선.** 주황과 종이의 대비는 2.7:1이라 면 단독으로는 경계가 약하다.
+- **블루 위 글자는 흰색.** 잉크/블루는 3.1:1이라 외곽선(그래픽)에만 쓴다.
+- **상태를 색만으로 알리지 않는다.** 선택된 칩은 주황 채움 + ✓.
+- 다크 모드는 정의하지 않는다(라이트 단일).
 
 ## Typography
 
@@ -99,7 +107,7 @@ Pretendard dynamic-subset 한 가지. 위계는 크기보다 굵기(800)와 자�
 
 Do
 - 없는 값은 비운다. 그럴듯한 가짜 이름·수치를 넣지 않는다.
-- 새 색을 만들기 전에 위 토큰으로 되는지 먼저 본다.
+- 새 색을 만들기 전에 위 토큰으로 되는지 먼저 본다. 색을 바꿀 때는 `color-tokens.py`의 대비 검사를 통과시킨다.
 - 사진 위 글자는 대비를 계산해서 오버레이를 정한다.
 - 한 번 바꿀 때마다 `docs/`에 근거와 재검토 조건을 남긴다.
 

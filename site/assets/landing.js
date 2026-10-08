@@ -53,6 +53,26 @@
   const peek = $('#peek'); const rClone = rL.g.cloneNode(true); rClone.removeAttribute('id'); rClone.removeAttribute('class'); peek.appendChild(rClone);
   const peyes = $$('.eye', rClone); prep(peyes);
 
+
+  /* ── 페이지 위치 pager (plan-16 B): 어느 장에 있는지 알려 주는 정보 ── */
+  const pager = $('#pager'), secs = $$('[data-pager]');
+  if (pager) {
+    secs.forEach((sec, i) => { const a = document.createElement('a'); a.href = '#' + sec.id; a.dataset.t = sec.dataset.pager; a.setAttribute('aria-label', `${secs.length}장 중 ${i + 1}장, ${sec.dataset.pager}`); pager.appendChild(a); });
+    const dots = $$('a', pager);
+    const mark = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) dots.forEach((d, i) => d.setAttribute('aria-current', String(secs[i] === e.target))); }), { rootMargin: '-45% 0px -50% 0px' });
+    secs.forEach(sec => mark.observe(sec));
+  }
+
+  /* ── 실행의 장면: 이전·다음 버튼 ── */
+  const deck = $('#deck'), prev = $('#sc-prev'), next = $('#sc-next');
+  if (deck) {
+    const step = () => (deck.querySelector('.slide')?.getBoundingClientRect().width || 300) + 16;
+    const upd = () => { prev.disabled = deck.scrollLeft < 8; next.disabled = deck.scrollLeft + deck.clientWidth >= deck.scrollWidth - 8; };
+    prev.addEventListener('click', () => deck.scrollBy({ left: -step(), behavior: reduce ? 'auto' : 'smooth' }));
+    next.addEventListener('click', () => deck.scrollBy({ left: step(), behavior: reduce ? 'auto' : 'smooth' }));
+    deck.addEventListener('scroll', upd, { passive: true }); addEventListener('resize', upd); upd();
+  }
+
   /* ── 힌트: 입력 방식에 맞춰 ── */
   if (matchMedia('(pointer: coarse)').matches) $('#hint').textContent = '글자를 눌러 보세요. 궤도의 점은 지금 하는 프로젝트입니다.';
 
