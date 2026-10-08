@@ -1,17 +1,6 @@
-/* REMO Portfolio — pencil-new.pen "Home Final / Mobile / Projects Index / People / Contact Sheet / Spec" 구현.
+/* 서브페이지 스타일. 색 토큰은 tokens.css, 외곽선 언어는 홈(landing.css)과 맞춘 아래 '통일' 블록. 원 주석: pencil-new.pen "Home Final / Mobile / Projects Index / People / Contact Sheet / Spec" 구현.
    결정 기록: docs/plan-11-pen.md. 토큰은 .pen variables 그대로, 명암비가 모자란 곳만 보정. */
 :root {
-  --ink: #151515;            /* $remo-ink */
-  --ink-2: #1D1D1B;
-  --paper: #F7F6F2;          /* $remo-paper */
-  --soft: #EEECE5;           /* $remo-soft */
-  --line: #D8D6CE;           /* $remo-line */
-  --orange: #FF5A1F;         /* $remo-orange — 채움·잉크/사진 위 글자 */
-  --orange-text: #B93A08;    /* 근백색 위 작은 글자 (원값 2.88:1 → 5.4:1) */
-  --muted: #6C6A64;          /* $remo-muted 5.0:1 */
-  --blue: #1E548C;
-  --green: #C8E8D1;          /* $remo-green */
-  --white: #FFFFFF;
   --gutter: clamp(20px, 4.2vw, 60px);
   --wrap: 1440px;
   --nav-h: 78px;
@@ -39,12 +28,12 @@ img { display: block; max-width: 100%; height: auto; }
 .lead { margin-top: 16px; max-width: 47ch; color: var(--muted); font-size: 15px; line-height: 1.5; }
 .arrow::after { content: "  →"; white-space: pre; }
 .btn { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 11px 17px; border-radius: 999px; background: var(--ink); color: var(--white); font-size: 13px; font-weight: 800; text-decoration: none; border: 0; cursor: pointer; }
-.btn:hover { background: #2B2B29; }
+.btn:hover { background: color-mix(in srgb, var(--ink) 86%, var(--white)); }
 .btn.orange { background: var(--orange); color: var(--ink); }
-.btn.orange:hover { background: #FF7A48; }
+.btn.orange:hover { background: var(--orange-400); }
 
 /* 내비: 78px, 아래 1px 라인, REMO CORE / WORK PEOPLE ABOUT 문의 */
-.nav { position: sticky; top: 0; z-index: 30; height: var(--nav-h); background: rgba(247, 246, 242, .94); border-bottom: 1px solid var(--line); backdrop-filter: blur(8px); }
+.nav { position: sticky; top: 0; z-index: 30; height: var(--nav-h); background: var(--paper); background: color-mix(in srgb, var(--paper) 94%, transparent); border-bottom: 1px solid var(--line); backdrop-filter: blur(8px); }
 .nav .wrap { height: 100%; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
 .nav .brand { font-size: 23px; font-weight: 800; letter-spacing: -0.045em; text-decoration: none; }
 .nav .links { display: flex; gap: 6px; }
@@ -66,12 +55,12 @@ img { display: block; max-width: 100%; height: auto; }
 .sheet nav { margin-top: 10vh; display: grid; gap: 6px; }
 .sheet nav a { font-size: 36px; font-weight: 800; letter-spacing: -0.04em; text-decoration: none; padding: 8px 0; }
 .sheet nav a small { display: block; font-size: 12px; font-weight: 800; letter-spacing: .12em; color: var(--orange); }
-.sheet .foot { margin-top: auto; font-size: 13px; color: #C1C0BB; }
+.sheet .foot { margin-top: auto; font-size: 13px; color: var(--line); }
 
 /* 히어로: 사진 풀블리드 560 / 모바일 344, 눈썹 라벨만 보임 */
 .hero { position: relative; height: 560px; overflow: hidden; background: var(--ink); color: var(--white); }
 .hero img { width: 100%; height: 100%; object-fit: cover; object-position: center 40%; }
-.hero::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(21,21,21,.62), rgba(21,21,21,0) 38%), linear-gradient(to top, rgba(21,21,21,.55), rgba(21,21,21,.1) 45%); }
+.hero::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(26,26,26,.62), rgba(26,26,26,0) 38%), linear-gradient(to top, rgba(26,26,26,.55), rgba(26,26,26,.1) 45%); }
 .hero .over { position: absolute; inset: 0; z-index: 1; display: flex; flex-direction: column; justify-content: space-between; padding: 30px var(--gutter); }
 .hero .eyebrow { font-size: 12px; font-weight: 800; letter-spacing: .12em; color: var(--orange); }
 .hero .caption { font-size: 11px; font-weight: 800; letter-spacing: .1em; color: var(--white); align-self: flex-start; }
@@ -86,7 +75,7 @@ img { display: block; max-width: 100%; height: auto; }
 @media (max-width: 1023px) { .section .head { grid-template-columns: 1fr; } }
 .section.soft { background: var(--soft); }
 .section.dark { background: var(--ink); color: var(--white); }
-.section.dark .lead { color: #C1C0BB; }
+.section.dark .lead { color: var(--line); }
 
 /* WHAT WE DO — 흰 카드 3, 1px 라인, r12 */
 .cards3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
@@ -104,7 +93,7 @@ img { display: block; max-width: 100%; height: auto; }
 .pgrid.four { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 @media (max-width: 1279px) { .pgrid, .pgrid.four { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 767px) { .pgrid, .pgrid.four { grid-template-columns: 1fr; } }
-.pcard { position: relative; display: flex; flex-direction: column; justify-content: flex-end; gap: 6px; min-height: 220px; padding: 18px; border-radius: 10px; overflow: hidden; color: var(--white); text-decoration: none; background: var(--ink-2); isolation: isolate; transition: transform 200ms ease-out; }
+.pcard { position: relative; display: flex; flex-direction: column; justify-content: flex-end; gap: 6px; min-height: 220px; padding: 18px; border-radius: 10px; overflow: hidden; color: var(--white); text-decoration: none; background: var(--ink); isolation: isolate; transition: transform 200ms ease-out; }
 .pcard.tall { min-height: 380px; border-radius: var(--r); }
 .pcard img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 40%; z-index: -2; transition: transform 500ms ease-out; }
 /* 화면 캡처는 가로로 길어 가운데를 자르면 내용이 사라진다 — 왼쪽 기준 */
@@ -114,7 +103,6 @@ img { display: block; max-width: 100%; height: auto; }
 .pcard::before { content: ""; position: absolute; inset: 0; z-index: -1; background: rgba(0,0,0,.53); }
 .pcard.tile::before { background: transparent; }
 .pcard.tile.blue { background: var(--blue); }
-.pcard.tile.green { background: var(--green); color: var(--ink); }
 .pcard.tile.orange { background: var(--orange); color: var(--ink); }
 .pcard.tile.paper { background: var(--white); color: var(--ink); border: 1px solid var(--line); }
 .pcard .kind { position: absolute; top: 19px; left: 18px; font-size: 11px; font-weight: 800; letter-spacing: .09em; color: var(--orange); }
@@ -208,7 +196,7 @@ img { display: block; max-width: 100%; height: auto; }
 .field .hint { font-size: 13px; color: var(--muted); }
 .field input[type="text"], .field input[type="email"], .field textarea { background: var(--paper); color: var(--ink); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; font: inherit; font-size: 16px; width: 100%; }
 .field textarea { resize: vertical; min-height: 96px; }
-.field input:focus-visible, .field textarea:focus-visible { outline: none; border-color: var(--ink); box-shadow: 0 0 0 3px rgba(255, 90, 31, .35); }
+.field input:focus-visible, .field textarea:focus-visible { outline: none; border-color: var(--ink); box-shadow: 0 0 0 4px var(--orange); }
 fieldset.field { border: 0; margin: 0; }
 .choices { display: flex; flex-wrap: wrap; gap: 8px; }
 .choices label { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 14px; border: 1px solid var(--line); border-radius: 999px; font-size: 14px; font-weight: 700; cursor: pointer; background: var(--paper); }
@@ -230,3 +218,31 @@ fieldset.field { border: 0; margin: 0; }
 .footer a { color: var(--ink); text-decoration: none; font-weight: 700; }
 .footer a:hover { text-decoration: underline; text-underline-offset: 4px; }
 .footer .row { display: flex; gap: 18px; flex-wrap: wrap; }
+
+/* ── 통일 (2026-10-08, plan-18): 홈과 같은 색 토큰·3px 외곽선·둥근 스티커 문법 ── */
+:root { --stroke: 3px; }
+.nav { border-bottom: var(--stroke) solid var(--ink); }
+.nav .brand { display: inline-flex; align-items: center; gap: 10px; }
+.nav .brand img { width: 40px; height: 40px; }
+.nav .links a.pill { background: var(--orange); border: var(--stroke) solid var(--ink); padding-inline: 18px; border-radius: 999px; }
+.btn { border: var(--stroke) solid var(--ink); }
+.btn.orange { color: var(--on-orange); }
+.focus, .spec, .form, .empty { border: var(--stroke) solid var(--ink); border-radius: 28px; }
+.focus .n, .spec .k, .person .photo, .pcard .kind { color: var(--orange-text); }
+.pcard { border: var(--stroke) solid var(--ink); border-radius: 28px; }
+.pcard.tile.paper { border: var(--stroke) solid var(--ink); }
+.pcard.tile.paper .kind { color: var(--orange-text); }
+.pcard .kind { color: var(--orange); }
+.pcard.tile.orange .kind, .pcard.tile.paper .kind { color: var(--ink); }
+.pcard.tile.blue .kind { color: var(--on-blue); }   /* 주황 글자를 블루 면에 얹지 않는다: 보색에 가까워 진동한다 */
+.person .photo { border: var(--stroke) solid var(--ink); border-radius: 28px; }
+.filters button { min-height: 44px; border: var(--stroke) solid var(--ink); }
+.filters button[aria-pressed="true"] { background: var(--orange); color: var(--on-orange); border-color: var(--ink); }
+.filters button[aria-pressed="true"]::before { content: "✓"; margin-right: 6px; }   /* 색만으로 상태를 알리지 않는다 */
+.field input[type="text"], .field input[type="email"], .field textarea { border: var(--stroke) solid var(--ink); border-radius: 16px; background: var(--white); }
+.choices label { border: var(--stroke) solid var(--ink); background: var(--white); }
+.choices label:has(input:checked) { background: var(--orange); color: var(--on-orange); }
+.thumbs .t, .sheet-hero figure { border: var(--stroke) solid var(--ink); }
+.sheet-hero figure { border-radius: 28px; }
+.footer { border-top: var(--stroke) solid var(--ink); }
+.band.orange { border-block: var(--stroke) solid var(--ink); }

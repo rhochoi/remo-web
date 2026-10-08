@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>REMO OS 시각화 10종 비교 (시안)</title>
+  <!-- 같은 데이터(relations.json, 이름 없음)를 10가지 방식으로 그린 비교판. 판정은 docs/plan-17-os-compare.md -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard-dynamic-subset.min.css">
+  <style>
+    :root { --ink:#1A1A1A; --paper:#F7F6F2; --orange:#FF6A00; --orange-text:#B84A00; --blue:#3659E3; --white:#fff; --muted:#6C6A64; }
+    * { box-sizing: border-box; }
+    body { margin:0; background:var(--paper); color:var(--ink); font-family:Pretendard,-apple-system,system-ui,sans-serif; line-height:1.5; word-break:keep-all; }
+    :focus-visible { outline:3px solid var(--ink); outline-offset:3px; box-shadow:0 0 0 6px var(--orange); }
+    .wrap { max-width:1280px; margin:0 auto; padding:32px clamp(16px,4vw,48px) 64px; }
+    h1 { margin:0; font-size:clamp(26px,3.4vw,39px); letter-spacing:-.035em; line-height:1.12; }
+    p { margin:10px 0 0; color:var(--muted); max-width:62ch; }
+    .bar { position:sticky; top:0; z-index:5; background:rgba(247,246,242,.95); border-bottom:3px solid var(--ink); padding:10px clamp(16px,4vw,48px); display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+    .bar b { font-size:13px; margin-right:8px; }
+    .bar button { min-height:44px; padding:0 16px; border-radius:999px; border:3px solid var(--ink); background:#fff; font:inherit; font-size:14px; font-weight:800; cursor:pointer; }
+    .bar button[aria-pressed="true"] { background:var(--orange); }
+    .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(min(100%,420px),1fr)); gap:24px; margin-top:28px; }
+    .card { border:3px solid var(--ink); border-radius:28px; overflow:hidden; background:#fff; display:flex; flex-direction:column; }
+    .stage { background:var(--blue); aspect-ratio:520/420; position:relative; }
+    .stage svg, .stage canvas { position:absolute; inset:0; width:100%; height:100%; display:block; }
+    .meta { padding:16px 18px 18px; border-top:3px solid var(--ink); }
+    .meta h2 { margin:0; font-size:20px; letter-spacing:-.03em; }
+    .meta h2 small { font-size:12px; color:var(--orange-text); letter-spacing:.08em; margin-right:6px; }
+    .meta p { font-size:13px; margin-top:6px; }
+    .meta .ref { font-size:12px; margin-top:8px; }
+    .note { font-size:13px; margin-top:20px; }
+    svg text { font-family:Pretendard,sans-serif; }
+  </style>
+</head>
+<body>
+  <div class="bar" role="group" aria-label="관계 유형(모든 시안에 적용)"><b>관계 유형</b>
+    <button type="button" data-t="synergy" aria-pressed="true">같이 하면 강해지는</button>
+    <button type="button" data-t="cover" aria-pressed="false">서로 메워주는</button>
+    <button type="button" data-t="collab" aria-pressed="false">손발이 맞는</button>
+  </div>
+  <div class="wrap">
+    <h1>REMO OS 시각화 10종 비교</h1>
+    <p>같은 데이터(구성원 10명 자기보고, 이름 없음)를 얼굴 없이 10가지 방식으로 그렸습니다. 모두 잡거나 가리켜 볼 수 있고, 위 버튼으로 관계 유형이 한꺼번에 바뀝니다. 판정은 plan-17에 있습니다.</p>
+    <div class="grid" id="grid"></div>
+    <p class="note">시안 전용 페이지입니다. 사이트에 연결하지 않았습니다.</p>
+  </div>
+<script>
+(() => {
+  const NS = 'http://www.w3.org/2000/svg', W = 520, H = 420, reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const clamp = (v, a, b) => Math.min(b, Math.max(a, v)), $ = (s, r = document) => r.querySelector(s);
+  const mk = (t, a = {}, p) => { const e = document.createElementNS(NS, t); for (const k in a) e.setAttribute(k, a[k]); p && p.appendChild(e); return e; };
+  const rng = s => () => { s |= 0; s = s + 0x6D2B79F5 | 0; let t = Math.imul(s ^ s >>> 15, 1 | s); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
+  const label = { synergy: '같이 하면 강해지는', cover: '서로 메워주는', collab: '손발이 맞는' };
+  let type = 'synergy'; const listeners = [];
+  let D, N, E;
+
+  const toSvg = (svg, e) => { const m = svg.getScreenCTM(); const p = new DOMPoint(e.clientX, e.clientY).matrixTransform(m.inverse()); return { x: p.x, y: p.y }; };
+  const deg = (n, t = type) => E.filter(e => e.tp === t && (e.s === n || e.t === n)).length;
+  const act = (t = type) => E.filter(e => e.tp === t);
+  const ropePair = (svg, g, w = 5) => ({ o: mk('path', { fill: 'none', stroke: '#1A1A1A', 'stroke-width': w + 5, 'stroke-linecap': 'round' }, g), i: mk('path', { fill: 'none', stroke: '#fff', 'stroke-width': w, 'stroke-linecap': 'round' }, g) });
+  const ink = { stroke: '#1A1A1A', 'stroke-width': 3, 'stroke-linejoin': 'round' };
+
+  /* ───────── 1. 도형 구슬: 서로 다른 기하 도형 + 물리 (Framer Gravi·Reactive Balls류의 물리 놀이터) ───────── */
+  const SHAPES = [
+    r => `M0 ${-r}A${r} ${r} 0 1 1 0 ${r}A${r} ${r} 0 1 1 0 ${-r}Z`,
+    r => { const k = r * .82, c = r * .3; return `M${-k + c} ${-k}H${k - c}Q${k} ${-k} ${k} ${-k + c}V${k - c}Q${k} ${k} ${k - c} ${k}H${-k + c}Q${-k} ${k} ${-k} ${k - c}V${-k + c}Q${-k} ${-k} ${-k + c} ${-k}Z`; },
+    r => `M0 ${-r}Q${r * .25} ${-r} ${r * .95} ${r * .62}Q${r} ${r * .85} ${r * .72} ${r * .85}H${-r * .72}Q${-r} ${r * .85} ${-r * .95} ${r * .62}Q${-r * .25} ${-r} 0 ${-r}Z`,
+    r => `M${-r} ${-r * .55}H${r}A${r * .55} ${r * .55} 0 0 1 ${r} ${r * .55}H${-r}A${r * .55} ${r * .55} 0 0 1 ${-r} ${-r * .55}Z`,
+    r => `M${-r} ${r * .55}A${r} ${r} 0 0 1 ${r} ${r * .55}Z`,
+    r => { let d = '', n = 6; for (let i = 0; i < n; i++) { const a = i / n * 6.2832, b = (i + .5) / n * 6.2832; d += (i ? 'Q' : 'M') + (i ? `${(Math.cos(a - .52) * r * 1.18).toFixed(1)} ${(Math.sin(a - .52) * r * 1.18).toFixed(1)} ` : '') + `${(Math.cos(a) * r * .72).toFixed(1)} ${(Math.sin(a) * r * .72).toFixed(1)}`; } return d + 'Z'; },
+    r => `M0 ${-r}Q${r * .3} ${-r * .3} ${r} 0Q${r * .3} ${r * .3} 0 ${r}Q${-r * .3} ${r * .3} ${-r} 0Q${-r * .3} ${-r * .3} 0 ${-r}Z`,
+    r => { const a = r * .34, b = r; return `M${-a} ${-b}H${a}V${-a}H${b}V${a}H${a}V${b}H${-a}V${a}H${-b}V${-a}H${-a}Z`; },
+    r => `M0 ${-r}A${r} ${r} 0 1 1 0 ${r}A${r} ${r} 0 1 1 0 ${-r}ZM0 ${-r * .42}A${r * .42} ${r * .42} 0 1 0 0 ${r * .42}A${r * .42} ${r * .42} 0 1 0 0 ${-r * .42}Z`,
+    r => `M${-r * .6} ${-r}H${r * .6}A${r * .6} ${r * .6} 0 0 1 ${r * .6} ${r}H${-r * .6}A${r * .6} ${r * .6} 0 0 1 ${-r * .6} ${-r}Z`,
+  ];
+  function v1(svg, st) {
+    const g0 = mk('g', {}, svg), gr = mk('g', {}, svg), gn = mk('g', {}, svg), P = N.map((n, i) => {
+      const g = mk('g', { style: 'cursor:grab;touch-action:none' }, gn), r = n.r * 1.55;
+      mk('path', { d: SHAPES[i % 10](r), fill: '#fff', 'fill-rule': 'evenodd', ...ink }, g);
+      return { n: n.n, g, r, x: n.px, y: n.py, vx: 0, vy: 0, a: 0, drag: false };
+    });
+    const by = Object.fromEntries(P.map(p => [p.n, p])); let ropes = [], hov = null;
+    const build = () => { gr.replaceChildren(); ropes = act().map(e => ({ e, a: by[e.s], b: by[e.t], ...ropePair(svg, gr, e.w === 3 ? 5 : 3) })); P.forEach(p => p.g.firstChild.setAttribute('fill', deg(p.n) ? '#fff' : 'rgba(255,255,255,.7)')); };
+    P.forEach(p => {
+      p.g.addEventListener('pointerdown', e => { p.drag = true; p.g.style.cursor = 'grabbing'; p.g.setPointerCapture(e.pointerId); });
+      p.g.addEventListener('pointermove', e => { if (p.drag) { const q = toSvg(svg, e); p.x = clamp(q.x, p.r, W - p.r); p.y = clamp(q.y, p.r, H - p.r); p.vx = p.vy = 0; } });
+      p.g.addEventListener('pointerup', () => { p.drag = false; p.g.style.cursor = 'grab'; });
+      p.g.addEventListener('pointerenter', () => p.g.firstChild.setAttribute('fill', '#FF6A00')); p.g.addEventListener('pointerleave', () => p.g.firstChild.setAttribute('fill', deg(p.n) ? '#fff' : 'rgba(255,255,255,.7)'));
+    });
+    st.on(build); build();
+    return t => {
+      ropes.forEach(({ a, b, e }) => { const dx = b.x - a.x, dy = b.y - a.y, d = Math.hypot(dx, dy) || 1, rest = (a.r + b.r) * 1.9, f = (d - rest) * .012 * (e.w === 3 ? 1.4 : 1); a.vx += dx / d * f; a.vy += dy / d * f; b.vx -= dx / d * f; b.vy -= dy / d * f; });
+      P.forEach(p => { P.forEach(q => { if (q === p) return; const dx = p.x - q.x, dy = p.y - q.y, d = Math.hypot(dx, dy) || 1, m = p.r + q.r + 4; if (d < m) { const f = (m - d) * .08; p.vx += dx / d * f; p.vy += dy / d * f; } }); p.vx += (W / 2 - p.x) * .0014; p.vy += (H / 2 - p.y) * .0014; });
+      P.forEach(p => { if (!p.drag) { p.vx *= .9; p.vy *= .9; p.x = clamp(p.x + p.vx, p.r, W - p.r); p.y = clamp(p.y + p.vy, p.r, H - p.r); } p.a += (p.vx * .01); p.g.setAttribute('transform', `translate(${p.x.toFixed(1)} ${p.y.toFixed(1)}) rotate(${(p.a * 40).toFixed(1)})`); });
+      ropes.forEach(({ a, b, o, i }) => { const mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2, dd = `M${a.x} ${a.y}Q${mx} ${my + 8} ${b.x} ${b.y}`; o.setAttribute('d', dd); i.setAttribute('d', dd); });
+    };
+  }
+
+  /* ───────── 2. 궤도판: 홈 첫 화면의 궤도 문법. 돌려서 본다 (3D 궤도형 팀 페이지류) ───────── */
+  function v2(svg, st) {
+    const cx = 260, cy = 215, rx = 190, ry = 150; let rot = -1.2, dragging = false, last = 0;
+    mk('ellipse', { cx, cy, rx, ry, fill: 'none', stroke: '#1A1A1A', 'stroke-width': 3 }, svg); const ge = mk('g', {}, svg), gn = mk('g', {}, svg);
+    const P = N.map((n, i) => { const g = mk('g', { style: 'cursor:grab' }, gn); mk('circle', { r: n.r * .9, fill: '#fff', ...ink }, g); return { n: n.n, g, r: n.r * .9, i }; });
+    const by = Object.fromEntries(P.map(p => [p.n, p])); let edges = [], hov = null;
+    const build = () => { ge.replaceChildren(); edges = act().map(e => ({ e, a: by[e.s], b: by[e.t], ...ropePair(svg, ge, e.w === 3 ? 4 : 2.4) })); };
+    P.forEach(p => { p.g.addEventListener('pointerenter', () => hov = p); p.g.addEventListener('pointerleave', () => hov = null); });
+    svg.addEventListener('pointerdown', e => { dragging = true; last = Math.atan2(toSvg(svg, e).y - cy, toSvg(svg, e).x - cx); svg.setPointerCapture(e.pointerId); });
+    svg.addEventListener('pointermove', e => { if (!dragging) return; const q = toSvg(svg, e), a = Math.atan2(q.y - cy, q.x - cx); let d = a - last; if (d > Math.PI) d -= 6.2832; if (d < -Math.PI) d += 6.2832; rot += d; last = a; });
+    svg.addEventListener('pointerup', () => dragging = false);
+    st.on(build); build();
+    return () => {
+      if (!dragging && !reduce) rot += .0015;
+      P.forEach(p => { const a = rot + p.i / P.length * 6.2832; p.x = cx + Math.cos(a) * rx; p.y = cy + Math.sin(a) * ry; p.g.setAttribute('transform', `translate(${p.x.toFixed(1)} ${p.y.toFixed(1)})`); p.g.firstChild.setAttribute('fill', hov && hov !== p && !edges.some(({ a, b }) => (a === hov && b === p) || (b === hov && a === p)) ? 'rgba(255,255,255,.45)' : deg(p.n) ? '#fff' : 'rgba(255,255,255,.6)'); });
+      edges.forEach(({ a, b, o, i, e }) => { const dd = `M${a.x} ${a.y}Q${cx} ${cy} ${b.x} ${b.y}`; o.setAttribute('d', dd); i.setAttribute('d', dd); const dim = hov && a !== hov && b !== hov; o.style.opacity = i.style.opacity = dim ? .15 : 1; });
+    };
+  }
+
+  /* ───────── 3. 고(goo): 가까워지면 하나로 번지는 방울 (Codrops·CSS-Tricks의 gooey 필터) ───────── */
+  function v3(svg, st) {
+    const defs = mk('defs', {}, svg); const f = mk('filter', { id: 'goo' + Math.random().toString(36).slice(2, 6), x: '-20%', y: '-20%', width: '140%', height: '140%' }, defs);
+    mk('feGaussianBlur', { in: 'SourceGraphic', stdDeviation: 7, result: 'b' }, f); mk('feColorMatrix', { in: 'b', mode: 'matrix', values: '1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 20 -9' }, f);
+    const gI = mk('g', { filter: `url(#${f.id})`, fill: '#1A1A1A' }, svg), gW = mk('g', { filter: `url(#${f.id})`, fill: '#fff' }, svg);
+    const P = N.map(n => ({ n: n.n, r: n.r * 1.2, x: n.px, y: n.py, vx: 0, vy: 0, ci: mk('circle', {}, gI), cw: mk('circle', {}, gW), drag: false }));
+    P.forEach(p => { p.ci.setAttribute('r', p.r + 3.5); p.cw.setAttribute('r', p.r); p.cw.style.cursor = 'grab'; p.cw.style.touchAction = 'none';
+      p.cw.addEventListener('pointerdown', e => { p.drag = true; p.cw.setPointerCapture(e.pointerId); }); p.cw.addEventListener('pointermove', e => { if (p.drag) { const q = toSvg(svg, e); p.x = clamp(q.x, p.r, W - p.r); p.y = clamp(q.y, p.r, H - p.r); p.vx = p.vy = 0; } }); p.cw.addEventListener('pointerup', () => p.drag = false); });
+    const by = Object.fromEntries(P.map(p => [p.n, p])); let es = []; st.on(() => { es = act().map(e => ({ a: by[e.s], b: by[e.t], w: e.w })); });
+    es = act().map(e => ({ a: by[e.s], b: by[e.t], w: e.w }));
+    return () => {
+      es.forEach(({ a, b, w }) => { const dx = b.x - a.x, dy = b.y - a.y, d = Math.hypot(dx, dy) || 1, rest = (a.r + b.r) * .95, f = (d - rest) * .02 * (w === 3 ? 1.3 : .8); a.vx += dx / d * f; a.vy += dy / d * f; b.vx -= dx / d * f; b.vy -= dy / d * f; });
+      P.forEach(p => { P.forEach(q => { if (q === p) return; const linked = es.some(e => (e.a === p && e.b === q) || (e.b === p && e.a === q)); if (linked) return; const dx = p.x - q.x, dy = p.y - q.y, d = Math.hypot(dx, dy) || 1, m = p.r + q.r + 22; if (d < m) { const f = (m - d) * .05; p.vx += dx / d * f; p.vy += dy / d * f; } }); p.vx += (W / 2 - p.x) * .0012; p.vy += (H / 2 - p.y) * .0012; });
+      P.forEach(p => { if (!p.drag) { p.vx *= .88; p.vy *= .88; p.x = clamp(p.x + p.vx, p.r, W - p.r); p.y = clamp(p.y + p.vy, p.r, H - p.r); } [p.ci, p.cw].forEach(c => { c.setAttribute('cx', p.x.toFixed(1)); c.setAttribute('cy', p.y.toFixed(1)); }); });
+    };
+  }
+
+  /* ───────── 4. 코드 다이어그램: 원 둘레의 호와 곡선 (amCharts·Flourish류) ───────── */
+  function v4(svg, st) {
+    const cx = 260, cy = 210, R = 150; const ga = mk('g', {}, svg), ge = mk('g', {}, svg); let hov = null, arcs = [], paths = [];
+    const build = () => {
+      ga.replaceChildren(); ge.replaceChildren(); const es = act(), d = N.map(n => Math.max(1, deg(n.n))), tot = d.reduce((a, b) => a + b, 0), gap = .09; let a0 = -Math.PI / 2; arcs = [];
+      N.forEach((n, i) => { const span = (6.2832 - gap * N.length) * d[i] / tot, a1 = a0 + span; const p = (a, r) => `${(cx + Math.cos(a) * r).toFixed(1)} ${(cy + Math.sin(a) * r).toFixed(1)}`;
+        const dd = `M${p(a0, R)}A${R} ${R} 0 ${span > Math.PI ? 1 : 0} 1 ${p(a1, R)}`, o = mk('path', { d: dd, fill: 'none', stroke: '#1A1A1A', 'stroke-width': 20, 'stroke-linecap': 'round' }, ga), w = mk('path', { d: dd, fill: 'none', stroke: deg(n.n) ? '#fff' : 'rgba(255,255,255,.55)', 'stroke-width': 13, 'stroke-linecap': 'round', style: 'cursor:pointer' }, ga);
+        const mid = (a0 + a1) / 2; arcs.push({ n: n.n, mid, w }); w.addEventListener('pointerenter', () => { hov = n.n; paint(); }); w.addEventListener('pointerleave', () => { hov = null; paint(); }); a0 = a1 + gap; });
+      paths = es.map(e => { const A = arcs.find(x => x.n === e.s).mid, B = arcs.find(x => x.n === e.t).mid, r = R - 14, dd = `M${cx + Math.cos(A) * r} ${cy + Math.sin(A) * r}Q${cx} ${cy} ${cx + Math.cos(B) * r} ${cy + Math.sin(B) * r}`; return { e, o: mk('path', { d: dd, fill: 'none', stroke: '#1A1A1A', 'stroke-width': (e.w === 3 ? 4 : 2.4) + 4, 'stroke-linecap': 'round' }, ge), i: mk('path', { d: dd, fill: 'none', stroke: '#fff', 'stroke-width': e.w === 3 ? 4 : 2.4, 'stroke-linecap': 'round' }, ge) }; });
+    };
+    const paint = () => paths.forEach(({ e, o, i }) => { const dim = hov && e.s !== hov && e.t !== hov; o.style.opacity = i.style.opacity = dim ? .12 : 1; });
+    st.on(build); build(); return null;
+  }
+
+  /* ───────── 5. 별자리: 손전등으로 선이 드러난다 (Nadieh Bremer의 별자리 시각화 계열) ───────── */
+  function v5(svg, st) {
+    const id = 'm' + Math.random().toString(36).slice(2, 6), defs = mk('defs', {}, svg), rg = mk('radialGradient', { id: id + 'g' }, defs);
+    mk('stop', { offset: '0', 'stop-color': '#fff' }, rg); mk('stop', { offset: '.6', 'stop-color': '#fff', 'stop-opacity': .9 }, rg); mk('stop', { offset: '1', 'stop-color': '#000' }, rg);
+    const mask = mk('mask', { id }, defs), spot = mk('circle', { r: 120, fill: `url(#${id}g)`, cx: 260, cy: 210 }, mask);
+    const ge = mk('g', { mask: `url(#${id})` }, svg), gd = mk('g', {}, svg); const R = rng(5); let sx = 260, sy = 210, tx = 260, ty = 210;
+    svg.addEventListener('pointermove', e => { const q = toSvg(svg, e); tx = q.x; ty = q.y; });
+    svg.addEventListener('pointerdown', e => { const q = toSvg(svg, e); tx = q.x; ty = q.y; });
+    const star = (r) => `M0 ${-r}Q${r * .22} ${-r * .22} ${r} 0Q${r * .22} ${r * .22} 0 ${r}Q${-r * .22} ${r * .22} ${-r} 0Q${-r * .22} ${-r * .22} 0 ${-r}Z`;
+    N.forEach(n => { const g = mk('g', { transform: `translate(${n.px} ${n.py})` }, gd); mk('path', { d: star(8 + n.r * .45), fill: '#fff', ...ink, 'stroke-width': 2.5 }, g); });
+    const build = () => { ge.replaceChildren(); const by = Object.fromEntries(N.map(n => [n.n, n])); act().forEach(e => { const a = by[e.s], b = by[e.t], mx = (a.px + b.px) / 2 + (R() - .5) * 18, my = (a.py + b.py) / 2 + (R() - .5) * 18; const dd = `M${a.px} ${a.py}Q${mx} ${my} ${b.px} ${b.py}`; mk('path', { d: dd, fill: 'none', stroke: '#1A1A1A', 'stroke-width': e.w === 3 ? 9 : 7, 'stroke-linecap': 'round' }, ge); mk('path', { d: dd, fill: 'none', stroke: '#fff', 'stroke-width': e.w === 3 ? 4 : 2.4, 'stroke-linecap': 'round', 'stroke-dasharray': e.w === 3 ? 'none' : '1 7' }, ge); }); };
+    st.on(build); build();
+    return () => { sx += (tx - sx) * .15; sy += (ty - sy) * .15; spot.setAttribute('cx', sx.toFixed(1)); spot.setAttribute('cy', sy.toFixed(1)); };
+  }
+
+  /* ───────── 6. 핀보드: 종이 쪽지와 실 (핀보드 은유. 웹 사례는 못 찾아 직접 구성) ───────── */
+  function v6(svg, st) {
+    const gr = mk('g', {}, svg), gt = mk('g', {}, svg), R = rng(9);
+    const T = N.map((n, i) => { const g = mk('g', { style: 'cursor:grab;touch-action:none' }, gt), a = (R() - .5) * 10; mk('rect', { x: -30, y: -22, width: 60, height: 46, rx: 8, fill: '#fff', ...ink, transform: `rotate(${a})` }, g);
+      mk('path', { d: 'M-18 -6H16M-18 4H8', stroke: '#1A1A1A', 'stroke-width': 2.5, 'stroke-linecap': 'round', transform: `rotate(${a})`, opacity: .55 }, g); mk('circle', { cx: 0, cy: -20, r: 5.5, fill: '#FF6A00', ...ink, 'stroke-width': 2.5 }, g);
+      const t = { n: n.n, g, x: n.px, y: n.py, drag: false }; g.addEventListener('pointerdown', e => { t.drag = true; g.style.cursor = 'grabbing'; g.setPointerCapture(e.pointerId); }); g.addEventListener('pointermove', e => { if (t.drag) { const q = toSvg(svg, e); t.x = clamp(q.x, 34, W - 34); t.y = clamp(q.y, 28, H - 28); } }); g.addEventListener('pointerup', () => { t.drag = false; g.style.cursor = 'grab'; }); return t; });
+    const by = Object.fromEntries(T.map(t => [t.n, t])); let rs = []; const build = () => { gr.replaceChildren(); rs = act().map(e => ({ e, a: by[e.s], b: by[e.t], ...ropePair(svg, gr, e.w === 3 ? 4 : 2.4) })); T.forEach(t => t.g.style.opacity = deg(t.n) ? 1 : .6); };
+    st.on(build); build();
+    return () => { T.forEach(t => t.g.setAttribute('transform', `translate(${t.x.toFixed(1)} ${t.y.toFixed(1)})`)); rs.forEach(({ a, b, o, i }) => { const mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2, sag = 10 + Math.hypot(b.x - a.x, b.y - a.y) * .08, dd = `M${a.x} ${a.y - 20}Q${mx} ${my - 20 + sag} ${b.x} ${b.y - 20}`; o.setAttribute('d', dd); i.setAttribute('d', dd); }); };
+  }
+
+  /* ───────── 7. 행렬: 10×10 칸 (Ghoniem 등의 행렬 대 노드링크 비교 연구) ───────── */
+  function v7(svg, st) {
+    const c = 34, x0 = 90, y0 = 40, cells = []; let hov = null; const gl = mk('g', {}, svg);
+    for (let i = 0; i < 10; i++) for (let j = 0; j < 10; j++) { const r = mk('rect', { x: x0 + j * c, y: y0 + i * c, width: c - 4, height: c - 4, rx: 8, fill: 'rgba(255,255,255,.12)', stroke: '#1A1A1A', 'stroke-width': 2 }, svg); cells.push({ i, j, r }); r.addEventListener('pointerenter', () => { hov = [i, j]; paint(); }); r.addEventListener('pointerleave', () => { hov = null; paint(); }); }
+    const dots = N.map((n, i) => { mk('circle', { cx: x0 - 18, cy: y0 + i * c + (c - 4) / 2, r: 7, fill: '#fff', ...ink, 'stroke-width': 2 }, svg); mk('circle', { cx: x0 + i * c + (c - 4) / 2, cy: y0 - 18, r: 7, fill: '#fff', ...ink, 'stroke-width': 2 }, svg); });
+    let on = new Set(); const paint = () => cells.forEach(({ i, j, r }) => { const a = N[i].n, b = N[j].n, hit = on.has(a + '-' + b) || (type === 'synergy' && on.has(b + '-' + a)); const rel = hov && (hov[0] === i || hov[1] === j); r.setAttribute('fill', hit ? '#FF6A00' : rel ? 'rgba(255,255,255,.4)' : 'rgba(255,255,255,.12)'); r.setAttribute('stroke-width', hov && hov[0] === i && hov[1] === j ? 4 : 2); });
+    st.on(() => { on = new Set(act().map(e => e.s + '-' + e.t)); paint(); }); on = new Set(act().map(e => e.s + '-' + e.t)); paint(); return null;
+  }
+
+  /* ───────── 8. 아크 다이어그램: 한 줄 위의 호 (조용하고 모바일 친화적) ───────── */
+  function v8(svg, st) {
+    const y = 250, xs = N.map((n, i) => 50 + i * (420 / 9)), ga = mk('g', {}, svg); let hov = null, arcs = [];
+    mk('path', { d: `M30 ${y}H490`, stroke: '#1A1A1A', 'stroke-width': 5, 'stroke-linecap': 'round' }, svg);
+    const nodes = N.map((n, i) => { const g = mk('g', { transform: `translate(${xs[i]} ${y})`, style: 'cursor:pointer' }, svg); mk('circle', { r: 15, fill: '#fff', ...ink }, g); g.addEventListener('pointerenter', () => { hov = n.n; paint(); }); g.addEventListener('pointerleave', () => { hov = null; paint(); }); return g; });
+    const idx = Object.fromEntries(N.map((n, i) => [n.n, i]));
+    const build = () => { ga.replaceChildren(); arcs = act().map(e => { const a = xs[idx[e.s]], b = xs[idx[e.t]], dir = type === 'synergy' ? -1 : (idx[e.s] < idx[e.t] ? -1 : 1), h = Math.abs(b - a) * .62 * dir, dd = `M${a} ${y}C${a} ${y + h} ${b} ${y + h} ${b} ${y}`; return { e, o: mk('path', { d: dd, fill: 'none', stroke: '#1A1A1A', 'stroke-width': (e.w === 3 ? 5 : 3) + 4, 'stroke-linecap': 'round' }, ga), i: mk('path', { d: dd, fill: 'none', stroke: '#fff', 'stroke-width': e.w === 3 ? 5 : 3, 'stroke-linecap': 'round' }, ga) }; }); nodes.forEach((g, i) => g.firstChild.setAttribute('fill', deg(N[i].n) ? '#fff' : 'rgba(255,255,255,.55)')); };
+    const paint = () => arcs.forEach(({ e, o, i }) => { const dim = hov && e.s !== hov && e.t !== hov; o.style.opacity = i.style.opacity = dim ? .12 : 1; });
+    st.on(build); build(); return null;
+  }
+
+  /* ───────── 9. 점 격자 자석: 배경 점들이 사람과 포인터에 끌린다 (캔버스) ───────── */
+  function v9(svg, st, cv) {
+    const ctx = cv.getContext('2d'), dpr = Math.min(devicePixelRatio || 1, 2); cv.width = W * dpr; cv.height = H * dpr; ctx.scale(dpr, dpr);
+    let px = -999, py = -999; cv.addEventListener('pointermove', e => { const b = cv.getBoundingClientRect(); px = (e.clientX - b.left) / b.width * W; py = (e.clientY - b.top) / b.height * H; }); cv.addEventListener('pointerleave', () => { px = py = -999; });
+    const gap = 20, pts = []; for (let x = gap / 2; x < W; x += gap) for (let y = gap / 2; y < H; y += gap) pts.push([x, y]);
+    return t => {
+      ctx.clearRect(0, 0, W, H); const es = act(), by = Object.fromEntries(N.map(n => [n.n, n]));
+      ctx.fillStyle = 'rgba(255,255,255,.55)';
+      pts.forEach(([x, y]) => { let dx = 0, dy = 0; N.forEach(n => { const ex = n.px - x, ey = n.py - y, d = Math.hypot(ex, ey) || 1, k = Math.max(0, 1 - d / 90); dx += ex / d * k * 9; dy += ey / d * k * 9; }); const ex = x - px, ey = y - py, d = Math.hypot(ex, ey) || 1, k = Math.max(0, 1 - d / 80); dx += ex / d * k * 16; dy += ey / d * k * 16; ctx.beginPath(); ctx.arc(x + dx, y + dy, 1.6 + Math.hypot(dx, dy) * .05, 0, 6.2832); ctx.fill(); });
+      ctx.lineCap = 'round'; es.forEach(e => { const a = by[e.s], b = by[e.t]; ctx.strokeStyle = '#1A1A1A'; ctx.lineWidth = (e.w === 3 ? 4 : 2.4) + 4; ctx.beginPath(); ctx.moveTo(a.px, a.py); ctx.lineTo(b.px, b.py); ctx.stroke(); ctx.strokeStyle = '#fff'; ctx.lineWidth = e.w === 3 ? 4 : 2.4; ctx.stroke(); });
+      N.forEach(n => { ctx.beginPath(); ctx.arc(n.px, n.py, n.r * .75, 0, 6.2832); ctx.fillStyle = deg(n.n) ? '#fff' : 'rgba(255,255,255,.6)'; ctx.fill(); ctx.strokeStyle = '#1A1A1A'; ctx.lineWidth = 3; ctx.stroke(); });
+    };
+  }
+
+  /* ───────── 10. 노선도: 45도 꺾임 선과 정거장 (지하철 노선도 문법) ───────── */
+  function v10(svg, st) {
+    const gl = mk('g', {}, svg), gs = mk('g', {}, svg), sn = n => ({ x: Math.round(n.px / 40) * 40, y: Math.round(n.py / 35) * 35 }); let hov = null, ls = [];
+    const S = N.map(n => ({ ...n, ...sn(n) })), by = Object.fromEntries(S.map(s => [s.n, s]));
+    const route = (a, b) => { const dx = b.x - a.x, dy = b.y - a.y, ax = Math.abs(dx), ay = Math.abs(dy), sx = Math.sign(dx), sy = Math.sign(dy), d = Math.min(ax, ay); if (ax >= ay) return `M${a.x} ${a.y}H${a.x + sx * (ax - d) / 2}L${a.x + sx * ((ax - d) / 2 + d)} ${b.y}H${b.x}`; return `M${a.x} ${a.y}V${a.y + sy * (ay - d) / 2}L${b.x} ${a.y + sy * ((ay - d) / 2 + d)}V${b.y}`; };
+    const stations = S.map(s => { const g = mk('g', { transform: `translate(${s.x} ${s.y})`, style: 'cursor:pointer' }, gs); mk('circle', { r: 13, fill: '#fff', ...ink }, g); g.addEventListener('pointerenter', () => { hov = s.n; paint(); }); g.addEventListener('pointerleave', () => { hov = null; paint(); }); return g; });
+    const build = () => { gl.replaceChildren(); ls = act().map(e => { const dd = route(by[e.s], by[e.t]); return { e, o: mk('path', { d: dd, fill: 'none', stroke: '#1A1A1A', 'stroke-width': (e.w === 3 ? 8 : 5) + 5, 'stroke-linejoin': 'round', 'stroke-linecap': 'round' }, gl), i: mk('path', { d: dd, fill: 'none', stroke: '#fff', 'stroke-width': e.w === 3 ? 8 : 5, 'stroke-linejoin': 'round', 'stroke-linecap': 'round' }, gl) }; }); stations.forEach((g, i) => { const d = deg(S[i].n); g.firstChild.setAttribute('r', d >= 4 ? 17 : 13); g.firstChild.setAttribute('fill', d ? '#fff' : 'rgba(255,255,255,.55)'); }); };
+    const paint = () => ls.forEach(({ e, o, i }) => { const dim = hov && e.s !== hov && e.t !== hov; o.style.opacity = i.style.opacity = dim ? .12 : 1; });
+    st.on(build); build(); return null;
+  }
+
+  const VARIANTS = [
+    ['도형 구슬', 'Physics', '서로 다른 기하 도형을 잡아 던진다. 관계가 스프링', 'Framer의 Gravi·Reactive Balls 같은 물리 놀이터 패턴', v1],
+    ['궤도판', 'Orbit', '홈 첫 화면의 궤도 문법. 드래그로 돌려 본다', '궤도를 도는 팀 프로필(Contra 사례)과 같은 계열', v2],
+    ['고(goo)', 'Gooey', '관계가 있으면 하나로 번지는 방울', 'Codrops·CSS-Tricks의 gooey SVG 필터', v3],
+    ['코드 다이어그램', 'Chord', '원 둘레의 호와 곡선. 가리키면 나머지가 물러난다', 'amCharts·Flourish의 chord diagram', v4],
+    ['별자리', 'Constellation', '포인터 주변에서만 선이 드러난다', 'Nadieh Bremer의 별자리 시각화 계열', v5],
+    ['핀보드', 'Pinboard', '쪽지를 잡아 옮기면 실이 따라온다', '핀과 실 은유(웹 사례는 찾지 못함)', v6],
+    ['행렬', 'Matrix', '10×10 칸. 가리키면 행·열이 밝아진다', 'Ghoniem 등의 행렬 대 노드링크 연구', v7],
+    ['아크', 'Arc', '한 줄 위에 호. 위·아래로 방향을 가른다', '아크 다이어그램(일반 기법, 출처 미확인)', v8],
+    ['점 격자 자석', 'Magnetic grid', '배경 점이 사람과 포인터에 끌린다', '자석형 점 격자(일반 패턴, 출처 미확인)', v9],
+    ['노선도', 'Transit', '45도 꺾임 선과 정거장', '지하철 노선도 문법(일반 기법, 출처 미확인)', v10],
+  ];
+
+  fetch('../data/relations.json').then(r => r.json()).then(d => {
+    D = d; E = d.edges; const xs = d.nodes.map(n => n.x), ys = d.nodes.map(n => n.y), x0 = Math.min(...xs), x1 = Math.max(...xs), y0 = Math.min(...ys), y1 = Math.max(...ys);
+    N = d.nodes.map(n => ({ ...n, px: 50 + (n.x - x0) / (x1 - x0) * (W - 100), py: 50 + (n.y - y0) / (y1 - y0) * (H - 100) }));
+    const grid = $('#grid'), ticks = [];
+    VARIANTS.forEach(([name, en, note, ref, fn], i) => {
+      const card = document.createElement('article'); card.className = 'card';
+      card.innerHTML = `<div class="stage"></div><div class="meta"><h2><small>${String(i + 1).padStart(2, '0')} ${en.toUpperCase()}</small>${name}</h2><p>${note}</p><p class="ref">참고: ${ref}</p></div>`;
+      grid.appendChild(card); const stage = card.firstChild, isCanvas = fn === v9;
+      const el = isCanvas ? document.createElement('canvas') : document.createElementNS(NS, 'svg'); if (!isCanvas) { el.setAttribute('viewBox', `0 0 ${W} ${H}`); el.setAttribute('role', 'img'); el.setAttribute('aria-label', `${name} 방식으로 그린 구성원 관계 시안`); } else el.setAttribute('aria-label', `${name} 방식으로 그린 구성원 관계 시안`);
+      stage.appendChild(el);
+      const st = { on: cb => listeners.push(cb) }; const tick = fn(el, st, el); if (tick) ticks.push([tick, stage]);
+    });
+    document.querySelectorAll('[data-t]').forEach(b => b.addEventListener('click', () => { type = b.dataset.t; document.querySelectorAll('[data-t]').forEach(x => x.setAttribute('aria-pressed', x === b)); listeners.forEach(cb => cb()); }));
+    const vis = new Set(); const io = new IntersectionObserver(es => es.forEach(e => e.isIntersecting ? vis.add(e.target) : vis.delete(e.target)), { rootMargin: '100px' }); ticks.forEach(([, s]) => io.observe(s));
+    (function frame(t) { requestAnimationFrame(frame); ticks.forEach(([fn, s]) => { if (vis.has(s)) fn(t); }); })(0);
+  });
+})();
+</script>
+</body>
+</html>

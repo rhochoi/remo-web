@@ -1,0 +1,42 @@
+/* 자동 생성: python3 docs/tools/color-tokens.py. 손으로 고치지 말고 스크립트와 plan-18을 고친다.
+   브랜드 원값 3개(주황·블루·잉크)는 로고 픽셀 실측. 나머지 스텝은 OKLCH에서 명도만 바꿔 만든 파생값. */
+:root {
+  /* 중립 */
+  --ink: #1A1A1A;
+  --paper: #F7F6F2;
+  --soft: #EEECE5;
+  --line: #D8D6CE;
+  --muted: #6C6A64;
+  --white: #FFFFFF;
+  /* 주황 (브랜드 = 500) */
+  --orange-50: #FFF2ED;
+  --orange-100: #FFDACB;
+  --orange-200: #FFC2A7;
+  --orange-300: #FFA881;
+  --orange-400: #FF8B55;
+  --orange-500: #FF6A00;
+  --orange-600: #CB5300;
+  --orange-700: #9A3D00;
+  --orange-800: #6B2800;
+  --orange-900: #401500;
+  /* 블루 (브랜드 = 600) */
+  --blue-50: #F1F5FF;
+  --blue-100: #CEDCFF;
+  --blue-200: #ABC4FF;
+  --blue-300: #89AAFF;
+  --blue-400: #688FFF;
+  --blue-500: #4971FD;
+  --blue-600: #3659E3;
+  --blue-700: #2742B5;
+  --blue-800: #172B8C;
+  --blue-900: #0A1465;
+  /* 역할: 화면에서는 역할 이름만 쓴다 */
+  --orange: var(--orange-500);
+  --orange-text: var(--orange-700);   /* 밝은 바탕 위 주황 글자 */
+  --orange-soft: var(--orange-100);     /* 선택·강조의 옅은 배경 */
+  --blue: var(--blue-600);
+  --blue-hover: var(--blue-700);
+  --blue-tint: var(--blue-200);         /* 블루 위 비활성 도형 */
+  --on-blue: var(--white);
+  --on-orange: var(--ink);
+}

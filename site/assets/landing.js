@@ -53,47 +53,32 @@
   const peek = $('#peek'); const rClone = rL.g.cloneNode(true); rClone.removeAttribute('id'); rClone.removeAttribute('class'); peek.appendChild(rClone);
   const peyes = $$('.eye', rClone); prep(peyes);
 
-  /* ── 2. 관계 그래프 ── */
-  const graph = $('#graph'), read = $('#read'), label = { synergy: '같이 하면 강해지는', cover: '서로 메워주는', collab: '손발이 맞는' };
-  let G = null, type = 'synergy', hoverNode = null;
-  const mk = (n, a = {}) => { const e = document.createElementNS(NS, n); for (const k in a) e.setAttribute(k, a[k]); return e; };
-  const gEyes = [];
-  const draw = () => {
-    $$('.edge', graph).forEach(e => e.remove());
-    const eg = $('#edges', graph); const active = new Set(); let count = 0;
-    G.edges.filter(e => e.tp === type).forEach(e => {
-      const a = G.pos[e.s], b = G.pos[e.t], mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2, dx = b.x - a.x, dy = b.y - a.y, k = .12;
-      const p = mk('path', { class: 'edge', d: `M${a.x} ${a.y}Q${mx - dy * k} ${my + dx * k} ${b.x} ${b.y}`, 'stroke-width': e.w === 3 ? 4 : 2.4, pathLength: 1 });
-      p.dataset.s = e.s; p.dataset.t = e.t; eg.appendChild(p); active.add(e.s); active.add(e.t); count++;
-      if (!reduce) p.animate([{ strokeDasharray: '1 1', strokeDashoffset: 1 }, { strokeDasharray: '1 1', strokeDashoffset: 0 }], { duration: 480, easing: 'ease-out' });   // 끝나면 점선 없이 실선으로 돌아온다. 애니메이션이 안 돌아도 선은 보인다
-    });
-    $$('.person', graph).forEach(g => g.classList.toggle('on', active.has(+g.dataset.n)));
-    G.active = active; G.count = count; sayDefault();
-  };
-  const sayDefault = () => { read.textContent = `${label[type]} 관계 ${G.count}개. 연결된 사람 ${G.active.size}명.`; };
-  fetch('data/relations.json').then(r => r.json()).then(d => {
-    $('#cap').textContent = d.caption.replace('팀 진단 도구(REMO OS)의 관계 데이터. ', '').replace(' 노드에 이름은 없다.', '') + ' 노드에 이름은 없습니다.';
-    G = { pos: {}, edges: d.edges };
-    const eg = mk('g', { id: 'edges' }); graph.appendChild(eg);
-    d.nodes.forEach(n => { G.pos[n.n] = { x: n.x, y: n.y }; });
-    d.nodes.forEach(n => {
-      const r = n.r * 1.2, g = mk('g', { class: 'person', 'data-n': n.n, transform: `translate(${n.x} ${n.y})` });
-      g.appendChild(mk('circle', { class: 'face', r }));
-      [-1, 1].forEach(sd => { const c = mk('circle', { class: 'pupil', cx: sd * r * .32, cy: -r * .08, r: r * .13 }); g.appendChild(c); gEyes.push({ c, g, cx: sd * r * .32, cy: -r * .08, r }); });
-      g.addEventListener('pointerenter', () => { hoverNode = n.n; g.style.transform = 'scale(1.12)'; g.style.transformBox = 'fill-box'; g.style.transformOrigin = 'center'; $$('.edge', graph).forEach(e => e.classList.toggle('dim', !(+e.dataset.s === n.n || +e.dataset.t === n.n))); const c = G.edges.filter(e => e.tp === type && (e.s === n.n || e.t === n.n)).length; read.textContent = `이 사람은 "${label[type]}" 관계가 ${c}개입니다.`; });
-      g.addEventListener('pointerleave', () => { hoverNode = null; g.style.transform = ''; $$('.edge', graph).forEach(e => e.classList.remove('dim')); sayDefault(); });
-      graph.appendChild(g);
-    });
-    draw();
-  }).catch(() => { read.textContent = '관계 데이터를 불러오지 못했습니다.'; });
-  $$('[data-t]').forEach(b => b.addEventListener('click', () => { type = b.dataset.t; $$('[data-t]').forEach(x => x.setAttribute('aria-pressed', x === b)); if (G) draw(); }));
+
+  /* ── 페이지 위치 pager (plan-16 B): 어느 장에 있는지 알려 주는 정보 ── */
+  const pager = $('#pager'), secs = $$('[data-pager]');
+  if (pager) {
+    secs.forEach((sec, i) => { const a = document.createElement('a'); a.href = '#' + sec.id; a.dataset.t = sec.dataset.pager; a.setAttribute('aria-label', `${secs.length}장 중 ${i + 1}장, ${sec.dataset.pager}`); pager.appendChild(a); });
+    const dots = $$('a', pager);
+    const mark = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) dots.forEach((d, i) => d.setAttribute('aria-current', String(secs[i] === e.target))); }), { rootMargin: '-45% 0px -50% 0px' });
+    secs.forEach(sec => mark.observe(sec));
+  }
+
+  /* ── 실행의 장면: 이전·다음 버튼 ── */
+  const deck = $('#deck'), prev = $('#sc-prev'), next = $('#sc-next');
+  if (deck) {
+    const step = () => (deck.querySelector('.slide')?.getBoundingClientRect().width || 300) + 16;
+    const upd = () => { prev.disabled = deck.scrollLeft < 8; next.disabled = deck.scrollLeft + deck.clientWidth >= deck.scrollWidth - 8; };
+    prev.addEventListener('click', () => deck.scrollBy({ left: -step(), behavior: reduce ? 'auto' : 'smooth' }));
+    next.addEventListener('click', () => deck.scrollBy({ left: step(), behavior: reduce ? 'auto' : 'smooth' }));
+    deck.addEventListener('scroll', upd, { passive: true }); addEventListener('resize', upd); upd();
+  }
 
   /* ── 힌트: 입력 방식에 맞춰 ── */
   if (matchMedia('(pointer: coarse)').matches) $('#hint').textContent = '글자를 눌러 보세요. 궤도의 점은 지금 하는 프로젝트입니다.';
 
   /* ── 루프: 화면에 보이는 것만 갱신 ── */
   const vis = new Set(); const io = new IntersectionObserver(es => es.forEach(e => e.isIntersecting ? vis.add(e.target) : vis.delete(e.target)), { rootMargin: '80px' });
-  [wm, peek, graph].forEach(el => io.observe(el));
+  [wm, peek].forEach(el => io.observe(el));
   let last = performance.now();
   (function frame(now) {
     requestAnimationFrame(frame);
@@ -112,9 +97,5 @@
       lookAt(wm, eyes, { x: rL.x, y: rL.y }, 6.5); placeEyes(eyes, b);
     }
     if (vis.has(peek)) { lookAt(peek, peyes, { x: 0, y: 0 }, 6.5); placeEyes(peyes, 1); }
-    if (vis.has(graph) && gEyes.length) gEyes.forEach(o => {
-      const m = graph.getScreenCTM(); if (!m) return; const pos = G.pos[+o.g.dataset.n], p = new DOMPoint(ptr.x, ptr.y).matrixTransform(m.inverse()), dx = p.x - pos.x - o.cx, dy = p.y - pos.y - o.cy, d = Math.hypot(dx, dy) || 1, k = Math.min(1, d / 120) * o.r * .14;
-      o.c.setAttribute('transform', `translate(${(dx / d * k).toFixed(2)} ${(dy / d * k).toFixed(2)})`);
-    });
   })(last);
 })();
