@@ -9,9 +9,9 @@
 
 > Reading this as: **팀 포트폴리오 원페이지 for 잠재 클라이언트·파트너(신뢰 우선)**, with a **브랜드 가이드 v4 형태 언어(둥근 매스·손맛·단색 고대비)**, leaning toward **순수 HTML/CSS, Pretendard, 움직임 최소**.
 
-다이얼: `DESIGN_VARIANCE: 6` / `MOTION_INTENSITY: 2` / `VISUAL_DENSITY: 3`
+다이얼: `DESIGN_VARIANCE: 6` / `MOTION_INTENSITY: 3` / `VISUAL_DENSITY: 3`
 - VARIANCE 6 — 균등 그리드를 깨되(손맛) 신뢰 우선 대상이라 9~10의 실험성은 목적과 어긋남
-- MOTION 2 — 움직임 예산은 관계 맵 재도입 시 그쪽에 몰아준다(decisions.md). 그 전에는 정보 전달에 기여하는 움직임이 없다
+- MOTION 3 (2026-10-08에 2에서 상향, docs/plan-12-tools.md T4) — 화살표 이동과 카드 스크롤 진입 추가. 움직임 예산은 관계 맵 재도입 시 그쪽에 몰아준다(decisions.md). 그 전에는 정보 전달에 기여하는 움직임이 없다
 - DENSITY 3 — 문장이 적고 크다. 자리표시 없이 비운 자리가 많은 단계
 
 ## 판정표
