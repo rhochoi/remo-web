@@ -89,7 +89,7 @@ export default async function handler(req, res) {
     });
     if (!answer.text) return res.status(200).json({ ok: true, answer: '답변을 생성하지 못했습니다(차단되었거나 빈 응답). 표현을 바꿔 다시 시도해 주세요.', sources: [] });
 
-    const sources = picked.map((r, i) => ({ n: i + 1, title: r.title, path: r.path, date: r.doc_date }));
+    const sources = picked.map((r, i) => ({ n: i + 1, title: r.title, path: r.path, date: r.doc_date, excerpt: r.content.replace(/\s+/g, ' ').slice(0, 240) }));
     return res.status(200).json({ ok: true, answer: answer.text, sources, queries });
   } catch (e) {
     console.error('ask failed', e.status || '', e.message);
