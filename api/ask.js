@@ -3,7 +3,7 @@
 // 무료 키는 입력·출력을 Google이 제품 개선에 쓰고 사람이 검토할 수 있다 → private 표시된 문서(민감 정보)는 검색 단계에서 제외해 보내지 않는다.
 import { GoogleGenAI } from '@google/genai';
 import { neon } from '@neondatabase/serverless';
-import { authorize } from './_lib/auth.js';
+import { guard } from './_lib/guard.js';
 import { retrieve } from './_lib/retrieve.js';
 
 const MODEL = process.env.GEMINI_MODEL || 'gemini-3.8-flash';
@@ -28,7 +28,7 @@ const ANSWER_SYSTEM = `당신은 팀 내부 노션 기록을 근거로 질문에
 const clean = (s) => s.replaceAll('</document', '＜/document');
 
 export default async function handler(req, res) {
-  if (!(await authorize(req, res))) return;
+  if (!guard(req, res, { name: 'ask', perMinute: 6 })) return;
   if (!process.env.GEMINI_API_KEY) return res.status(503).json({ ok: false, error: 'no-llm-key' });
 
   const q = req.body && typeof req.body.q === 'string' ? req.body.q.trim() : '';

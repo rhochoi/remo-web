@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <!-- 내부 기록실 — 페이지 자체에는 데이터가 없다. 결과는 /api/search · /api/ask(공유 비밀번호)에서만 온다. 메뉴·사이트맵에 링크하지 않는다.
-       대화·답변은 화면 메모리에만 두고 브라우저에 저장하지 않는다(비밀번호만 탭이 열려 있는 동안 sessionStorage). 결정 기록: docs/plan-19-archive-room.md -->
+  <!-- 기록실 — 비밀번호 없는 공개 화면. 페이지 자체에는 데이터가 없고 결과는 /api/search · /api/ask에서 온다(private 문서 제외). 메뉴·사이트맵에 링크하지 않고 noindex.
+       대화·답변은 화면 메모리에만 두고 브라우저에 저장하지 않는다. 결정 기록: docs/plan-19-archive-room.md -->
   <meta name="robots" content="noindex, nofollow">
   <title>기록실 · 리모</title>
   <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
@@ -28,8 +28,6 @@
     .brand { display: flex; align-items: center; gap: 10px; font-weight: 800; letter-spacing: -0.02em; font-size: 17px; }
     .brand img { display: block; border-radius: 8px; }
     .brand small { font-weight: 400; color: var(--muted); font-size: 13px; letter-spacing: 0; }
-    .linkbtn { background: none; border: 0; color: var(--muted); font-size: 13px; cursor: pointer; min-height: 40px; padding: 0 10px; border-radius: 999px; transition: color .16s, background .16s; }
-    .linkbtn:hover { color: var(--ink); background: var(--soft); }
 
     main { flex: 1; width: 100%; max-width: 840px; margin: 0 auto; padding: 24px 16px 0; display: flex; flex-direction: column; }
 
@@ -43,13 +41,6 @@
     .ghost { height: 40px; padding: 0 16px; border-radius: 999px; border: 1px solid var(--muted); background: var(--white); font-size: 13px; cursor: pointer; transition: background .16s, transform .16s; }
     .ghost:hover { background: var(--soft); }
     .note { color: var(--muted); font-size: 13px; }
-
-    /* 잠금 */
-    #lock { margin: 12vh auto 0; max-width: 420px; width: 100%; background: var(--white); border: 1px solid var(--line); border-radius: 12px; padding: 24px; }
-    #lock h1 { margin: 0 0 6px; font-size: 26px; font-weight: 800; letter-spacing: -0.035em; }
-    #lock p { margin: 0 0 16px; color: var(--muted); }
-    #lock .pill { margin-top: 12px; width: 100%; }
-    .err { color: var(--orange-text); font-size: 14px; margin: 10px 0 0; min-height: 21px; }
 
     /* 빈 화면 */
     .empty { padding: 7vh 0 20px; }
@@ -125,21 +116,12 @@
   <a class="skip" href="#main">본문으로 건너뛰기</a>
   <header class="top"><div class="in">
     <div class="brand"><img src="assets/remo-badge-orange.png" width="30" height="30" alt=""><span>REMO 기록실</span><small>내부용</small></div>
-    <button class="linkbtn" id="logout" hidden>잠그기</button>
   </div></header>
 
   <main id="main">
     <noscript><p class="note">이 화면은 JavaScript가 필요합니다.</p></noscript>
-    <form id="lock" hidden>
-      <h1>기록실</h1>
-      <p>팀 노션 기록을 검색하고, 우리가 어떻게 움직였는지 물어볼 수 있습니다.</p>
-      <label class="sr" for="key">공유 비밀번호</label>
-      <input class="field" id="key" type="password" autocomplete="current-password" placeholder="공유 비밀번호" required>
-      <button class="pill">입장</button>
-      <p class="err" id="lockerr" role="alert"></p>
-    </form>
 
-    <section id="space" aria-label="대화" hidden>
+    <section id="space" aria-label="대화">
       <div class="empty" id="empty">
         <h1>우리는 어떻게<br>움직였을까요?</h1>
         <p>노션에 쌓인 회의록과 기획안을 근거로 답합니다. 질문하면 출처 문서가 함께 나옵니다.</p>
@@ -149,7 +131,7 @@
       <div id="thread" aria-live="polite"></div>
     </section>
 
-    <div class="composer-wrap" id="composerWrap" hidden>
+    <div class="composer-wrap" id="composerWrap">
       <form class="composer" id="composer">
         <label class="sr" for="q">질문 또는 검색어</label>
         <textarea id="q" rows="2" maxlength="500" placeholder="예: 프로젝트 기획 단계에서 우리는 어떻게 움직였지?" required></textarea>
@@ -170,23 +152,11 @@
     const MARK_OPEN = '', MARK_CLOSE = '', MAX_Q = 500;
     const EXAMPLES = ['프로젝트 기획 단계에서 우리는 어떻게 움직였지?', '팀 회의는 어떤 흐름으로 이어졌어?', '예산은 어떻게 정했어?'];
     const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-    let key = '', busy = false, msgSeq = 0;
-    try { key = sessionStorage.getItem('search-key') || ''; } catch {}
+    let busy = false, msgSeq = 0;
 
     const mk = (tag, cls, text) => { const n = document.createElement(tag); if (cls) n.className = cls; if (text != null) n.textContent = text; return n; };
     const mode = () => document.querySelector('input[name=mode]:checked').value;
     const scrollTo = (n, block) => n.scrollIntoView({ block, behavior: reduce ? 'auto' : 'smooth' });
-
-    function show(locked, msg) {
-      $('lock').hidden = !locked; $('space').hidden = locked; $('composerWrap').hidden = locked; $('logout').hidden = locked;
-      $('lockerr').textContent = msg || '';
-      (locked ? $('key') : $('q')).focus();
-    }
-    function lockOut(msg) {
-      key = ''; try { sessionStorage.removeItem('search-key'); } catch {}
-      $('thread').replaceChildren(); $('empty').hidden = false;
-      show(true, msg);
-    }
 
     // 본문을 HTML로 넣지 않는다 — **굵게**와 [n] 인용 칩만 DOM으로 만든다
     const CITE = /\[(\d+(?:\s*,\s*\d+)*)\]/g;
@@ -230,7 +200,7 @@
 
     function errorText(res, data) {
       if (res.status === 429) return data.error === 'daily-limit' ? '오늘 질문 한도에 도달했습니다. 내일 다시 해 주세요.' : '시도가 너무 많습니다. 잠시 후 다시 해 주세요.';
-      if (res.status === 503) return data.error === 'no-llm-key' ? '서버에 GEMINI_API_KEY가 설정되어 있지 않습니다.' : '서버에 SEARCH_PASSWORD가 설정되어 있지 않습니다.';
+      if (res.status === 503) return '서버에 GEMINI_API_KEY가 설정되어 있지 않습니다.';
       if (res.status === 400) return '질문이 비었거나 너무 깁니다(500자 이내).';
       return '서버 오류가 났습니다. 잠시 후 다시 시도해 주세요.';
     }
@@ -243,7 +213,7 @@
     }
 
     async function send(path, q) {
-      const res = await fetch(path, { method: 'POST', headers: { 'content-type': 'application/json', 'x-search-key': key }, body: JSON.stringify({ q }) });
+      const res = await fetch(path, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ q }) });
       const data = await res.json().catch(() => ({}));
       return { res, data };
     }
@@ -312,7 +282,6 @@
           holder.replaceWith(errorCard(`서버에 연결하지 못했습니다. ${where} (${e.name}: ${e.message})`, retry)); return;
         }
         const { res, data } = r;
-        if (res.status === 401) { lockOut('비밀번호가 맞지 않습니다.'); return; }
         let out;
         try { out = !res.ok ? errorCard(errorText(res, data), retry) : kind === 'ask' ? answerCard(data) : resultsCards(data); }
         catch (e) { out = errorCard(`응답을 화면에 그리지 못했습니다(${e.name}: ${e.message}). 서버 응답 형식이 예상과 다릅니다.`, retry); }
@@ -335,13 +304,7 @@
       $('go').textContent = ask ? '질문하기' : '검색';
       $('q').placeholder = ask ? '예: 프로젝트 기획 단계에서 우리는 어떻게 움직였지?' : '검색어 (여러 단어는 모두 포함된 문서 우선)';
     }));
-    $('lock').addEventListener('submit', (e) => {
-      e.preventDefault(); key = $('key').value; $('key').value = '';
-      try { sessionStorage.setItem('search-key', key); } catch {}
-      show(false);
-    });
-    $('logout').addEventListener('click', () => lockOut(''));
-    show(!key);
+    $('q').focus();
   </script>
 </body>
 </html>
