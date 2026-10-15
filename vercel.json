@@ -20,5 +20,10 @@
       "path": "/api/purge-inquiries",
       "schedule": "0 18 * * *"
     }
-  ]
+  ],
+  "functions": {
+    "api/ask.js": {
+      "maxDuration": 60
+    }
+  }
 }

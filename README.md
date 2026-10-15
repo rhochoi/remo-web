@@ -11,6 +11,7 @@ REMO 팀 웹사이트. 배포: https://remo-web.vercel.app/ (2026-09-18 공개)
 ## 구조
 
 - `site/` — 배포되는 정적 사이트 (GitHub Pages가 이 폴더만 본다)
+- `api/search.js` + `site/search.html` + `scripts/index-notion.mjs` — 내부 노션 검색. 노션 Markdown & CSV 내보내기를 `node scripts/index-notion.mjs <폴더>`로 `notion_chunks`에 전체 교체 색인(`db/search.sql`). 접근에 비밀번호는 없다(2026-10-15 결정, docs/plan-19): `private` 문서는 검색·질문 모두에서 제외하고, IP당 분당 호출 제한과 `/api/ask` 일일 상한으로 남용을 줄인다. pg_trgm + FTS 키워드 검색(외부 전송 없음). `/api/ask`는 질문마다 검색된 발췌를 Gemini API로 보내 근거 기반 답을 만든다 — 무료 키는 입력을 Google이 제품 개선에 쓰므로, 색인 때 민감 문서를 `private`로 표시해 질문 대상에서 뺀다(`scripts/index-notion.mjs`의 `--list-private`·`--private-file`). 하루 호출 상한 `ASK_DAILY_LIMIT`(기본 200). 노션이 바뀌면 재내보내기 후 재색인
 - `docs/` — 구조(IA), 결정 기록, 섹션별 계획 (배포되지 않음)
 - `.claude/skills/` — 팀이 공유하는 AI 디자인 스킬 + 리모 오버라이드
 - `.github/workflows/pages.yml` — main 푸시 시 자동 배포

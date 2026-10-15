@@ -1,0 +1,310 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- 기록실 — 비밀번호 없는 공개 화면. 페이지 자체에는 데이터가 없고 결과는 /api/search · /api/ask에서 온다(private 문서 제외). 메뉴·사이트맵에 링크하지 않고 noindex.
+       대화·답변은 화면 메모리에만 두고 브라우저에 저장하지 않는다. 결정 기록: docs/plan-19-archive-room.md -->
+  <meta name="robots" content="noindex, nofollow">
+  <title>기록실 · 리모</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard-dynamic-subset.min.css">
+  <link rel="stylesheet" href="assets/tokens.css?v=1">
+  <style>
+    * { box-sizing: border-box; }
+    html { -webkit-text-size-adjust: 100%; }
+    body { margin: 0; min-height: 100dvh; background: var(--paper); color: var(--ink); font: 400 15px/1.5 Pretendard, system-ui, sans-serif; display: flex; flex-direction: column; }
+    :focus-visible { outline: 3px solid var(--orange); outline-offset: 3px; }
+    [hidden] { display: none !important; }
+    button, input, textarea { font: inherit; color: inherit; }
+    .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+    .skip { position: absolute; left: 12px; top: -60px; background: var(--ink); color: var(--white); padding: 10px 16px; border-radius: 999px; z-index: 10; }
+    .skip:focus { top: 12px; }
+    .num-t { font-variant-numeric: tabular-nums; }
+
+    /* 헤더 */
+    .top { border-bottom: 1px solid var(--line); }
+    .top .in { max-width: 840px; margin: 0 auto; padding: 10px 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .brand { display: flex; align-items: center; gap: 10px; font-weight: 800; letter-spacing: -0.02em; font-size: 17px; }
+    .brand img { display: block; border-radius: 8px; }
+    .brand small { font-weight: 400; color: var(--muted); font-size: 13px; letter-spacing: 0; }
+
+    main { flex: 1; width: 100%; max-width: 840px; margin: 0 auto; padding: 24px 16px 0; display: flex; flex-direction: column; }
+
+    /* 공통 컨트롤 — 경계는 muted(5.4:1)로 3:1 기준을 넘긴다 */
+    .field { display: block; width: 100%; background: var(--white); border: 1px solid var(--muted); border-radius: 10px; padding: 12px 14px; }
+    .field:focus-visible { outline: none; border-color: var(--ink); box-shadow: 0 0 0 4px var(--orange); }
+    .pill { height: 44px; padding: 0 20px; border-radius: 999px; border: 0; background: var(--ink); color: var(--white); font-weight: 800; cursor: pointer; white-space: nowrap; transition: background .16s, transform .16s; }
+    .pill:hover { background: #000; }
+    .pill:active, .ghost:active, .chip:active, .cite:active { transform: scale(.97); }
+    .pill:disabled { opacity: .45; cursor: not-allowed; transform: none; }
+    .ghost { height: 40px; padding: 0 16px; border-radius: 999px; border: 1px solid var(--muted); background: var(--white); font-size: 13px; cursor: pointer; transition: background .16s, transform .16s; }
+    .ghost:hover { background: var(--soft); }
+    .note { color: var(--muted); font-size: 13px; }
+
+    /* 빈 화면 */
+    .empty { padding: 7vh 0 20px; }
+    .empty h1 { margin: 0 0 12px; font-size: clamp(34px, 6vw, 52px); line-height: 1.06; font-weight: 800; letter-spacing: -0.04em; word-break: keep-all; text-wrap: balance; }
+    .empty p { margin: 0 0 22px; color: var(--muted); max-width: 46ch; text-wrap: pretty; }
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+    .chip { min-height: 44px; padding: 8px 16px; border-radius: 999px; border: 1px solid var(--muted); background: var(--white); cursor: pointer; text-align: left; transition: background .16s, transform .16s; }
+    .chip:hover { background: var(--orange-soft); }
+    .empty .hint { margin: 18px 0 0; }
+
+    /* 대화 */
+    #thread { display: flex; flex-direction: column; gap: 20px; padding-bottom: 28px; }
+    .enter { animation: rise .22s ease-out both; }
+    @keyframes rise { from { opacity: 0; transform: translateY(6px); } }
+    .me { align-self: flex-end; max-width: 85%; background: var(--soft); border-radius: 12px; padding: 10px 14px; white-space: pre-wrap; word-break: break-word; }
+    .bot { background: var(--white); border: 1px solid var(--line); border-radius: 12px; padding: 20px 18px; }
+    .bot .text { white-space: pre-wrap; word-break: break-word; line-height: 1.7; max-width: 66ch; text-wrap: pretty; }
+    .bot .text strong { font-weight: 800; }
+    .cite { position: relative; display: inline-block; min-width: 24px; height: 24px; line-height: 22px; padding: 0 7px; margin: 0 2px; border-radius: 999px; border: 1px solid var(--muted); background: var(--paper); font-size: 12px; font-weight: 800; cursor: pointer; vertical-align: 1px; transition: background .16s, transform .16s; }
+    .cite::after { content: ''; position: absolute; inset: -10px -6px; } /* 눌리는 영역을 44px 근처로 */
+    .cite:hover { background: var(--orange-soft); }
+    details.srcs { margin-top: 16px; }
+    details.srcs > summary { cursor: pointer; font-weight: 800; font-size: 13px; letter-spacing: .02em; min-height: 40px; display: flex; align-items: center; }
+    details.srcs.rest > summary { color: var(--muted); font-weight: 400; }
+    ol.srclist { list-style: none; margin: 4px 0 0; padding: 0; display: grid; gap: 8px; }
+    ol.srclist li { display: grid; grid-template-columns: 28px 1fr; gap: 10px; padding: 12px; border-radius: 10px; background: var(--paper); border: 1px solid transparent; transition: background .3s, border-color .3s; }
+    ol.srclist li.hit { background: var(--orange-soft); border-color: var(--orange); }
+    .num { width: 24px; height: 24px; border-radius: 999px; background: var(--ink); color: var(--white); font-size: 12px; font-weight: 800; display: grid; place-items: center; }
+    .rest .num { background: var(--muted); }
+    .stitle { font-weight: 800; word-break: break-word; }
+    .smeta { color: var(--muted); font-size: 13px; word-break: break-all; }
+    .sex { margin: 6px 0 0; font-size: 14px; color: #3d3b36; word-break: break-word; }
+    .meta { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--line); display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+    .meta .grow { flex: 1; min-width: 180px; color: var(--muted); font-size: 13px; }
+
+    /* 로딩 — 답 카드와 같은 모양의 뼈대 */
+    .skel { display: grid; gap: 10px; margin-top: 14px; }
+    .skel i { display: block; height: 12px; border-radius: 6px; background: var(--soft); animation: breathe 1.2s ease-in-out infinite; }
+    .skel i:nth-child(1) { width: 92%; } .skel i:nth-child(2) { width: 78%; animation-delay: .15s; } .skel i:nth-child(3) { width: 56%; animation-delay: .3s; }
+    @keyframes breathe { 50% { opacity: .45; } }
+    .pending { color: var(--muted); font-size: 14px; }
+
+    /* 오류 */
+    .errcard { background: var(--orange-soft); border-radius: 12px; padding: 14px 16px; display: flex; gap: 12px; align-items: center; justify-content: space-between; flex-wrap: wrap; }
+    .errcard p { margin: 0; flex: 1; min-width: 200px; }
+
+    .result { background: var(--white); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; }
+    .result h3 { margin: 0; font-size: 16px; font-weight: 800; word-break: break-word; }
+    .result p { margin: 6px 0 0; white-space: pre-wrap; word-break: break-word; }
+    mark { background: var(--orange-soft); color: inherit; border-radius: 3px; padding: 0 1px; }
+
+    /* 입력창 */
+    .composer-wrap { position: sticky; bottom: 0; background: linear-gradient(to bottom, transparent, var(--paper) 18px); padding: 18px 0 14px; margin-top: auto; }
+    .composer { background: var(--white); border: 1px solid var(--muted); border-radius: 12px; padding: 10px; display: grid; gap: 8px; transition: box-shadow .16s; }
+    .composer:focus-within { border-color: var(--ink); box-shadow: 0 0 0 4px var(--orange); }
+    .composer textarea { border: 0; outline: none; resize: none; width: 100%; background: transparent; padding: 4px 6px; max-height: 180px; line-height: 1.5; }
+    .composer .bar { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+    .composer .right { display: flex; align-items: center; gap: 10px; }
+    .count { font-size: 12px; color: var(--muted); }
+    .count.warn { color: var(--orange-text); font-weight: 800; }
+    .seg { display: inline-flex; border: 1px solid var(--muted); border-radius: 999px; padding: 3px; background: var(--paper); }
+    .seg label { cursor: pointer; }
+    .seg input { position: absolute; opacity: 0; pointer-events: none; }
+    .seg span { display: block; height: 34px; line-height: 34px; padding: 0 14px; border-radius: 999px; font-size: 13px; font-weight: 800; color: var(--muted); transition: background .16s, color .16s; }
+    .seg input:checked + span { background: var(--ink); color: var(--white); }
+    .seg input:focus-visible + span { outline: 3px solid var(--orange); outline-offset: 2px; }
+    .foot { margin: 8px 2px 0; color: var(--muted); font-size: 12px; text-wrap: pretty; }
+
+    @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+  </style>
+</head>
+<body>
+  <a class="skip" href="#main">본문으로 건너뛰기</a>
+  <header class="top"><div class="in">
+    <div class="brand"><img src="assets/remo-badge-orange.png" width="30" height="30" alt=""><span>REMO 기록실</span><small>내부용</small></div>
+  </div></header>
+
+  <main id="main">
+    <noscript><p class="note">이 화면은 JavaScript가 필요합니다.</p></noscript>
+
+    <section id="space" aria-label="대화">
+      <div class="empty" id="empty">
+        <h1>우리는 어떻게<br>움직였을까요?</h1>
+        <p>노션에 쌓인 회의록과 기획안을 근거로 답합니다. 질문하면 출처 문서가 함께 나옵니다.</p>
+        <div class="chips" id="chips"></div>
+        <p class="note hint">찾고 싶은 단어를 정확히 안다면 &lsquo;문서 검색&rsquo;이 더 빠릅니다.</p>
+      </div>
+      <div id="thread" aria-live="polite"></div>
+    </section>
+
+    <div class="composer-wrap" id="composerWrap">
+      <form class="composer" id="composer">
+        <label class="sr" for="q">질문 또는 검색어</label>
+        <textarea id="q" rows="2" maxlength="500" placeholder="예: 프로젝트 기획 단계에서 우리는 어떻게 움직였지?" required></textarea>
+        <div class="bar">
+          <div class="seg" role="radiogroup" aria-label="모드">
+            <label><input type="radio" name="mode" value="ask" checked><span>질문</span></label>
+            <label><input type="radio" name="mode" value="search"><span>문서 검색</span></label>
+          </div>
+          <div class="right"><span class="count num-t" id="count" aria-live="polite"></span><button class="pill" id="go">질문하기</button></div>
+        </div>
+      </form>
+      <p class="foot">답은 노션 기록에서만 만들어지며 틀릴 수 있습니다. 개인정보가 있는 문서는 질문 대상에서 제외됩니다. Enter 전송, Shift+Enter 줄바꿈.</p>
+    </div>
+  </main>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const MARK_OPEN = '', MARK_CLOSE = '', MAX_Q = 500;
+    const EXAMPLES = ['프로젝트 기획 단계에서 우리는 어떻게 움직였지?', '팀 회의는 어떤 흐름으로 이어졌어?', '예산은 어떻게 정했어?'];
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let busy = false, msgSeq = 0;
+
+    const mk = (tag, cls, text) => { const n = document.createElement(tag); if (cls) n.className = cls; if (text != null) n.textContent = text; return n; };
+    const mode = () => document.querySelector('input[name=mode]:checked').value;
+    const scrollTo = (n, block) => n.scrollIntoView({ block, behavior: reduce ? 'auto' : 'smooth' });
+
+    // 본문을 HTML로 넣지 않는다 — **굵게**와 [n] 인용 칩만 DOM으로 만든다
+    const CITE = /\[(\d+(?:\s*,\s*\d+)*)\]/g;
+    function renderAnswer(box, text, id) {
+      text.split(/(\*\*[^*]+\*\*)/g).forEach((part) => {
+        if (/^\*\*[^*]+\*\*$/.test(part)) { box.append(mk('strong', '', part.slice(2, -2))); return; }
+        part.split(/(\[\d+(?:\s*,\s*\d+)*\])/g).forEach((p) => {
+          const m = p.match(/^\[(\d+(?:\s*,\s*\d+)*)\]$/);
+          if (!m) { if (p) box.append(p); return; }
+          m[1].split(',').map((s) => s.trim()).forEach((n) => {
+            const b = mk('button', 'cite', n); b.type = 'button'; b.setAttribute('aria-label', `근거 ${n}번으로 이동`);
+            b.addEventListener('click', () => {
+              const li = document.getElementById(`src-${id}-${n}`); if (!li) return;
+              li.closest('details').open = true;
+              scrollTo(li, 'center');
+              li.classList.add('hit'); setTimeout(() => li.classList.remove('hit'), 1800);
+            });
+            box.append(b);
+          });
+        });
+      });
+    }
+
+    function highlight(p, text) {
+      text.split(MARK_OPEN).forEach((part, i) => {
+        if (i === 0) return p.append(part);
+        const [hit, rest = ''] = part.split(MARK_CLOSE);
+        p.append(mk('mark', '', hit), rest);
+      });
+      return p;
+    }
+
+    function pendingCard() {
+      const box = mk('article', 'bot enter'); const label = mk('div', 'pending', '노션 기록을 찾는 중');
+      const skel = mk('div', 'skel'); skel.setAttribute('aria-hidden', 'true'); skel.append(mk('i'), mk('i'), mk('i'));
+      box.append(label, skel);
+      const t0 = Date.now();
+      const timer = setInterval(() => { label.textContent = `노션 기록을 찾고 답을 정리하는 중 · ${Math.floor((Date.now() - t0) / 1000)}초`; }, 1000);
+      return { box, stop: () => clearInterval(timer) };
+    }
+
+    function errorText(res, data) {
+      if (res.status === 429) return data.error === 'daily-limit' ? '오늘 질문 한도에 도달했습니다. 내일 다시 해 주세요.' : '시도가 너무 많습니다. 잠시 후 다시 해 주세요.';
+      if (res.status === 503) return '서버에 GEMINI_API_KEY가 설정되어 있지 않습니다.';
+      if (res.status === 400) return '질문이 비었거나 너무 깁니다(500자 이내).';
+      return '서버 오류가 났습니다. 잠시 후 다시 시도해 주세요.';
+    }
+
+    function errorCard(text, retry) {
+      const c = mk('div', 'errcard enter'); c.setAttribute('role', 'alert');
+      c.append(mk('p', '', text));
+      if (retry) { const b = mk('button', 'ghost', '다시 시도'); b.type = 'button'; b.addEventListener('click', () => { c.remove(); retry(); }); c.append(b); }
+      return c;
+    }
+
+    async function send(path, q) {
+      const res = await fetch(path, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ q }) });
+      const data = await res.json().catch(() => ({}));
+      return { res, data };
+    }
+
+    function sourceList(id, sources, label, rest) {
+      const d = mk('details', `srcs${rest ? ' rest' : ''}`); d.open = !rest;
+      d.append(mk('summary', '', label));
+      const ol = mk('ol', 'srclist');
+      sources.forEach((s) => {
+        const li = mk('li'); li.id = `src-${id}-${s.n}`;
+        const body = mk('div');
+        body.append(mk('div', 'stitle', s.title), mk('div', 'smeta num-t', `${s.date || '날짜 없음'} · ${s.path}`));
+        if (s.excerpt) body.append(mk('p', 'sex', `${s.excerpt}…`));
+        li.append(mk('span', 'num', String(s.n)), body); ol.append(li);
+      });
+      d.append(ol); return d;
+    }
+
+    function answerCard(data) {
+      const id = ++msgSeq, box = mk('article', 'bot enter');
+      const text = mk('div', 'text'); renderAnswer(text, data.answer, id); box.append(text);
+      const srcs = data.sources || [];
+      // 답에서 실제로 인용한 문서를 먼저, 함께 찾은 나머지는 접어 둔다
+      const cited = new Set([...data.answer.matchAll(CITE)].flatMap((m) => m[1].split(',').map((s) => Number(s.trim()))));
+      const used = srcs.filter((s) => cited.has(s.n)), others = srcs.filter((s) => !cited.has(s.n));
+      if (used.length) {
+        box.append(sourceList(id, used, `인용한 문서 ${used.length}건`, false));
+        if (others.length) box.append(sourceList(id, others, `함께 찾은 문서 ${others.length}건`, true));
+      } else if (srcs.length) box.append(sourceList(id, srcs, `찾은 문서 ${srcs.length}건`, false));
+      const meta = mk('div', 'meta'); meta.append(mk('span', 'grow', '노션 기록에서만 만든 답입니다. 출처를 확인하세요.'));
+      const copy = mk('button', 'ghost', '답 복사'); copy.type = 'button';
+      copy.addEventListener('click', async () => { try { await navigator.clipboard.writeText(data.answer); copy.textContent = '복사됨'; setTimeout(() => (copy.textContent = '답 복사'), 1500); } catch { copy.textContent = '복사 실패'; } });
+      meta.append(copy); box.append(meta);
+      return box;
+    }
+
+    function resultsCards(data) {
+      const wrap = mk('div', 'enter'); wrap.style.cssText = 'display:grid;gap:10px';
+      if (!data.results.length) { wrap.append(mk('p', 'note', '결과가 없습니다. 다른 단어로 검색해 보세요.')); return wrap; }
+      wrap.append(mk('p', 'note', data.mode === 'any' ? `모든 단어가 들어간 문서가 없어 일부만 맞는 ${data.results.length}건을 보여줍니다.` : `${data.results.length}건`));
+      data.results.forEach((r) => {
+        const c = mk('article', 'result');
+        c.append(mk('h3', '', r.title), mk('div', 'smeta num-t', `${r.date || '날짜 없음'} · ${r.path}`), highlight(mk('p'), r.snippet));
+        wrap.append(c);
+      });
+      return wrap;
+    }
+
+    async function run(kind, q, echo) {
+      if (busy || !q) return;
+      busy = true; $('go').disabled = true; $('empty').hidden = true;
+      const thread = $('thread');
+      if (echo) thread.append(mk('div', 'me enter', q));
+      const pend = kind === 'ask' ? pendingCard() : null;
+      const holder = pend ? pend.box : mk('p', 'note', '검색 중…');
+      thread.append(holder); scrollTo(holder, 'end');
+      const retry = () => run(kind, q, false);
+      try {
+        let r;
+        try { r = await send(kind === 'ask' ? '/api/ask' : '/api/search', q); }
+        catch (e) {
+          // 요청이 서버에 닿지 못한 경우 — 어디서 열었는지가 가장 흔한 원인이라 주소를 함께 보여 준다
+          const where = location.protocol === 'file:' || /^(localhost|127\.)/.test(location.hostname)
+            ? '이 화면은 배포된 사이트의 /search 주소에서 열어야 동작합니다(파일이나 로컬 서버에서는 API가 없습니다).'
+            : `현재 주소: ${location.origin}. Vercel 로그인 보호 때문에 막혔거나 배포가 아직 끝나지 않았을 수 있습니다.`;
+          holder.replaceWith(errorCard(`서버에 연결하지 못했습니다. ${where} (${e.name}: ${e.message})`, retry)); return;
+        }
+        const { res, data } = r;
+        let out;
+        try { out = !res.ok ? errorCard(errorText(res, data), retry) : kind === 'ask' ? answerCard(data) : resultsCards(data); }
+        catch (e) { out = errorCard(`응답을 화면에 그리지 못했습니다(${e.name}: ${e.message}). 서버 응답 형식이 예상과 다릅니다.`, retry); }
+        holder.replaceWith(out); scrollTo(out, 'start');
+      } catch (e) { holder.replaceWith(errorCard(`예상하지 못한 오류가 났습니다(${e.name}: ${e.message}).`, retry)); }
+      finally { if (pend) pend.stop(); busy = false; $('go').disabled = false; $('q').focus(); }
+    }
+
+    const fit = () => {
+      const q = $('q'); q.style.height = 'auto'; q.style.height = Math.min(q.scrollHeight, 180) + 'px';
+      const n = q.value.length, c = $('count');
+      c.textContent = n >= MAX_Q - 100 ? `${n}/${MAX_Q}` : ''; c.classList.toggle('warn', n >= MAX_Q);
+    };
+    EXAMPLES.forEach((t) => { const b = mk('button', 'chip', t); b.type = 'button'; b.addEventListener('click', () => run('ask', t, true)); $('chips').append(b); });
+    $('q').addEventListener('input', fit);
+    $('q').addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) { e.preventDefault(); $('composer').requestSubmit(); } });
+    $('composer').addEventListener('submit', (e) => { e.preventDefault(); const q = $('q').value.trim(); $('q').value = ''; fit(); run(mode(), q, true); });
+    document.querySelectorAll('input[name=mode]').forEach((r) => r.addEventListener('change', () => {
+      const ask = mode() === 'ask';
+      $('go').textContent = ask ? '질문하기' : '검색';
+      $('q').placeholder = ask ? '예: 프로젝트 기획 단계에서 우리는 어떻게 움직였지?' : '검색어 (여러 단어는 모두 포함된 문서 우선)';
+    }));
+    $('q').focus();
+  </script>
+</body>
+</html>
