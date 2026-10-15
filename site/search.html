@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- 내부 검색 — 페이지 자체에는 데이터가 없다. 결과는 /api/search(공유 비밀번호)에서만 온다. 메뉴·사이트맵에 링크하지 않는다. -->
+  <meta name="robots" content="noindex, nofollow">
+  <title>내부 검색 · 리모</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard-dynamic-subset.min.css">
+  <link rel="stylesheet" href="assets/tokens.css?v=1">
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font: 16px/1.6 Pretendard, system-ui, sans-serif; }
+    main { max-width: 760px; margin: 0 auto; padding: 48px 16px 96px; }
+    h1 { margin: 0 0 24px; font-size: 24px; letter-spacing: -0.02em; word-break: keep-all; }
+    form { display: flex; gap: 8px; }
+    input, button { font: inherit; border-radius: 12px; border: 1px solid var(--line); padding: 12px 16px; background: var(--white); color: var(--ink); }
+    input { flex: 1; min-width: 0; }
+    input:focus-visible, button:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+    button { background: var(--blue); border-color: var(--blue); color: var(--on-blue); cursor: pointer; }
+    button:hover { background: var(--blue-hover); }
+    #lock { margin-bottom: 24px; }
+    .note { color: var(--muted); font-size: 14px; margin: 12px 0 0; }
+    ul { list-style: none; margin: 24px 0 0; padding: 0; }
+    li { padding: 16px 0; border-top: 1px solid var(--line); }
+    li h2 { margin: 0; font-size: 17px; word-break: keep-all; }
+    li .path { color: var(--muted); font-size: 13px; margin: 2px 0 6px; word-break: break-all; }
+    li p { margin: 0; font-size: 15px; white-space: pre-wrap; word-break: break-word; }
+    .modes { display: flex; gap: 16px; margin: 0 0 12px; }
+    .modes label { cursor: pointer; font-size: 15px; }
+    #answer { margin-top: 24px; padding: 16px; background: var(--white); border: 1px solid var(--line); border-radius: 12px; white-space: pre-wrap; word-break: break-word; }
+    ol.src { margin: 12px 0 0; padding-left: 24px; font-size: 14px; color: var(--muted); }
+    ol.src span { word-break: break-all; }
+    mark { background: var(--orange-soft); color: inherit; border-radius: 3px; padding: 0 1px; }
+    [hidden] { display: none !important; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>내부 검색</h1>
+    <form id="lock" hidden>
+      <input id="key" type="password" autocomplete="current-password" placeholder="공유 비밀번호" aria-label="공유 비밀번호" required>
+      <button>입장</button>
+    </form>
+    <div class="modes" role="radiogroup" aria-label="모드">
+      <label><input type="radio" name="mode" value="ask" checked> 질문하기</label>
+      <label><input type="radio" name="mode" value="search"> 문서 검색</label>
+    </div>
+    <form id="find">
+      <input id="q" type="search" placeholder="예: 프로젝트 기획 단계에서 우리는 어떻게 움직였지?" aria-label="질문 또는 검색어" autocomplete="off" required>
+      <button id="go">질문</button>
+    </form>
+    <p class="note" id="status" role="status" aria-live="polite"></p>
+    <div id="answer" hidden></div>
+    <ul id="out"></ul>
+  </main>
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const MARK_OPEN = '', MARK_CLOSE = '';
+    let key = '';
+    try { key = sessionStorage.getItem('search-key') || ''; } catch {}
+
+    function setLocked(locked, msg) {
+      $('lock').hidden = !locked;
+      $('find').hidden = locked;
+      $('status').textContent = msg || '';
+      (locked ? $('key') : $('q')).focus();
+    }
+
+    // 강조 표식으로 나눠 mark를 DOM으로 만든다 — 본문을 HTML로 넣지 않는다
+    function snippet(text) {
+      const p = document.createElement('p');
+      text.split(MARK_OPEN).forEach((part, i) => {
+        if (i === 0) return p.append(part);
+        const [hit, rest = ''] = part.split(MARK_CLOSE);
+        const m = document.createElement('mark'); m.textContent = hit;
+        p.append(m, rest);
+      });
+      return p;
+    }
+
+    const mode = () => document.querySelector('input[name=mode]:checked').value;
+    document.querySelectorAll('input[name=mode]').forEach((r) => r.addEventListener('change', () => {
+      $('go').textContent = mode() === 'ask' ? '질문' : '검색';
+      $('q').placeholder = mode() === 'ask' ? '예: 프로젝트 기획 단계에서 우리는 어떻게 움직였지?' : '검색어 (여러 단어는 모두 포함된 문서 우선)';
+    }));
+
+    async function post(path, q) {
+      let res;
+      try { res = await fetch(path, { method: 'POST', headers: { 'content-type': 'application/json', 'x-search-key': key }, body: JSON.stringify({ q }) }); }
+      catch { setStatus('네트워크 오류'); return null; }
+      if (res.status === 401) { key = ''; try { sessionStorage.removeItem('search-key'); } catch {} setLocked(true, '비밀번호가 맞지 않습니다.'); return null; }
+      if (res.status === 429) { setStatus((await res.json().catch(() => ({}))).error === 'daily-limit' ? '오늘 질문 한도에 도달했습니다. 내일 다시 해 주세요.' : '시도가 너무 많습니다. 잠시 후 다시 해 주세요.'); return null; }
+      if (!res.ok) { setStatus('서버 오류'); return null; }
+      return res.json();
+    }
+
+    async function ask(q) {
+      setStatus('노션 기록을 찾고 답을 정리하는 중… (10~30초)');
+      $('out').replaceChildren(); $('answer').hidden = true;
+      const data = await post('/api/ask', q);
+      if (!data) return;
+      const box = $('answer');
+      const text = document.createElement('div'); text.textContent = data.answer;
+      const list = document.createElement('ol'); list.className = 'src';
+      data.sources.forEach((s) => {
+        const li = document.createElement('li'); li.value = s.n;
+        li.append(`${s.title}${s.date ? ` · ${s.date}` : ''} — `);
+        const path = document.createElement('span'); path.textContent = s.path; li.append(path);
+        list.append(li);
+      });
+      box.replaceChildren(text, ...(data.sources.length ? [list] : []));
+      box.hidden = false;
+      setStatus(data.sources.length ? `근거 문서 ${data.sources.length}건 · 답은 이 기록에서만 만들어지며, 틀릴 수 있으니 출처를 확인하세요.` : '');
+    }
+
+    async function search(q) {
+      $('status').textContent = '검색 중…';
+      $('answer').hidden = true;
+      let res;
+      try {
+        res = await fetch('/api/search', { method: 'POST', headers: { 'content-type': 'application/json', 'x-search-key': key }, body: JSON.stringify({ q }) });
+      } catch { return setStatus('네트워크 오류'); }
+      if (res.status === 401) { key = ''; try { sessionStorage.removeItem('search-key'); } catch {} return setLocked(true, '비밀번호가 맞지 않습니다.'); }
+      if (res.status === 429) return setStatus('시도가 너무 많습니다. 잠시 후 다시 해 주세요.');
+      if (!res.ok) return setStatus('검색 서버 오류');
+      const { results, mode } = await res.json();
+      $('out').replaceChildren(...results.map((r) => {
+        const li = document.createElement('li');
+        const h = document.createElement('h2'); h.textContent = r.title;
+        const path = document.createElement('div'); path.className = 'path'; path.textContent = r.path;
+        li.append(h, path, snippet(r.snippet));
+        return li;
+      }));
+      setStatus(results.length ? (mode === 'any' ? `모든 단어가 들어간 문서가 없어 일부만 맞는 ${results.length}건을 보여줍니다.` : `${results.length}건`) : '결과가 없습니다.');
+    }
+    const setStatus = (t) => { $('status').textContent = t; };
+
+    $('lock').addEventListener('submit', (e) => {
+      e.preventDefault();
+      key = $('key').value; $('key').value = '';
+      try { sessionStorage.setItem('search-key', key); } catch {}
+      setLocked(false);
+    });
+    $('find').addEventListener('submit', (e) => { e.preventDefault(); (mode() === 'ask' ? ask : search)($('q').value.trim()); });
+    setLocked(!key);
+  </script>
+</body>
+</html>
